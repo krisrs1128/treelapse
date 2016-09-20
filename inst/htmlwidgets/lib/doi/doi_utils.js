@@ -543,14 +543,15 @@ function filter_tree(values, threshold) {
  * This adds some useful methods to the hierachy defined by the tree JSON
  * structure.
  */
-function tree(tree_json) {
+function tree(tree_json, depth) {
   this.filter_tree = filter_tree;
   this.name = tree_json.name;
+  this.depth = depth;
   if (Object.keys(tree_json).indexOf("children") != -1) {
     this.children = [];
     for (var i = 0; i < tree_json.children.length; i++) {
       var subtree = tree_json.children[i];
-      this.children.push(new tree(subtree));
+      this.children.push(new tree(subtree, depth + 1));
     }
   }
 }
