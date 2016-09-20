@@ -471,13 +471,6 @@ function supplement_tree(tree_var, depth) {
   return tree_var;
 }
 
-function get_abunds(abund_var, otu_id) {
-  var values = []
-  for (var time_id in abund_var[otu_id]) {
-    values.push(abund_var[otu_id][time_id].value);
-  }
-  return values;
-}
 
 function get_ancestors(tree_var, node_id, ancestors) {
   // this seems pretty roundabout. Is there no way to traverse the tree upwards?
@@ -502,31 +495,51 @@ function link_id_fun(d) {
   return d.source.name + "-" + d.target.name;
 }
 
-function filter_tree(tree_var, min_avg_abund) {
-  var keys = Object.keys(tree_var)
-  if (keys.indexOf("children") != -1) {
-
-    var children_copy = tree_var.children.slice();
-    tree_var.children = []
-
-    for (var i = 0; i < children_copy.length; i++) {
-      var cur_values = get_abunds(abund_var, children_copy[i].name);
-      if (d3.mean(cur_values) >= min_avg_abund) {
-	tree_var.children.push(filter_tree(children_copy[i], min_avg_abund));
-      }
+function get_matching_subarray(values, categories, to_match) {
+  var matched_values = [];
+  for(var i = 0; i < values.length; i++) {
+    if (categories[i] == to_match) {
+      matched_values.push(values[i]);
     }
+  }
+  return matched_values;
+}
 
-    // exact same logic as filter_doi(), maybe modularize this code...
-    var tree_var_res = {}
-    for (var k = 0; k < keys.length; k++) {
-      if (keys[k] != "children") {
-	tree_var_res[keys[k]] = tree_var[keys[k]];
-      } else {
-	if (tree_var.children.length > 0) {
-	  tree_var_res[keys[k]] = tree_var[keys[k]];
-	}
+
+function filter_tree(values, threshold) {
+  var keys = Object.keys(this);
+  if (keys.indexOf("children") == -1) {
+    return this;
+  }
+
+  var children_copy = this.children;
+  this.children = [];
+
+  for (var i = 0; i < children_copy.length; i++) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.sample,
+      children_copy[i].name[0]
+    );
+
+    if (d3.mean(cur_values) >= threshold) {
+      children_copy[i].filter_tree = filter_tree;
+      this.children.push(
+	children_copy[i].filter_tree(values, threshold)
+      );
+    }
+  }
+
+  // exact same logic as filter_doi(), maybe modularize this code...
+  filtered_tree = {};
+  for (var k = 0; k < keys.length; k++) {
+    if (keys[k] != "children") {
+      filtered_tree[keys[k]] = this[keys[k]];
+    } else {
+      if (this.children.length > 0) {
+	filtered_tree[keys[k]] = this[keys[k]];
       }
     }
   }
-  return tree_var;
+  return filtered_tree;
 }

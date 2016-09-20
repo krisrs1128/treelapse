@@ -1,4 +1,11 @@
 
+function draw_doi(elem, width, height, tree) {
+  setup_background(elem, width, height, "#F7F7F7");
+  //var layout = tree_block(filtered_tree, focus_node_id, min_doi,
+  //			  display_dim, node_size);
+
+}
+
 function doi_update() {
   var filtered_tree = filter_tree(jQuery.extend(true, {}, tree_var),
 				  min_avg_abund);

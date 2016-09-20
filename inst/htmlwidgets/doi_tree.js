@@ -7,24 +7,13 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
-	var svg_elem = d3.select(el)
-	    .append("svg")
-	    .attrs({
-	      "width": width,
-	      "height": height
-	    });
-
-	var rect = d3.select("svg")
-	    .append("rect")
-	    .attrs({
-	      id: "background_rect",
-	      width: width,
-	      height: height,
-	      "fill": "#F5F5F5"
-	    })
+	draw_doi(el, width, height, x);
+	x[1].filter_tree = filter_tree;
+	var tree = x[1].filter_tree(x[0], .4);
+	console.log(tree);
       },
 
       resize: function(width, height) {}
-    }
+    };
   }
 });
