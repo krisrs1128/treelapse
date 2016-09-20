@@ -507,39 +507,50 @@ function get_matching_subarray(values, categories, to_match) {
 
 
 function filter_tree(values, threshold) {
-  var keys = Object.keys(this);
-  if (keys.indexOf("children") == -1) {
+
+  // if we're at a leaf, return
+  if (Object.keys(this).indexOf("children") == -1) {
     return this;
   }
 
-  var children_copy = this.children;
-  this.children = [];
+  var subtrees = this.children;
+  var filtered_subtrees = [];
 
-  for (var i = 0; i < children_copy.length; i++) {
+  for (var i = 0; i < subtrees.length; i++) {
     var cur_values = get_matching_subarray(
       values.value,
       values.sample,
-      children_copy[i].name[0]
+      subtrees[i].name[0]
     );
 
     if (d3.mean(cur_values) >= threshold) {
-      children_copy[i].filter_tree = filter_tree;
-      this.children.push(
-	children_copy[i].filter_tree(values, threshold)
+      filtered_subtrees.push(
+	subtrees[i].filter_tree(values, threshold)
       );
     }
   }
 
-  // exact same logic as filter_doi(), maybe modularize this code...
-  filtered_tree = {};
-  for (var k = 0; k < keys.length; k++) {
-    if (keys[k] != "children") {
-      filtered_tree[keys[k]] = this[keys[k]];
-    } else {
-      if (this.children.length > 0) {
-	filtered_tree[keys[k]] = this[keys[k]];
-      }
+  // copy full tree, and replace subtrees with filtered version
+  var filtered_tree = jQuery.extend({}, this);
+  filtered_tree.children = filtered_subtrees;
+
+  return filtered_tree;
+}
+
+/**
+ * Define a "tree" object
+ *
+ * This adds some useful methods to the hierachy defined by the tree JSON
+ * structure.
+ */
+function tree(tree_json) {
+  this.filter_tree = filter_tree;
+  this.name = tree_json.name;
+  if (Object.keys(tree_json).indexOf("children") != -1) {
+    this.children = [];
+    for (var i = 0; i < tree_json.children.length; i++) {
+      var subtree = tree_json.children[i];
+      this.children.push(new tree(subtree));
     }
   }
-  return filtered_tree;
 }
