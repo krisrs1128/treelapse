@@ -439,7 +439,6 @@ function trim_height(tree_var) {
  **/
 function tree_block(tree_var0, focus_node_id, min_doi, display_dim, node_size) {
   var tree_var = jQuery.extend(true, {}, tree_var0);
-  tree_var = supplement_tree(tree_var, 0);
   tree_var = set_doi(tree_var, focus_node_id, min_doi);
   tree_var = filter_doi(tree_var, min_doi);
   tree_var = segment_tree(tree_var);
@@ -458,19 +457,6 @@ function tree_block(tree_var0, focus_node_id, min_doi, display_dim, node_size) {
 }
 
 // where are the comments??
-
-function supplement_tree(tree_var, depth) {
-  tree_var.depth = depth;
-  tree_var.hidden_desc = false;
-  if (Object.keys(tree_var).indexOf("children") != -1) {
-    for (var i = 0; i < tree_var.children.length; i++) {
-      tree_var.children[i] = supplement_tree(tree_var.children[i],
-					     depth + 1);
-    }
-  }
-  return tree_var;
-}
-
 
 function get_ancestors(tree_var, node_id, ancestors) {
   // this seems pretty roundabout. Is there no way to traverse the tree upwards?
