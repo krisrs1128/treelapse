@@ -13,8 +13,13 @@ HTMLWidgets.widget({
 	doi_tree.set_doi("Bacteria", -6);
 	doi_tree.set_segments();
 
-	doi_tree.trim_width("Bacteria", [500, 500], [5, 5]);
-	console.log(doi_tree);
+	nodes = doi_tree.tree_block(
+	  "Bacteria",
+	    -5,
+	  [500, 500],
+	  [5, 5]
+	);
+	console.log(nodes);
       },
 
       resize: function(width, height) {}

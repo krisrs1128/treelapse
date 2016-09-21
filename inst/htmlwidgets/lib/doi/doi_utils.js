@@ -1,7 +1,11 @@
-/**
+/*******************************************************************************
 * Functions to calculate degree-of-interest related quantities. We
 * are following http://vis.stanford.edu/papers/doitrees-revisited
-**/
+*******************************************************************************/
+
+/*******************************************************************************
+* DOI-Tree related objects
+*******************************************************************************/
 
 /**
  * Define a "tree" object
@@ -45,6 +49,7 @@ function DoiTreeInternal(tree_json, depth) {
   this.get_block_dois = get_block_dois;
   this.trim_width = trim_width;
   this.filter_block = filter_block;
+  this.tree_block = tree_block;
 
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
@@ -63,6 +68,85 @@ function DoiTreeInternal(tree_json, depth) {
     }
   }
 }
+
+/*******************************************************************************
+* General tree methods
+*******************************************************************************/
+
+/**
+ * Check whether a tree contains a  node of a specified id
+ *
+ * @param {Object} tree_var The tree sturctured variable that we will
+ * containing objects whose .name attribute will be checked to contain
+ * the id node_id.
+ * @param {string} node_id The id to search the tree for.
+ * @return {bool} true or false, depending on whether the node_id was
+ * found in the tree.
+ **/
+function contains_node(node_id) {
+  if (this.name == node_id) {
+    return true;
+  }
+
+  if (Object.keys(this).indexOf("children") == -1) {
+    return false;
+  }
+
+  var children_indic = [];
+  for (var i = 0; i < this.children.length; i++) {
+    var cur_indic = this.children[i].contains_node(node_id);
+    children_indic.push(cur_indic);
+  }
+  return children_indic.some(function(x) { return x; });
+}
+
+function get_attr_array(attr) {
+  if (Object.keys(this).indexOf("children") == -1) {
+    return [this[attr]];
+  }
+
+  all_attrs = [this[attr]];
+  for (var i = 0; i < this.children.length; i++) {
+    all_attrs = all_attrs.concat(
+      this.children[i].get_attr_array(attr)
+    );
+  }
+
+  return all_attrs;
+}
+
+function filter_tree(values, threshold) {
+  // if we're at a leaf, return
+  if (Object.keys(this).indexOf("children") == -1) {
+    return;
+  }
+
+  var subtrees = this.children;
+  var filtered_subtrees = [];
+
+  for (var i = 0; i < subtrees.length; i++) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      subtrees[i].name
+    );
+
+    if (d3.mean(cur_values) >= threshold) {
+      subtrees[i].filter_tree(values, threshold);
+      filtered_subtrees.push(subtrees[i]);
+    }
+  }
+
+  if (filtered_subtrees.length > 0) {
+    this.children = filtered_subtrees;
+  } else {
+    delete this.children;
+  }
+}
+
+/*******************************************************************************
+* DOI-tree specific methods
+*******************************************************************************/
 
 /**
  * Compute the DOI of a tree, given a specific single focus node
@@ -100,33 +184,6 @@ function set_doi(focus_node_id, min_doi) {
 }
 
 /**
- * Check whether a tree contains a  node of a specified id
- *
- * @param {Object} tree_var The tree sturctured variable that we will
- * containing objects whose .name attribute will be checked to contain
- * the id node_id.
- * @param {string} node_id The id to search the tree for.
- * @return {bool} true or false, depending on whether the node_id was
- * found in the tree.
- **/
-function contains_node(node_id) {
-  if (this.name == node_id) {
-    return true;
-  }
-
-  if (Object.keys(this).indexOf("children") == -1) {
-    return false;
-  }
-
-  var children_indic = [];
-  for (var i = 0; i < this.children.length; i++) {
-    var cur_indic = this.children[i].contains_node(node_id);
-    children_indic.push(cur_indic);
-  }
-  return children_indic.some(function(x) { return x; });
-}
-
-/**
  * Compute fisheye distribution over a tree
  *
  * Assigns doi argument to current node, and doi - 1 to immediate
@@ -150,17 +207,6 @@ function set_tree_fisheye(doi) {
       this.children[i].set_tree_fisheye(doi - 1);
     }
   }
-}
-
-/**
- * Get nodes at a certain depth
- *
- * @param {Array} x An array of objects with a .depth attribute
- * @param {int} i The depth to which to filter nodes.
- * @return An array of elements of x at a given depth.
- **/
-function filter_depth(x, i) {
-  return x.filter(function(d) { return d.depth == i; });
 }
 
 function set_segments() {
@@ -235,50 +281,6 @@ function get_layout_bounds(focus_node_id, display_dim, node_size) {
   };
 }
 
-function get_attr_array(attr) {
-  if (Object.keys(this).indexOf("children") == -1) {
-    return [this[attr]];
-  }
-
-  all_attrs = [this[attr]];
-  for (var i = 0; i < this.children.length; i++) {
-    all_attrs = all_attrs.concat(
-      this.children[i].get_attr_array(attr)
-    );
-  }
-
-  return all_attrs;
-}
-
-function filter_tree(values, threshold) {
-  // if we're at a leaf, return
-  if (Object.keys(this).indexOf("children") == -1) {
-    return;
-  }
-
-  var subtrees = this.children;
-  var filtered_subtrees = [];
-
-  for (var i = 0; i < subtrees.length; i++) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      subtrees[i].name
-    );
-
-    if (d3.mean(cur_values) >= threshold) {
-      subtrees[i].filter_tree(values, threshold);
-      filtered_subtrees.push(subtrees[i]);
-    }
-  }
-
-  if (filtered_subtrees.length > 0) {
-    this.children = filtered_subtrees;
-  } else {
-    delete this.children;
-  }
-}
-
 /**
  * Filter away nodes unassociated with a DOI
  **/
@@ -328,8 +330,6 @@ function filter_block(depth, segment) {
     delete this.children;
   }
 }
-
-
 
 /**
  * Rearrange dois along trees into blocks
@@ -402,44 +402,6 @@ function average_block_dois(block_dois) {
 }
 
 /**
- * Helper to retrieve values in object
- *
- * This only applies to objects with depth two.
- */
-function flatten_nested_object(obj) {
-  var values = [];
-
-  var keys = Object.keys(obj);
-  for (var i = 0; i < keys.length; i++) {
-    cur_obj = obj[keys[i]];
-
-    cur_keys = Object.keys(cur_obj);
-    for (var j = 0; j < cur_keys.length; j++) {
-      values.push(
-	{
-	  "outer_key": keys[i],
-	  "inner_key": cur_keys[j],
-	  "value": cur_obj[cur_keys[j]]
-	}
-      );
-    }
-  }
-
-  return values;
-}
-
-/**
- * Shamelessly hide ugly code
- */
-function unique_average_dois(flattened_dois) {
-  return d3.set(
-    flattened_dois.map(
-      function(d) { return d.value; }
-    )).values()
-    .sort(function(a, b) { return a - b;});
-}
-
-/**
  * Trim the width of a tree until it fits within a certain width
  *
  * This implements the breadth-trimming strategy described in the
@@ -497,26 +459,13 @@ function trim_width(focus_node_id, display_dim, node_size) {
  *
  * @return The filtered tree and nodes.
  **/
-function tree_block(tree_var0, focus_node_id, min_doi, display_dim, node_size) {
-  var tree_var = jQuery.extend(true, {}, tree_var0);
-  tree_var = set_doi(tree_var, focus_node_id, min_doi);
-  tree_var = filter_doi(tree_var, min_doi);
-  tree_var = segment_tree(tree_var);
-
-  var cur_bounds = get_layout_bounds(tree_var, focus_node_id,
-				     display_dim, node_size);
-  if (cur_bounds.x_min < 0 || cur_bounds.x_max > display_dim[0]) {
-    tree_var = trim_width(tree_var, focus_node_id, display_dim, node_size);
-  }
-  if (cur_bounds.y_min < 0 || cur_bounds.y_max > display_dim[1]) {
-    tree_var = trim_height(tree_var, display_dim, node_size);
-  }
-
-  var nodes = get_layout(tree_var, focus_node_id, display_dim, node_size);
-  return {"tree_var": tree_var, "nodes": nodes}
+function tree_block(focus_node_id, min_doi, display_dim, node_size) {
+  this.set_doi(focus_node_id, min_doi);
+  this.filter_doi(min_doi);
+  this.segment_tree();
+  this.trim_width(focus_node_id, display_dim, node_size);
+  return this.get_layout(focus_node_id, display_dim, node_size);
 }
-
-// where are the comments??
 
 function get_ancestors(tree_var, node_id, ancestors) {
   // this seems pretty roundabout. Is there no way to traverse the tree upwards?
@@ -537,9 +486,9 @@ function get_ancestors(tree_var, node_id, ancestors) {
   return ancestors;
 }
 
-function link_id_fun(d) {
-  return d.source.name + "-" + d.target.name;
-}
+/*******************************************************************************
+ * Miscellaneous helper functions
+ ******************************************************************************/
 
 function get_matching_subarray(values, categories, to_match) {
   var matched_values = [];
@@ -549,4 +498,42 @@ function get_matching_subarray(values, categories, to_match) {
     }
   }
   return matched_values;
+}
+
+/**
+ * Helper to retrieve values in object
+ *
+ * This only applies to objects with depth two.
+ */
+function flatten_nested_object(obj) {
+  var values = [];
+
+  var keys = Object.keys(obj);
+  for (var i = 0; i < keys.length; i++) {
+    cur_obj = obj[keys[i]];
+
+    cur_keys = Object.keys(cur_obj);
+    for (var j = 0; j < cur_keys.length; j++) {
+      values.push(
+	{
+	  "outer_key": keys[i],
+	  "inner_key": cur_keys[j],
+	  "value": cur_obj[cur_keys[j]]
+	}
+      );
+    }
+  }
+
+  return values;
+}
+
+/**
+ * Shamelessly hide ugly code
+ */
+function unique_average_dois(flattened_dois) {
+  return d3.set(
+    flattened_dois.map(
+      function(d) { return d.value; }
+    )).values()
+    .sort(function(a, b) { return a - b;});
 }
