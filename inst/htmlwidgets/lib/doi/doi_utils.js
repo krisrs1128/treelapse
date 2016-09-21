@@ -4,6 +4,58 @@
 **/
 
 /**
+ * Define a "tree" object
+ *
+ * This adds some useful methods to the hierachy defined by the tree JSON
+ * structure.
+ */
+function Tree(tree_json) {
+  return new TreeInternal(tree_json, 0);
+}
+
+function DoiTree(tree_json) {
+  return new DoiTreeInternal(tree_json, 0);
+}
+
+function TreeInternal(tree_json, depth) {
+  this.filter_tree = filter_tree;
+  this.contains_node = contains_node;
+  this.get_attr_array = get_attr_array;
+
+  this.name = tree_json.name[0];
+  this.depth = depth;
+  if (Object.keys(tree_json).indexOf("children") != -1) {
+    this.children = [];
+    for (var i = 0; i < tree_json.children.length; i++) {
+      var subtree = tree_json.children[i];
+      this.children.push(new TreeInternal(subtree, depth + 1));
+    }
+  }
+}
+
+function DoiTreeInternal(tree_json, depth) {
+  this.doi = null;
+  this.set_tree_fisheye = set_tree_fisheye;
+  this.filter_doi = filter_doi;
+  this.set_doi = set_doi;
+
+  this.filter_tree = filter_tree;
+  this.contains_node = contains_node;
+  this.get_attr_array = get_attr_array;
+
+  this.name = tree_json.name[0];
+  this.depth = depth;
+
+  if (Object.keys(tree_json).indexOf("children") != -1) {
+    this.children = [];
+    for (var i = 0; i < tree_json.children.length; i++) {
+      var subtree = tree_json.children[i];
+      this.children.push(new DoiTreeInternal(subtree, depth + 1));
+    }
+  }
+}
+
+/**
  * Compute the DOI of a tree, given a specific single focus node
  *
  * Calculates the DOI according to
@@ -24,19 +76,18 @@
  * // using tax_tree defined by src/processing/prepare_phylo.R
  * set_doi(tax_tree, "G:Ruminococcus", -2)
  **/
-function set_doi(tree_var, focus_node_id, min_doi) {
-  var desc_indic = contains_node(tree_var, focus_node_id);
-  if (desc_indic) {
-    tree_var.doi = 0;
-    if (tree_var.children != null) {
-      for (var i = 0; i < tree_var.children.length; i++) {
-	tree_var.children[i] = set_doi(tree_var.children[i], focus_node_id, min_doi);
+function set_doi(focus_node_id, min_doi) {
+  var desc_indic = this.contains_node(focus_node_id);
+  if (!desc_indic) {
+    this.set_tree_fisheye(-1);
+  } else {
+    this.doi = 0;
+    if (Object.keys(this).indexOf("children") != -1) {
+      for (var i = 0; i < this.children.length; i++) {
+	this.children[i].set_doi(focus_node_id, min_doi);
       }
     }
-  } else {
-    tree_var = set_tree_fisheye(tree_var, -1);
   }
-  return tree_var;
 }
 
 /**
@@ -49,21 +100,21 @@ function set_doi(tree_var, focus_node_id, min_doi) {
  * @return {bool} true or false, depending on whether the node_id was
  * found in the tree.
  **/
-function contains_node(tree_var, node_id) {
-  if (tree_var.name == node_id) {
+function contains_node(node_id) {
+  if (this.name == node_id) {
     return true;
   }
 
-  if (tree_var.children == null) {
+  if (Object.keys(this).indexOf("children") == -1) {
     return false;
   }
 
-  var children_indic = []
-  for (var i = 0; i < tree_var.children.length; i++) {
-    var cur_indic = contains_node(tree_var.children[i], node_id);
+  var children_indic = [];
+  for (var i = 0; i < this.children.length; i++) {
+    var cur_indic = this.children[i].contains_node(node_id);
     children_indic.push(cur_indic);
   }
-  return children_indic.some(function(x) { return x; })
+  return children_indic.some(function(x) { return x; });
 }
 
 /**
@@ -83,17 +134,13 @@ function contains_node(tree_var, node_id) {
  * @example
  * test_doi = set_doi(tax_tree, "K:Bacteria", -10)
  **/
-function set_tree_fisheye(tree_var, doi) {
-  if (tree_var.doi == undefined) {
-    tree_var.doi = doi;
-  }
-
-  if (tree_var.children != undefined) {
-    for (var i = 0; i < tree_var.children.length; i++) {
-      tree_var.children[i] = set_tree_fisheye(tree_var.children[i], doi - 1);
+function set_tree_fisheye(doi) {
+  this.doi = doi;
+  if (Object.keys(this).indexOf("children") != -1) {
+    for (var i = 0; i < this.children.length; i++) {
+      this.children[i].set_tree_fisheye(doi - 1);
     }
   }
-  return tree_var;
 }
 
 /**
@@ -216,44 +263,62 @@ function get_layout_bounds(tree_var, focus_node_id, display_dim, node_size) {
 	  "y_min": d3.min(nodes_pos.y), "y_max": d3.max(nodes_pos.y)};
 }
 
+function get_attr_array(cur_array, attr) {
+  cur_array.push(this[attr]);
+  if (Object.keys(this).indexOf("children") == -1) {
+    return cur_array;
+  }
+
+  new_arrays = [];
+  for (var i = 0; i < this.children.length; i++) {
+    new_arrays.push(
+      this.children[i].get_attr_array(cur_array, attr)
+    );
+  }
+
+  return Array.prototype.concat.apply([], new_arrays);
+}
+
+function filter_tree(values, threshold) {
+  // if we're at a leaf, return
+  if (Object.keys(this).indexOf("children") == -1) {
+    return;
+  }
+
+  var subtrees = this.children;
+  var filtered_subtrees = [];
+
+  for (var i = 0; i < subtrees.length; i++) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      subtrees[i].name
+    );
+
+    if (d3.mean(cur_values) >= threshold) {
+      subtrees[i].filter_tree(values, threshold);
+      filtered_subtrees.push(subtrees[i]);
+    }
+  }
+
+  if (filtered_subtrees.length > 0) {
+    this.children = filtered_subtrees;
+  } else {
+    delete this.children;
+  }
+}
+
 /**
  * Filter away nodes unassociated with a DOI
- *
- * We use the fact that, when setting the DOI, we don't assign a doi
- * to nodes with doi below a minimum threshold. Therefore, to reduce
- * the tree to nodes with doi above the threshold, we just need to
- * remove nodes with an unspecified doi.
- *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions.
- * @return {Object} tree_var The same object, but after removing any
- * nodes below the minimum threshold removed.
  **/
-function filter_doi(tree_var, min_doi) {
-  var keys = Object.keys(tree_var)
-  if (keys.indexOf("children") != -1) {
-    var children_copy = tree_var.children.slice();
-    tree_var.children = []
+function filter_doi(min_doi) {
+  values = {
+    "value": this.get_attr_array([], "doi"),
+    "unit": this.get_attr_array([], "name")
+  };
 
-    for (var i = 0; i < children_copy.length; i++) {
-      if (children_copy[i].doi >= min_doi) {
-	tree_var.children.push(filter_doi(children_copy[i], min_doi));
-      }
-    }
-  }
-
-  var tree_var_res = {}
-  for (var k = 0; k < keys.length; k++) {
-    if (keys[k] != "children") {
-      tree_var_res[keys[k]] = tree_var[keys[k]];
-    } else {
-      if (tree_var.children.length > 0) {
-	tree_var_res[keys[k]] = tree_var[keys[k]];
-      }
-    }
-  }
-
-  return tree_var_res;
+  console.log(values);
+  this.filter_tree(values, min_doi);
 }
 
 /**
@@ -489,55 +554,4 @@ function get_matching_subarray(values, categories, to_match) {
     }
   }
   return matched_values;
-}
-
-
-function filter_tree(values, threshold) {
-
-  // if we're at a leaf, return
-  if (Object.keys(this).indexOf("children") == -1) {
-    return this;
-  }
-
-  var subtrees = this.children;
-  var filtered_subtrees = [];
-
-  for (var i = 0; i < subtrees.length; i++) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.sample,
-      subtrees[i].name[0]
-    );
-
-    if (d3.mean(cur_values) >= threshold) {
-      filtered_subtrees.push(
-	subtrees[i].filter_tree(values, threshold)
-      );
-    }
-  }
-
-  // copy full tree, and replace subtrees with filtered version
-  var filtered_tree = jQuery.extend({}, this);
-  filtered_tree.children = filtered_subtrees;
-
-  return filtered_tree;
-}
-
-/**
- * Define a "tree" object
- *
- * This adds some useful methods to the hierachy defined by the tree JSON
- * structure.
- */
-function tree(tree_json, depth) {
-  this.filter_tree = filter_tree;
-  this.name = tree_json.name;
-  this.depth = depth;
-  if (Object.keys(tree_json).indexOf("children") != -1) {
-    this.children = [];
-    for (var i = 0; i < tree_json.children.length; i++) {
-      var subtree = tree_json.children[i];
-      this.children.push(new tree(subtree, depth + 1));
-    }
-  }
 }
