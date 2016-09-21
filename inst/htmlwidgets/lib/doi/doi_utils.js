@@ -35,9 +35,11 @@ function TreeInternal(tree_json, depth) {
 
 function DoiTreeInternal(tree_json, depth) {
   this.doi = null;
+  this.segment = null;
   this.set_tree_fisheye = set_tree_fisheye;
   this.filter_doi = filter_doi;
   this.set_doi = set_doi;
+  this.set_segments = set_segments;
 
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
@@ -154,68 +156,20 @@ function filter_depth(x, i) {
   return x.filter(function(d) { return d.depth == i; });
 }
 
-/**
- * Define node segmentation given nodes and depths
- *
- * Function that performs the node segmentation required for the
- * TreeBlock algorithm, using an array of nodes and their depths.
- *
- * @param {array} nodes An array of nodes, assumed to contain a .depth
- * field.
- * @param {array} depths An array of integers, giving the depths of
- * the specified nodes.
- * @return {array} nodes The original array, but with a .segment
- * attribute added to each node.
- **/
-function set_node_segments(nodes, depths) {
-  // set 0 for root [any nodes at depth 0]
-  for (var i = 0; i < nodes.length; i++) {
-    if (nodes[i].depth == 0) {
-      nodes[i].segment = 0;
-    }
+function set_segments() {
+  if (typeof this.children == "undefined") return;
+  if (typeof this.children[0].children == "undefined") return;
+
+  if (this.segment === null) {
+    this.segment = 0;
   }
 
-  // intentionally skip root, and iterate over depths
-  for (var i = 1; i <= d3.max(depths); i++) {
-    var parents = filter_depth(nodes, i - 1).map(function(d) { return d.name; });
-    var children = filter_depth(nodes, i);
-
-    // iterate over nodes at this depth
-    for (var j = 0; j < children.length; j++) {
-      var cur_ix = nodes.map(function(d) { return d.name })
-	  .indexOf(children[j].name);
-      nodes[cur_ix].segment = parents.indexOf(children[j].parent.name);
+  for (var i = 0; i < this.children.length; i++) {
+    this.children[i].set_segments();
+    for (var j = 0; j < this.children[i].children.length; j++) {
+      this.children[i].children[j].segment = i;
     }
   }
-  return nodes;
-}
-
-/**
- * Define a tree segmentation
- *
- * This enumerate blocks [0, 1, ..., n_depth_d] at each depth level,
- * which are used in the TreeBlock algorithm in the DOI paper. At any
- * fixed depth, nodes are assigned to the same block if they have
- * the same parent.
- *
- * This implementation uses a scoping trick. It relies on the fact
- * that modifying the nodes variable [associated with a
- * d3.layout.tree() modifies the tree from which it was created.
- *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions. This is the object that
- * will be segmented.
- * @return {Object} tree_var The original tree_var object, but with
- * with a new .segment attribute within each subject, giving the
- * segment needed by the TreeBlock algorithm.
- * @reference http://vis.stanford.edu/papers/doitrees-revisited
- **/
-function segment_tree(tree_var) {
-  var nodes = d3.layout.cluster()
-      .nodes(tree_var);
-  var depths = nodes.map(function(d) { return d.depth });
-  nodes = set_node_segments(nodes, depths);
-  return tree_var;
 }
 
 /**
