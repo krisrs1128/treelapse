@@ -43,6 +43,8 @@ function DoiTreeInternal(tree_json, depth) {
   this.set_doi = set_doi;
   this.set_segments = set_segments;
   this.get_block_dois = get_block_dois;
+  this.trim_width = trim_width;
+  this.filter_block = filter_block;
 
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
@@ -181,11 +183,15 @@ function set_segments() {
  * Get tree node positions
  **/
 function get_layout(focus_node_id, display_dim, node_size) {
-  var nodes = d3.layout.cluster()
-      .nodeSize(node_size)
-      .nodes(this);
+  var hierarchy = d3.hierarchy(this);
+  var cluster = d3.cluster()
+      .size(display_dim)
+      .nodeSize(node_size);
+
+  var nodes = cluster(hierarchy).descendants();
+
   var focus = nodes.filter(function(d) {
-    return d.name == focus_node_id;
+    return d.data.name == focus_node_id;
   })[0];
   var x_move = focus.x - 0.5 * display_dim[0];
 
@@ -217,10 +223,14 @@ function get_layout(focus_node_id, display_dim, node_size) {
  **/
 function get_layout_bounds(focus_node_id, display_dim, node_size) {
   var nodes = this.get_layout(focus_node_id, display_dim, node_size);
+  console.log(nodes);
+
   var nodes_pos = {
     "x": nodes.map(function(d) { return d.x; }),
     "y": nodes.map(function(d) { return d.y; })
   };
+
+  console.log(nodes_pos);
 
   return {
     "x_min": d3.min(nodes_pos.x),
@@ -302,23 +312,29 @@ function filter_doi(min_doi) {
  * @return {Object} tree_var The original tree_var object, but with
  * the single specified block filtered out.
  **/
-function filter_block(tree_var, depth, segment) {
-  if (tree_var.depth == depth && tree_var.segment == segment) {
+function filter_block(depth, segment) {
+  if (Object.keys(this).indexOf("children") == -1) {
     return;
   }
 
-  if (Object.keys(tree_var).indexOf("children") != -1) {
-    var subtree = []
-    for (var i = 0; i < tree_var.children.length; i++) {
-      var filtered = filter_block(tree_var.children[i], depth, segment);
-      if (typeof filtered != "undefined") {
-	subtree.push(filtered);
-      }
+  var subtrees = this.children;
+  var filtered_subtrees = [];
+
+  for (var i = 0; i < subtrees.length; i++) {
+    if (subtrees[i].depth != depth || subtrees[i].segment != segment) {
+      subtrees[i].filter_block(depth, segment);
+      filtered_subtrees.push(subtrees[i]);
     }
-    tree_var.children = subtree;
   }
-  return tree_var;
+
+  if (filtered_subtrees.length > 0) {
+    this.children = filtered_subtrees;
+  } else {
+    delete this.children;
+  }
 }
+
+
 
 /**
  * Rearrange dois along trees into blocks
@@ -391,6 +407,33 @@ function average_block_dois(block_dois) {
 }
 
 /**
+ * Helper to retrieve values in object
+ *
+ * This only applies to objects with depth two.
+ */
+function flatten_nested_object(obj) {
+  var values = [];
+
+  var keys = Object.keys(obj);
+  for (var i = 0; i < keys.length; i++) {
+    cur_obj = obj[keys[i]];
+
+    cur_keys = Object.keys(cur_obj);
+    for (var j = 0; j < cur_keys.length; j++) {
+      values.push(
+	{
+	  "outer_key": keys[i],
+	  "inner_key": cur_keys[j],
+	  "value": cur_obj[cur_keys[j]]
+	}
+      );
+    }
+  }
+
+  return values;
+}
+
+/**
  * Trim the width of a tree until it fits within a certain width
  *
  * This implements the breadth-trimming strategy described in the
@@ -407,42 +450,34 @@ function average_block_dois(block_dois) {
  * height of the rectangle reserved for a single node.
  * @reference http://vis.stanford.edu/files/2004-DOITree-AVI.pdf
  **/
-function trim_width(tree_var, focus_node_id, display_dim, node_size) {
-  var average_dois = average_block_dois(tree_var);
-  var sorted_dois = average_dois.values
-      .concat()
-      .sort(function(a, b) { return a - b; });
-  sorted_dois = _.uniq(sorted_dois); // maybe uniquing should go before sorting?
+function trim_width(focus_node_id, display_dim, node_size) {
+  block_dois = this.get_block_dois();
+  var average_dois = flatten_nested_object(
+    average_block_dois(block_dois)
+  );
+
+  var sorted_dois = d3.set(average_dois.map(function(d) { return d.value; }))
+      .values()
+      .sort();
 
   // iterate over DOIs, starting with the smallest
   for (var i = 0; i < sorted_dois.length; i++) {
-    cur_bounds = get_layout_bounds(tree_var, focus_node_id,
-				   display_dim, node_size);
+    cur_bounds = this.get_layout_bounds(focus_node_id, display_dim, node_size);
+    console.log(cur_bounds);
+    console.log(display_dim);
+
     if (cur_bounds.x_max < display_dim[0] & cur_bounds.x_min > 0) {
       break;
     }
 
     // find all blocks with the current DOI value
-    for (var j = 0; j < average_dois.values.length; j++) {
-      if (average_dois.values[j] == sorted_dois[i]) {
-	tree_var = filter_block(tree_var, average_dois.depths[j], average_dois.segments[j]);
+    for (var j = 0; j < average_dois.length; j++) {
+      if (average_dois[j].value == sorted_dois[i]) {
+	this.filter_block(average_dois[j].outer_key, average_dois[j].inner_key);
       }
     }
 
   }
-  return tree_var;
-}
-
-/**
- * Trim the height of the tree, according to DOI
- *
- * probably should just remove this function, or at least raise an
- * implementation error
- * This is not implemented yet. It's not strictly necessary, if we
- * allow panning and give breadcrumbs.
- **/
-function trim_height(tree_var) {
-  return tree_var;
 }
 
 /**
