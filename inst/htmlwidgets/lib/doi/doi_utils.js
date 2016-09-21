@@ -21,6 +21,8 @@ function TreeInternal(tree_json, depth) {
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
   this.get_attr_array = get_attr_array;
+  this.get_layout = get_layout;
+  this.get_layout_bounds = get_layout_bounds;
 
   this.name = tree_json.name[0];
   this.depth = depth;
@@ -40,10 +42,13 @@ function DoiTreeInternal(tree_json, depth) {
   this.filter_doi = filter_doi;
   this.set_doi = set_doi;
   this.set_segments = set_segments;
+  this.get_block_dois = get_block_dois;
 
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
   this.get_attr_array = get_attr_array;
+  this.get_layout = get_layout;
+  this.get_layout_bounds = get_layout_bounds;
 
   this.name = tree_json.name[0];
   this.depth = depth;
@@ -175,18 +180,19 @@ function set_segments() {
 /**
  * Get tree node positions
  **/
-function get_layout(tree_var, focus_node_id, display_dim, node_size) {
+function get_layout(focus_node_id, display_dim, node_size) {
   var nodes = d3.layout.cluster()
       .nodeSize(node_size)
-      .nodes(tree_var);
+      .nodes(this);
   var focus = nodes.filter(function(d) {
-    return d.name == focus_node_id; })[0];
-  var x_move = focus.x - display_dim[0] / 2
+    return d.name == focus_node_id;
+  })[0];
+  var x_move = focus.x - 0.5 * display_dim[0];
 
   for (var i = 0; i < nodes.length; i++) {
-    nodes[i].x -= x_move
+    nodes[i].x -= x_move;
     nodes[i].y = node_size[1] * (nodes[i].depth - focus.depth) +
-      display_dim[1] / 3
+      display_dim[1] / 3.0;
   }
   return nodes;
 }
@@ -209,28 +215,34 @@ function get_layout(tree_var, focus_node_id, display_dim, node_size) {
  * @return {array} A length 2 array giving the width and height of
  * result tree.
  **/
-function get_layout_bounds(tree_var, focus_node_id, display_dim, node_size) {
-  var nodes = get_layout(tree_var, focus_node_id, display_dim, node_size);
-  var nodes_pos = {"x": nodes.map(function(d) { return d.x }),
-		   "y": nodes.map(function(d) { return d.y })};
-  return {"x_min": d3.min(nodes_pos.x), "x_max": d3.max(nodes_pos.x),
-	  "y_min": d3.min(nodes_pos.y), "y_max": d3.max(nodes_pos.y)};
+function get_layout_bounds(focus_node_id, display_dim, node_size) {
+  var nodes = this.get_layout(focus_node_id, display_dim, node_size);
+  var nodes_pos = {
+    "x": nodes.map(function(d) { return d.x; }),
+    "y": nodes.map(function(d) { return d.y; })
+  };
+
+  return {
+    "x_min": d3.min(nodes_pos.x),
+    "x_max": d3.max(nodes_pos.x),
+    "y_min": d3.min(nodes_pos.y),
+    "y_max": d3.max(nodes_pos.y)
+  };
 }
 
-function get_attr_array(cur_array, attr) {
-  cur_array.push(this[attr]);
+function get_attr_array(attr) {
   if (Object.keys(this).indexOf("children") == -1) {
-    return cur_array;
+    return [this[attr]];
   }
 
-  new_arrays = [];
+  all_attrs = [this[attr]];
   for (var i = 0; i < this.children.length; i++) {
-    new_arrays.push(
-      this.children[i].get_attr_array(cur_array, attr)
+    all_attrs = all_attrs.concat(
+      this.children[i].get_attr_array(attr)
     );
   }
 
-  return Array.prototype.concat.apply([], new_arrays);
+  return all_attrs;
 }
 
 function filter_tree(values, threshold) {
@@ -267,11 +279,10 @@ function filter_tree(values, threshold) {
  **/
 function filter_doi(min_doi) {
   values = {
-    "value": this.get_attr_array([], "doi"),
-    "unit": this.get_attr_array([], "name")
+    "value": this.get_attr_array("doi"),
+    "unit": this.get_attr_array("name")
   };
 
-  console.log(values);
   this.filter_tree(values, min_doi);
 }
 
@@ -323,28 +334,23 @@ function filter_block(tree_var, depth, segment) {
  * block-segment combination, an array of DOIs for that block in the
  * tree is returned.
  **/
-function get_block_dois(tree_var) {
-  var nodes = d3.layout.cluster()
-      .nodes(tree_var);
+function get_block_dois() {
+  var dois = this.get_attr_array( "doi");
+  var depths = this.get_attr_array("depth");
+  var segments = this.get_attr_array("segment");
 
   var block_dois = {};
-  unique_depths = _.uniq(nodes.map(function(d) { return d.depth }));
+  for (var i = 0; i < dois.length; i++) {
 
-  // initialize structure to store dois
-  for (var i = 0; i < unique_depths.length; i++) {
-    block_dois[i] = {}; // should this be block_dois[unique_depths[i]]?
-    cur_nodes = nodes.filter(function(d) { return d.depth == i });
-    unique_segments = _.uniq(cur_nodes.map(function(d) { return d.segment; }));
-    for (var j = 0; j < unique_segments.length; j++) {
-      block_dois[unique_depths[i]][unique_segments[j]] = [];
+    // initialize if doesn't already exist
+    if (Object.keys(block_dois).indexOf(depths[i].toString()) == -1) {
+      block_dois[depths[i]] = {};
     }
-  }
+    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i].toString()) == -1) {
+      block_dois[depths[i]][segments[i]] = [];
+    }
 
-  // fill in actual values
-  for (var i = 0; i < nodes.length; i++) {
-    cur_depth = nodes[i].depth
-    cur_segment = nodes[i].segment
-    block_dois[cur_depth][cur_segment].push(nodes[i].doi);
+    block_dois[depths[i]][segments[i]].push(dois[i]);
   }
 
   return block_dois;
