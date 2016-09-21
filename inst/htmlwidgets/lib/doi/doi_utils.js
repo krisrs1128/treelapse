@@ -370,25 +370,24 @@ function get_block_dois() {
  * specify the block and segment indices associated with each average
  * doi.
  **/
-function average_block_dois(tree_var) {
-  var block_dois = get_block_dois(tree_var);
-  var averages_values = [],
-      averages_segments = [],
-      averages_depths = [];
+function average_block_dois(block_dois) {
+  var average_dois = {};
 
   var depths = Object.keys(block_dois);
   for (var i = 0; i < depths.length; i++) {
+    average_dois[depths[i]] = {}
+
     var segments = Object.keys(block_dois[i]);
     for (var j = 0; j < segments.length; j++) {
-      averages_depths.push(depths[i])
-      averages_segments.push(segments[j])
-      averages_values.push(d3.mean(block_dois[depths[i]][segments[j]]));
+
+      average_dois[depths[i]][segments[j]] = d3.mean(
+	block_dois[depths[i]][segments[j]]
+      );
+
     }
   }
 
-  return {"depths": averages_depths,
-	  "segments": averages_segments,
-	  "values": averages_values};
+  return average_dois;
 }
 
 /**

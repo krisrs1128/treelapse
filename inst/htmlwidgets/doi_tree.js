@@ -12,7 +12,8 @@ HTMLWidgets.widget({
 	doi_tree.set_doi("Bacteria", -6);
 	doi_tree.set_segments();
 	var block_dois = doi_tree.get_block_dois();
-	console.log(block_dois);
+	var average_dois = average_block_dois(block_dois);
+	console.log(average_dois);
       },
 
       resize: function(width, height) {}
