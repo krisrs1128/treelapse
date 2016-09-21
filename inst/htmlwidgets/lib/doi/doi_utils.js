@@ -189,7 +189,6 @@ function get_layout(focus_node_id, display_dim, node_size) {
       .nodeSize(node_size);
 
   var nodes = cluster(hierarchy).descendants();
-
   var focus = nodes.filter(function(d) {
     return d.data.name == focus_node_id;
   })[0];
@@ -223,14 +222,10 @@ function get_layout(focus_node_id, display_dim, node_size) {
  **/
 function get_layout_bounds(focus_node_id, display_dim, node_size) {
   var nodes = this.get_layout(focus_node_id, display_dim, node_size);
-  console.log(nodes);
-
   var nodes_pos = {
     "x": nodes.map(function(d) { return d.x; }),
     "y": nodes.map(function(d) { return d.y; })
   };
-
-  console.log(nodes_pos);
 
   return {
     "x_min": d3.min(nodes_pos.x),
@@ -391,7 +386,7 @@ function average_block_dois(block_dois) {
 
   var depths = Object.keys(block_dois);
   for (var i = 0; i < depths.length; i++) {
-    average_dois[depths[i]] = {}
+    average_dois[depths[i]] = {};
 
     var segments = Object.keys(block_dois[i]);
     for (var j = 0; j < segments.length; j++) {
@@ -434,6 +429,17 @@ function flatten_nested_object(obj) {
 }
 
 /**
+ * Shamelessly hide ugly code
+ */
+function unique_average_dois(flattened_dois) {
+  return d3.set(
+    flattened_dois.map(
+      function(d) { return d.value; }
+    )).values()
+    .sort(function(a, b) { return a - b;});
+}
+
+/**
  * Trim the width of a tree until it fits within a certain width
  *
  * This implements the breadth-trimming strategy described in the
@@ -451,20 +457,15 @@ function flatten_nested_object(obj) {
  * @reference http://vis.stanford.edu/files/2004-DOITree-AVI.pdf
  **/
 function trim_width(focus_node_id, display_dim, node_size) {
-  block_dois = this.get_block_dois();
+  var block_dois = this.get_block_dois();
   var average_dois = flatten_nested_object(
     average_block_dois(block_dois)
   );
-
-  var sorted_dois = d3.set(average_dois.map(function(d) { return d.value; }))
-      .values()
-      .sort();
+  var sorted_dois = unique_average_dois(average_dois);
 
   // iterate over DOIs, starting with the smallest
   for (var i = 0; i < sorted_dois.length; i++) {
     cur_bounds = this.get_layout_bounds(focus_node_id, display_dim, node_size);
-    console.log(cur_bounds);
-    console.log(display_dim);
 
     if (cur_bounds.x_max < display_dim[0] & cur_bounds.x_min > 0) {
       break;
