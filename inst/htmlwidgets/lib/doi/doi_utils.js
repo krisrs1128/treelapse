@@ -234,7 +234,8 @@ function get_layout(focus_node_id, display_dim, node_size) {
       .size(display_dim)
       .nodeSize(node_size);
 
-  var nodes = cluster(hierarchy).descendants();
+  var layout = cluster(hierarchy);
+  var nodes = layout.descendants();
   var focus = nodes.filter(function(d) {
     return d.data.name == focus_node_id;
   })[0];
@@ -245,7 +246,7 @@ function get_layout(focus_node_id, display_dim, node_size) {
     nodes[i].y = node_size[1] * (nodes[i].depth - focus.depth) +
       display_dim[1] / 3.0;
   }
-  return nodes;
+  return layout;
 }
 
 /**
@@ -267,7 +268,11 @@ function get_layout(focus_node_id, display_dim, node_size) {
  * result tree.
  **/
 function get_layout_bounds(focus_node_id, display_dim, node_size) {
-  var nodes = this.get_layout(focus_node_id, display_dim, node_size);
+  var nodes = this.get_layout(
+    focus_node_id,
+    display_dim,
+    node_size
+  ).descendants();
   var nodes_pos = {
     "x": nodes.map(function(d) { return d.x; }),
     "y": nodes.map(function(d) { return d.y; })
@@ -462,28 +467,9 @@ function trim_width(focus_node_id, display_dim, node_size) {
 function tree_block(focus_node_id, min_doi, display_dim, node_size) {
   this.set_doi(focus_node_id, min_doi);
   this.filter_doi(min_doi);
-  this.segment_tree();
+  this.set_segments();
   this.trim_width(focus_node_id, display_dim, node_size);
   return this.get_layout(focus_node_id, display_dim, node_size);
-}
-
-function get_ancestors(tree_var, node_id, ancestors) {
-  // this seems pretty roundabout. Is there no way to traverse the tree upwards?
-  if(contains_node(tree_var, node_id)) {
-    ancestors.push(tree_var.name);
-  } else {
-    return;
-  }
-
-  if (typeof tree_var.children != "undefined") {
-    for (var i = 0; i < tree_var.children.length; i++) {
-      var next_ancestors = get_ancestors(tree_var.children[i], node_id, ancestors);
-      if (typeof next_ancestors != "undefined") {
-	ancestors.concat(next_ancestors);
-      }
-    }
-  }
-  return ancestors;
 }
 
 /*******************************************************************************
