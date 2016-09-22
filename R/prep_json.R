@@ -92,3 +92,23 @@ taxa_edgelist <- function(taxa) {
   do.call(rbind, el) %>%
     arrange(parent, child)
 }
+
+#' @title Get all the descendants that are tips
+#' @importFrom igraph graph.edgelist neighborhood
+#' @examples
+#' library("phyloseq")
+#' data(GlobalPatterns)
+#' GP <- subset_taxa(GlobalPatterns, Phylum=="Chlamydiae")
+#' el <- phy_tree(GP)$edge
+#' tip_descendants(el, 34)
+tip_descendants <- function(el, cur_ix) {
+  G <- graph.edgelist(el)
+  tips <- setdiff(el[, 2], el[, 1])
+  descendants <- neighborhood(
+    G,
+    order = max(el),
+    nodes = cur_ix,
+    mode = "out"
+  )[[1]]
+  tips[tips %in% names(descendants)]
+}
