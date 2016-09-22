@@ -28,15 +28,10 @@ doi_tree(values, edgelist, "Bacteria", width = 2000, height = 700)
 library("phyloseq")
 library("zoo")
 data(GlobalPatterns)
-bact <- subset_taxa(GlobalPatterns, Phylum == "Actinobacteria")
 
-tax <- tax_table(bact)@.Data
-for (i in seq_len(nrow(tax))) {
-  tax[i, ] <- na.locf(tax[i, ])
-}
-
-tax <- cbind(tax, OTU = rownames(tax))
-tax_tree <- tree_from_taxa(tax)
+GPr <- transform_sample_counts(GlobalPatterns, function(x) x / sum(x) )
+GPfr <- filter_taxa(GPr, function(x) mean(x) > 1e-3, TRUE)
+taxa <- taxa_edgelist(tax_table(GPfr))
 
 values <- tree_counts(
   as.matrix(tax_tree$el),
