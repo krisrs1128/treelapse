@@ -240,8 +240,9 @@ function get_layout(focus_node_id, display_dim, node_size) {
     return d.data.name == focus_node_id;
   })[0];
 
+  var x_move = 0.5 * display_dim[0] - focus.x;
   for (var i = 0; i < nodes.length; i++) {
-    nodes[i].x += 0.5 * display_dim[0];
+    nodes[i].x += x_move;
     nodes[i].y = node_size[1] * (nodes[i].depth - focus.depth) +
       display_dim[1] / 3.0;
   }

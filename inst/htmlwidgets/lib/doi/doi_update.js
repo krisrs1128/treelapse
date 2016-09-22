@@ -1,15 +1,18 @@
 
-function draw_doi(elem, width, height, values, tree) {
+function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"));
+  doi_update(width, height, tree, focus_node_id);
+}
 
+function doi_update(width, height, tree, focus_node_id) {
   // essential DOI algorithm
   var doi_tree = new DoiTree(tree);
   var layout = doi_tree.tree_block(
-    "Bacteria", // focus node
+    focus_node_id,
       -10, // min doi
     [width, height],
-    [5, 10] // node size
+    [10, 10] // node size
   );
 
   // bind to data
@@ -24,26 +27,14 @@ function draw_doi(elem, width, height, values, tree) {
 	function(d) { return d.data.name; }
       );
 
-  // draw elements
   link_selection.exit().remove();
   node_selection.exit().remove();
 
-  link_selection.enter()
-    .append("path")
-    .classed("tree_link", true)
-    .attrs({
-      "d": function(d) {
-	return "M" + d.target.x + "," + d.target.y +
-          "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
-          " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
-          " " + d.source.x + "," + d.source.y;
-      },
-      "stroke": "#555",
-      "stroke-opacity": 0.4,
-      "stroke-width": 1.5
-    });
+  var transitioner = d3.transition()
+      .duration(1000)
+      .ease(d3.easeCubic);
 
-
+  // draw nodes
   node_selection.enter()
     .append("circle")
     .classed("tree_node", true)
@@ -57,6 +48,44 @@ function draw_doi(elem, width, height, values, tree) {
       "cy": function(d) {
 	return d.y;
       },
-      "r": 2,
+      "r": 4.5,
+    })
+    .on("click",
+	function(d) {
+	  return doi_update(width, height, tree, d.data.name);
+	});
+
+  d3.selectAll(".tree_node")
+    .transition(transitioner)
+    .attrs({
+      "cx": function(d) {
+	return d.x;
+      },
+      "cy": function(d) {
+	return d.y;
+      },
     });
+
+  // draw links
+  link_selection.enter()
+    .append("path", "g")
+    .classed("tree_link", true)
+    .styles({
+      "stroke-opacity": 0,
+      "fill": "none",
+      "stroke-width": 5,
+      "stroke": "black"
+    });
+
+  d3.selectAll(".tree_link")
+    .transition(transitioner)
+    .attrs({
+      "d": function(d) {
+	return "M" + d.target.x + "," + d.target.y +
+          "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
+          " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
+          " " + d.source.x + "," + d.source.y;
+      }
+    })
+    .styles({"stroke-opacity": 1});
 }
