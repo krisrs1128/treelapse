@@ -97,3 +97,27 @@ test_that("Builds edgelist when NAs are present", {
   )
   expect_equal(taxa_edgelist(taxa), el)
 })
+
+test_that("Sums leaves in basic tree", {
+  el <- data.frame(
+    parent = c("1", "1", "1", "1", "2", "6"),
+    child = c("2", "4", "5", "6", "3", "7"),
+    stringsAsFactors = FALSE
+  )
+  counts  <- c(
+    "7" = 10,
+    "3" = 2,
+    "4" = 5,
+    "5" = 1
+  )
+
+  expected <- c(
+    "1" = 18,
+    "2" = 8,
+    "7" = 10,
+    "3" = 2,
+    "4" = 5,
+    "5" = 1
+  )
+  expect_equal(tree_sum(el, counts), expected)
+})
