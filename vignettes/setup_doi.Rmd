@@ -1,0 +1,51 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, setup}
+library("treelapse")
+library("data.table")
+library("jsonlite")
+
+edgelist <- fread("../treelapse_expers/data/tax_el.csv")
+values <- fread("../treelapse_expers/data/input_df.csv")
+setnames(values, c("sample", "unit", "time", "value"))
+
+library("devtools")
+document()
+install()
+doi_tree(values, edgelist, "Bacteria", width = 2000, height = 700)
+```
+
+```{r, phyloseq}
+library("phyloseq")
+data(GlobalPatterns)
+bact <- subset_taxa(GlobalPatterns, Class == "Chlamydiae")
+
+tax <- tax_table(bact)@.Data
+for (i in seq_len(nrow(tax))) {
+  tax[i, ] <- make.names(tax[i, ], unique = TRUE)
+}
+
+tax <- cbind(tax, OTU = rownames(tax))
+tax_tree <- tree_from_taxa(tax)
+
+values <- tree_counts(
+  as.matrix(tax_tree$el),
+  tax_tree$inv_mapping,
+  log(1 + otu_table(bact)@.Data[, 1])
+)
+setnames(values, c("unit", "value"))
+
+el <- tax_tree$el
+el$parent <- tax_tree$inv_mapping[el$parent]
+el$child <- tax_tree$inv_mapping[el$child]
+doi_tree(values, el, "Bacteria", width = 2000, height = 1000)
+```
