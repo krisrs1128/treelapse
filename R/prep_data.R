@@ -156,11 +156,10 @@ tree_sum <- function(el, values) {
 tip_descendants <- function(el, cur_node) {
   G <- graph.edgelist(el)
   tips <- setdiff(el[, 2], el[, 1])
-  descendants <- neighborhood(
+  descendants <- subcomponent(
     G,
-    order = max(el),
-    nodes = cur_node,
+    v = cur_node,
     mode = "out"
-  )[[1]]
+  )
   tips[tips %in% names(descendants)]
 }
