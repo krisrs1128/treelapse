@@ -1,0 +1,48 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, setup}
+library("treelapse")
+library("data.table")
+library("jsonlite")
+
+edgelist <- fread("../treelapse_expers/data/tax_el.csv")
+values <- fread("../treelapse_expers/data/input_df.csv")
+setnames(values, c("sample", "unit", "time", "value"))
+
+library("devtools")
+document()
+install()
+doi_tree(values, edgelist, "Bacteria", width = 2000, height = 700)
+```
+
+```{r, phyloseq}
+library("phyloseq")
+library("zoo")
+data(GlobalPatterns)
+
+GPr <- transform_sample_counts(GlobalPatterns, function(x) x / sum(x) )
+GPfr <- filter_taxa(GPr, function(x) mean(x) > 1e-4, TRUE)
+taxa <- taxa_edgelist(tax_table(GPfr))
+
+values <- tree_sum(
+  data.frame(taxa),
+  log(1 + apply(otu_table(GPfr)@.Data, 1, mean))
+)
+
+values <- data.frame(
+  unit = names(values),
+  value = values,
+  stringsAsFactors = FALSE
+)
+
+doi_tree(values, taxa, "Bacteria", "Bacteria", width = 10000, height = 500)
+```

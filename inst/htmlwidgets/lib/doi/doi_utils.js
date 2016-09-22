@@ -210,15 +210,17 @@ function set_tree_fisheye(doi) {
 }
 
 function set_segments() {
-  if (typeof this.children == "undefined") return;
-  if (typeof this.children[0].children == "undefined") return;
-
   if (this.segment === null) {
     this.segment = 0;
   }
 
+  if (typeof this.children == "undefined") return;
+
+
   for (var i = 0; i < this.children.length; i++) {
     this.children[i].set_segments();
+
+    if (typeof this.children[i].children == "undefined") continue;
     for (var j = 0; j < this.children[i].children.length; j++) {
       this.children[i].children[j].segment = i;
     }
@@ -236,6 +238,7 @@ function get_layout(focus_node_id, display_dim, node_size) {
 
   var layout = cluster(hierarchy);
   var nodes = layout.descendants();
+
   var focus = nodes.filter(function(d) {
     return d.data.name == focus_node_id;
   })[0];
@@ -357,12 +360,11 @@ function get_block_dois() {
 
   var block_dois = {};
   for (var i = 0; i < dois.length; i++) {
-
     // initialize if doesn't already exist
-    if (Object.keys(block_dois).indexOf(depths[i].toString()) == -1) {
+    if (Object.keys(block_dois).indexOf(depths[i]) == -1) {
       block_dois[depths[i]] = {};
     }
-    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i].toString()) == -1) {
+    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i]) == -1) {
       block_dois[depths[i]][segments[i]] = [];
     }
 

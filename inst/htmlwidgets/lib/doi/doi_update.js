@@ -18,14 +18,14 @@ function doi_update(width, height, values, tree, focus_node_id) {
     focus_node_id,
       -4, // min doi
     [width, height],
-    [20, 40] // node size
+    [10, 10] // node size
   );
 
   // setup scales used throughout
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([0.7, 13]),
+      .range([1, 8]),
     "opacity": d3.scaleLinear()
       .domain([-4, 0])
       .range(["#DCDCDC", "#000000"]),
