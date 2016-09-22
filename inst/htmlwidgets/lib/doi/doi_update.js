@@ -116,7 +116,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	);
 	return scales.size(d3.mean(cur_values));
       },
-      "stroke": "black"
+      "stroke": "black",
     });
 
   d3.selectAll(".tree_link")
@@ -129,5 +129,9 @@ function doi_update(width, height, values, tree, focus_node_id) {
           " " + d.source.x + "," + d.source.y;
       }
     })
-    .styles({"stroke-opacity": 1});
+    .styles({
+      "stroke-opacity": function(d) {
+	return scales.opacity(d.target.data.doi);
+      }
+    });
 }
