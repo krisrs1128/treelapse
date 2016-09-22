@@ -26,6 +26,9 @@ function doi_update(width, height, values, tree, focus_node_id) {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
       .range([0.7, 13]),
+    "opacity": d3.scaleLinear()
+      .domain([-4, 0])
+      .range([0.4, 1]),
   };
 
   // bind to data
@@ -61,6 +64,9 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "cy": function(d) {
 	return d.y;
       },
+      "opacity": function(d) {
+	return scales.opacity(d.data.doi);
+      },
       "r": function(d) {
 	var cur_values = get_matching_subarray(
 	  values.value,
@@ -90,6 +96,9 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "cy": function(d) {
 	return d.y;
       },
+      "opacity": function(d) {
+	return scales.opacity(d.data.doi);
+      }
     });
 
   // draw links
