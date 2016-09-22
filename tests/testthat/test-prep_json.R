@@ -100,8 +100,8 @@ test_that("Builds edgelist when NAs are present", {
 
 test_that("Sums leaves in basic tree", {
   el <- data.frame(
-    parent = c("1", "1", "1", "1", "2", "6"),
-    child = c("2", "4", "5", "6", "3", "7"),
+    parent = c("1", "1","2", "2", "2"),
+    child = c("2", "7", "3", "4", "5"),
     stringsAsFactors = FALSE
   )
   counts  <- c(
