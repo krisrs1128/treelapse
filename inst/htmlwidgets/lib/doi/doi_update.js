@@ -27,7 +27,14 @@ function doi_update(width, height, tree, focus_node_id) {
 	function(d) { return d.data.name; }
       );
 
-  // draw elements
+  link_selection.exit().remove();
+  node_selection.exit().remove();
+
+  var transitioner = d3.transition()
+      .duration(1000)
+      .ease(d3.easeCubic);
+
+  // draw nodes
   node_selection.enter()
     .append("circle")
     .classed("tree_node", true)
@@ -41,19 +48,15 @@ function doi_update(width, height, tree, focus_node_id) {
       "cy": function(d) {
 	return d.y;
       },
-      "r": 4,
+      "r": 4.5,
     })
     .on("click",
 	function(d) {
 	  return doi_update(width, height, tree, d.data.name);
 	});
 
-  var t = d3.transition()
-      .duration(1000)
-      .ease(d3.easeCubic);
-
-  node_selection
-    .transition(t)
+  d3.selectAll(".tree_node")
+    .transition(transitioner)
     .attrs({
       "cx": function(d) {
 	return d.x;
@@ -63,7 +66,26 @@ function doi_update(width, height, tree, focus_node_id) {
       },
     });
 
-  link_selection.exit().remove();
-  node_selection.exit().remove();
+  // draw links
+  link_selection.enter()
+    .append("path", "g")
+    .classed("tree_link", true)
+    .styles({
+      "stroke-opacity": 0,
+      "fill": "none",
+      "stroke-width": 5,
+      "stroke": "black"
+    });
 
+  d3.selectAll(".tree_link")
+    .transition(transitioner)
+    .attrs({
+      "d": function(d) {
+	return "M" + d.target.x + "," + d.target.y +
+          "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
+          " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
+          " " + d.source.x + "," + d.source.y;
+      }
+    })
+    .styles({"stroke-opacity": 1});
 }
