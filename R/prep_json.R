@@ -44,9 +44,31 @@ tree_json <- function(el, cur_node) {
   res
 }
 
-#' @param Get Edgelist from Tax Table
+#' @title Get Edgelist from Tax Table
+#' @description This is a helper to construct edgelists using tax tables. This
+#' is useful when we want to visualize the tree associated with a taxonomy
+#' (which can have more than two children, unlike the phylos that usually come
+#' with a phyloseq object).
+#'
+#' @param taxa [matrix] A matrix (with rownames) whose first column represents
+#' the highest level in the hierarchy, next level is next depth, etc, and whose
+#' rownames represent the finest level name (e.g., OTU in the phyloseq context).
+#' NAs can be used to represent that finer level information is not available;
+#' in this case, the tree skips these levels in the tree.
+#' @return el [data.frame] A two column data.frame (parent & child) giving a
+#' list of edges associated with the taxonomic tree.
+#' @examples
+#' taxa <- matrix(
+#'   c("1", "2", "1", NA, "1", NA, "1", "6"),
+#'     nrow = 4,
+#'     byrow = TRUE,
+#'     dimnames = list(c("3", "4", "5", "7"),
+#'                     c("depth_1", "depth_2"))
+#'    )
+#' taxa_edgelist(taxa)
 #' @importFrom dplyr %>% arrange
 #' @importFrom zoo na.locf
+#' @export
 taxa_edgelist <- function(taxa) {
   taxa <- cbind(taxa, OTU = rownames(taxa))
 
