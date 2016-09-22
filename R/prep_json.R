@@ -109,7 +109,18 @@ tree_sum <- function(el, values) {
   }
   result
 }
+
 #' @title Get all the descendants that are tips
+#'
+#' @description This is a helper for tree_sum, which gets the names of tip nodes
+#' that descend from a specified internal node, given an edgelist specifying the
+#' tree structure.
+#' @param el [character matrix] A matrix specifying the tree structure. The
+#' first column are character names for the parents, the second are children.
+#' @param cur_node [character] The name of the internal node to search for
+#' descendants from. The name must appear in el.
+#' @return tips [character vector] A character vector of tip nodes that descend
+#' from cur_node.
 #' @importFrom igraph graph.edgelist neighborhood
 #' @examples
 #' library("phyloseq")
@@ -117,13 +128,13 @@ tree_sum <- function(el, values) {
 #' GP <- subset_taxa(GlobalPatterns, Phylum=="Chlamydiae")
 #' el <- phy_tree(GP)$edge
 #' tip_descendants(el, 34)
-tip_descendants <- function(el, cur_ix) {
+tip_descendants <- function(el, cur_node) {
   G <- graph.edgelist(el)
   tips <- setdiff(el[, 2], el[, 1])
   descendants <- neighborhood(
     G,
     order = max(el),
-    nodes = cur_ix,
+    nodes = cur_node,
     mode = "out"
   )[[1]]
   tips[tips %in% names(descendants)]
