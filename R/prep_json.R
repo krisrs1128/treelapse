@@ -43,3 +43,30 @@ tree_json <- function(el, cur_node) {
   }
   res
 }
+
+#' @param Get Edgelist from Tax Table
+#' @importFrom dplyr %>% arrange
+#' @importFrom zoo na.locf
+taxa_edgelist <- function(taxa) {
+  taxa <- cbind(taxa, OTU = rownames(taxa))
+
+  for (i in seq_len(nrow(taxa))) {
+    taxa[i, ] <- na.locf(taxa[i, ])
+  }
+
+  el  <- list()
+  for (j in seq_len(ncol(taxa) - 1)) {
+    cur_el  <- data.frame(
+      parent = taxa[, j],
+      child = taxa[, j + 1],
+      stringsAsFactors = FALSE
+    )
+
+    # discard self-loops introduced by na.locf
+    cur_el <- cur_el[cur_el$parent != cur_el$child, ]
+    el[[j]] <- unique(cur_el)
+  }
+
+  do.call(rbind, el) %>%
+    arrange(parent, child)
+}
