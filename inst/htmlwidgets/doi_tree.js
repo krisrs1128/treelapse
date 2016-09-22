@@ -7,7 +7,7 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
-	draw_doi(el, width, height, x[0], x[1], "Bacteria");
+	draw_doi(el, width, height, x[0], x[1], x[2]);
       },
 
       resize: function(width, height) {}
