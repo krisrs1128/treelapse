@@ -28,7 +28,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
       .range([0.7, 13]),
     "opacity": d3.scaleLinear()
       .domain([-4, 0])
-      .range([0.4, 1]),
+      .range(["#DCDCDC", "#000000"]),
   };
 
   // bind to data
@@ -64,7 +64,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "cy": function(d) {
 	return d.y;
       },
-      "opacity": function(d) {
+      "fill": function(d) {
 	return scales.opacity(d.data.doi);
       },
       "r": function(d) {
@@ -96,7 +96,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "cy": function(d) {
 	return d.y;
       },
-      "opacity": function(d) {
+      "fill": function(d) {
 	return scales.opacity(d.data.doi);
       }
     });
@@ -130,7 +130,8 @@ function doi_update(width, height, values, tree, focus_node_id) {
       }
     })
     .styles({
-      "stroke-opacity": function(d) {
+      "stroke-opacity": 1,
+      "stroke": function(d) {
 	return scales.opacity(d.target.data.doi);
       }
     });
