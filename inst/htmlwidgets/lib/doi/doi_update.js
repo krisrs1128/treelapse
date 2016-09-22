@@ -2,10 +2,16 @@
 function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"));
-  doi_update(width, height, tree, focus_node_id);
+  doi_update(
+    width,
+    height,
+    values,
+    tree,
+    focus_node_id
+  );
 }
 
-function doi_update(width, height, tree, focus_node_id) {
+function doi_update(width, height, values, tree, focus_node_id) {
   // essential DOI algorithm
   var doi_tree = new DoiTree(tree);
   var layout = doi_tree.tree_block(
@@ -14,6 +20,13 @@ function doi_update(width, height, tree, focus_node_id) {
     [width, height],
     [10, 10] // node size
   );
+
+  // setup scales used throughout
+  var scales = {
+    "size": d3.scaleLinear()
+      .domain([0, d3.max(values.value)])
+      .range([0.7, 13]),
+  };
 
   // bind to data
   var link_selection = d3.select("#links")
@@ -48,11 +61,24 @@ function doi_update(width, height, tree, focus_node_id) {
       "cy": function(d) {
 	return d.y;
       },
-      "r": 4.5,
+      "r": function(d) {
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+	return scales.size(d3.mean(cur_values));
+      }
     })
     .on("click",
 	function(d) {
-	  return doi_update(width, height, tree, d.data.name);
+	  return doi_update(
+	    width,
+	    height,
+	    values,
+	    tree,
+	    d.data.name
+	  );
 	});
 
   d3.selectAll(".tree_node")
