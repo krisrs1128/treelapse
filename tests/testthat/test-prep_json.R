@@ -74,7 +74,8 @@ test_that("Builds basic edgelist.", {
 
   el <- data.frame(
     parent = c("1", "1", "2", "2", "2", "6"),
-    child = c("2", "6", "3", "4", "5", "7")
+    child = c("2", "6", "3", "4", "5", "7"),
+    stringsAsFactors = FALSE
   )
 
   expect_equal(taxa_edgelist(taxa), el)
@@ -91,7 +92,8 @@ test_that("Builds edgelist when NAs are present", {
 
   el <- data.frame(
     parent = c("1", "1", "1", "1", "2", "6"),
-    child = c("2", "4", "5", "6", "3", "7")
+    child = c("2", "4", "5", "6", "3", "7"),
+    stringsAsFactors = FALSE
   )
   expect_equal(taxa_edgelist(taxa), el)
 })
