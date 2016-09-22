@@ -80,4 +80,18 @@ test_that("Builds basic edgelist.", {
   expect_equal(taxa_edgelist(taxa), el)
 })
 
-test_that("Builds edgelist when NAs are present")
+test_that("Builds edgelist when NAs are present", {
+  taxa <- matrix(
+    c("1", "2", "1", NA, "1", NA, "1", "6"),
+    nrow = 4,
+    byrow = TRUE,
+    dimnames = list(c("3", "4", "5", "7"),
+                    c("depth_1", "depth_2"))
+  )
+
+  el <- data.frame(
+    parent = c("1", "1", "1", "1", "2", "6"),
+    child = c("2", "4", "5", "6", "3", "7")
+  )
+  expect_equal(taxa_edgelist(taxa), el)
+})
