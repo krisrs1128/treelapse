@@ -26,12 +26,13 @@ doi_tree(values, edgelist, "Bacteria", width = 2000, height = 700)
 
 ```{r, phyloseq}
 library("phyloseq")
+library("zoo")
 data(GlobalPatterns)
-bact <- subset_taxa(GlobalPatterns, Class == "Chlamydiae")
+bact <- subset_taxa(GlobalPatterns, Phylum == "Actinobacteria")
 
 tax <- tax_table(bact)@.Data
 for (i in seq_len(nrow(tax))) {
-  tax[i, ] <- make.names(tax[i, ], unique = TRUE)
+  tax[i, ] <- na.locf(tax[i, ])
 }
 
 tax <- cbind(tax, OTU = rownames(tax))
@@ -45,7 +46,10 @@ values <- tree_counts(
 setnames(values, c("unit", "value"))
 
 el <- tax_tree$el
+el <- el[el$parent != el$child, ]
 el$parent <- tax_tree$inv_mapping[el$parent]
 el$child <- tax_tree$inv_mapping[el$child]
-doi_tree(values, el, "Bacteria", width = 2000, height = 1000)
+el <- el[!(el$child %in% tax[, "OTU"]), ]
+
+doi_tree(values, el, "Bacteria", width = 50000, height = 500)
 ```
