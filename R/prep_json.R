@@ -93,6 +93,22 @@ taxa_edgelist <- function(taxa) {
     arrange(parent, child)
 }
 
+#' @importFrom magrittr %>%
+#' @importFrom data.table data.table
+tree_sum <- function(el, values) {
+  units <- el %>%
+    unlist() %>%
+    unique()
+
+  result <- setNames(values[units], units)
+  internal_nodes <- names(which(is.na(result)))
+
+  for (i in seq_along(internal_nodes)) {
+    cur_tips <- tip_descendants(as.matrix(el), internal_nodes[i])
+    result[internal_nodes[i]] <- sum(values[cur_tips])
+  }
+  result
+}
 #' @title Get all the descendants that are tips
 #' @importFrom igraph graph.edgelist neighborhood
 #' @examples
