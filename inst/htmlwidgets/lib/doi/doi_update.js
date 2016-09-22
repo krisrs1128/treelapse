@@ -16,9 +16,9 @@ function doi_update(width, height, values, tree, focus_node_id) {
   var doi_tree = new DoiTree(tree);
   var layout = doi_tree.tree_block(
     focus_node_id,
-      -10, // min doi
+      -4, // min doi
     [width, height],
-    [10, 10] // node size
+    [20, 40] // node size
   );
 
   // setup scales used throughout
@@ -99,7 +99,14 @@ function doi_update(width, height, values, tree, focus_node_id) {
     .styles({
       "stroke-opacity": 0,
       "fill": "none",
-      "stroke-width": 5,
+      "stroke-width": function(d) {
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.target.data.name
+	);
+	return scales.size(d3.mean(cur_values));
+      },
       "stroke": "black"
     });
 
