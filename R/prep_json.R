@@ -66,7 +66,8 @@ tree_json <- function(el, cur_node) {
 #'                     c("depth_1", "depth_2"))
 #'    )
 #' taxa_edgelist(taxa)
-#' @importFrom dplyr %>% arrange
+#' @importFrom dplyr arrange
+#' @importFrom maggritr %>%
 #' @importFrom zoo na.locf
 #' @export
 taxa_edgelist <- function(taxa) {
@@ -93,8 +94,32 @@ taxa_edgelist <- function(taxa) {
     arrange(parent, child)
 }
 
+#' @title Aggregate values in tips to internal nodes
+#'
+#' @description Given a value associated with each tip in a tree, this
+#' calculates, for each internal node, the sum across all tips that descend from
+#' it.
+#' @param el [character data.frame] The edgelist specifying the tree structure.
+#' The first column are character names for the parents, the second are
+#' children.
+#' @param values [named vector] Tip values on which to aggregate. The names must
+#' be the same names as in el.
 #' @importFrom magrittr %>%
 #' @importFrom data.table data.table
+#' @examples
+#' el <- data.frame(
+#'   parent = c("1", "1","2", "2", "2"),
+#'   child = c("2", "7", "3", "4", "5"),
+#'   stringsAsFactors = FALSE
+#' )
+#' counts  <- c(
+#'   "7" = 10,
+#'   "3" = 2,
+#'   "4" = 5,
+#'   "5" = 1
+#' )
+#' tree_sum(el, counts)
+#' @export
 tree_sum <- function(el, values) {
   units <- el %>%
     unlist() %>%
