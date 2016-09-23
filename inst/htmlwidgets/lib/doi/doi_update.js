@@ -1,5 +1,6 @@
 
 function draw_doi(elem, width, height, values, tree, focus_node_id) {
+  setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"));
   doi_update(
