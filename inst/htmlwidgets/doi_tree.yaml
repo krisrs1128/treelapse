@@ -19,3 +19,7 @@
     - doi_utils.js
     - doi_update.js
     - d3_utils.js
+  - name: roboto
+    version: 0.0.0
+    src: htmlwidgets/lib/font
+    stylesheet: roboto.css

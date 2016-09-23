@@ -67,7 +67,7 @@ tree_json <- function(el, cur_node) {
 #'    )
 #' taxa_edgelist(taxa)
 #' @importFrom dplyr arrange
-#' @importFrom maggritr %>%
+#' @importFrom magrittr %>%
 #' @importFrom zoo na.locf
 #' @export
 taxa_edgelist <- function(taxa) {
@@ -146,7 +146,7 @@ tree_sum <- function(el, values) {
 #' descendants from. The name must appear in el.
 #' @return tips [character vector] A character vector of tip nodes that descend
 #' from cur_node.
-#' @importFrom igraph graph.edgelist neighborhood
+#' @importFrom igraph graph.edgelist subcomponent
 #' @examples
 #' library("phyloseq")
 #' data(GlobalPatterns)
