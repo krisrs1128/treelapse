@@ -18,7 +18,7 @@ function Tree(tree_json) {
 }
 
 function DoiTree(tree_json) {
-  return new DoiTreeInternal(tree_json, 0);
+  return new DoiTreeInternal(tree_json, 0, "none");
 }
 
 function TreeInternal(tree_json, depth) {
@@ -39,13 +39,11 @@ function TreeInternal(tree_json, depth) {
   }
 }
 
-function DoiTreeInternal(tree_json, depth) {
+function DoiTreeInternal(tree_json, depth, parent) {
   this.doi = null;
-  this.segment = null;
+  this.segment = parent;
   this.set_tree_fisheye = set_tree_fisheye;
-  this.filter_doi = filter_doi;
   this.set_doi = set_doi;
-  this.set_segments = set_segments;
   this.get_block_dois = get_block_dois;
   this.trim_width = trim_width;
   this.filter_block = filter_block;
@@ -64,7 +62,7 @@ function DoiTreeInternal(tree_json, depth) {
     this.children = [];
     for (var i = 0; i < tree_json.children.length; i++) {
       var subtree = tree_json.children[i];
-      this.children.push(new DoiTreeInternal(subtree, depth + 1));
+      this.children.push(new DoiTreeInternal(subtree, depth + 1, this.name));
     }
   }
 }
@@ -169,7 +167,7 @@ function filter_tree(values, threshold) {
  * // using tax_tree defined by src/processing/prepare_phylo.R
  * set_doi(tax_tree, "G:Ruminococcus", -2)
  **/
-function set_doi(focus_node_id, min_doi) {
+function set_doi(focus_node_id) {
   var desc_indic = this.contains_node(focus_node_id);
   if (!desc_indic) {
     this.set_tree_fisheye(-1);
@@ -177,7 +175,7 @@ function set_doi(focus_node_id, min_doi) {
     this.doi = 0;
     if (Object.keys(this).indexOf("children") != -1) {
       for (var i = 0; i < this.children.length; i++) {
-	this.children[i].set_doi(focus_node_id, min_doi);
+	this.children[i].set_doi(focus_node_id);
       }
     }
   }
@@ -205,24 +203,6 @@ function set_tree_fisheye(doi) {
   if (Object.keys(this).indexOf("children") != -1) {
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].set_tree_fisheye(doi - 1);
-    }
-  }
-}
-
-function set_segments() {
-  if (this.segment === null) {
-    this.segment = 0;
-  }
-
-  if (typeof this.children == "undefined") return;
-
-
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].set_segments();
-
-    if (typeof this.children[i].children == "undefined") continue;
-    for (var j = 0; j < this.children[i].children.length; j++) {
-      this.children[i].children[j].segment = i;
     }
   }
 }
@@ -290,18 +270,6 @@ function get_layout_bounds(focus_node_id, display_dim, node_size) {
 }
 
 /**
- * Filter away nodes unassociated with a DOI
- **/
-function filter_doi(min_doi) {
-  values = {
-    "value": this.get_attr_array("doi"),
-    "unit": this.get_attr_array("name")
-  };
-
-  this.filter_tree(values, min_doi);
-}
-
-/**
  * Filter nodes within a single tree block
  *
  * The tree-blocking algorithm requires filtering away blocks of
@@ -360,11 +328,13 @@ function get_block_dois() {
 
   var block_dois = {};
   for (var i = 0; i < dois.length; i++) {
+
     // initialize if doesn't already exist
-    if (Object.keys(block_dois).indexOf(depths[i]) == -1) {
+    if (Object.keys(block_dois).indexOf(depths[i].toString()) == -1) {
       block_dois[depths[i]] = {};
     }
-    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i]) == -1) {
+
+    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i].toString()) == -1) {
       block_dois[depths[i]][segments[i]] = [];
     }
 
@@ -436,14 +406,17 @@ function trim_width(focus_node_id, display_dim, node_size) {
   for (var i = 0; i < sorted_dois.length; i++) {
     cur_bounds = this.get_layout_bounds(focus_node_id, display_dim, node_size);
 
-    if (cur_bounds.x_max < display_dim[0] & cur_bounds.x_min > 0) {
+    if (cur_bounds.x_max <= display_dim[0] & cur_bounds.x_min >= 0) {
       break;
     }
 
     // find all blocks with the current DOI value
     for (var j = 0; j < average_dois.length; j++) {
       if (average_dois[j].value == sorted_dois[i]) {
-	this.filter_block(average_dois[j].outer_key, average_dois[j].inner_key);
+	this.filter_block(
+	  average_dois[j].outer_key,
+	  average_dois[j].inner_key
+	);
       }
     }
 
@@ -466,10 +439,8 @@ function trim_width(focus_node_id, display_dim, node_size) {
  *
  * @return The filtered tree and nodes.
  **/
-function tree_block(focus_node_id, min_doi, display_dim, node_size) {
-  this.set_doi(focus_node_id, min_doi);
-  this.filter_doi(min_doi);
-  this.set_segments();
+function tree_block(focus_node_id, display_dim, node_size) {
+  this.set_doi(focus_node_id);
   this.trim_width(focus_node_id, display_dim, node_size);
   return this.get_layout(focus_node_id, display_dim, node_size);
 }

@@ -2,6 +2,7 @@
 function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"));
+  console.log(tree)
   doi_update(
     width,
     height,
@@ -12,24 +13,25 @@ function draw_doi(elem, width, height, values, tree, focus_node_id) {
 }
 
 function doi_update(width, height, values, tree, focus_node_id) {
+  console.log("Focusing on " + focus_node_id);
   // essential DOI algorithm
   var doi_tree = new DoiTree(tree);
-  var layout = doi_tree.tree_block(
-    focus_node_id,
-      -4, // min doi
-    [width, height],
-    [10, 10] // node size
-  );
+  doi_tree.set_doi();
 
-  // setup scales used throughout
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([1, 8]),
-    "opacity": d3.scaleLinear()
-      .domain([-4, 0])
-      .range(["#DCDCDC", "#000000"]),
+      .range([3, 35]),
+    "opacity": d3.scalePow().exponent([1e-15])
+      .domain(d3.extent(doi_tree.get_attr_array("doi")))
+      .range(["#F7F7F7", "#000000"]),
   };
+
+  var layout = doi_tree.tree_block(
+    focus_node_id,
+    [width, height],
+    [25, 100] // node size
+  );
 
   // bind to data
   var link_selection = d3.select("#links")
@@ -76,6 +78,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return scales.size(d3.mean(cur_values));
       }
     })
+    .text(function(d) { return d.data.depth + "-" + d.data.segment; })
     .on("click",
 	function(d) {
 	  return doi_update(
@@ -86,6 +89,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	    d.data.name
 	  );
 	});
+
 
   d3.selectAll(".tree_node")
     .transition(transitioner)
