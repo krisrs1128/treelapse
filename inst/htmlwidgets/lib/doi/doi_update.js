@@ -8,11 +8,12 @@ function draw_doi(elem, width, height, values, tree, focus_node_id) {
     height,
     values,
     tree,
-    focus_node_id
+    focus_node_id,
+    "Acido"
   );
 }
 
-function doi_update(width, height, values, tree, focus_node_id) {
+function doi_update(width, height, values, tree, focus_node_id, search_str) {
   console.log("Focusing on " + focus_node_id);
   // essential DOI algorithm
   var doi_tree = new DoiTree(tree);
@@ -84,6 +85,23 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	  d.data.name
 	);
 	return scales.size(d3.mean(cur_values));
+      },
+      "stroke": function(d) {
+	if (d.data.contains_partial_match(search_str)) {
+	  return "red";
+	}
+      },
+      "stroke-width": function(d) {
+      	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+	var width = 0.05 * scales.size(d3.mean(cur_values));
+	if (width < 1.5) {
+	  return 1.5;
+	}
+	return width;
       }
     })
     .on("click",
@@ -93,7 +111,8 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	    height,
 	    values,
 	    tree,
-	    d.data.name
+	    d.data.name,
+	    search_str
 	  );
 	});
 
@@ -109,6 +128,23 @@ function doi_update(width, height, values, tree, focus_node_id) {
       },
       "fill": function(d) {
 	return scales.opacity(d.data.doi);
+      },
+      "stroke": function(d) {
+	if (d.data.contains_partial_match(search_str)) {
+	  return "red";
+	}
+      },
+      "stroke-width": function(d) {
+      	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+	var width = 0.05 * scales.size(d3.mean(cur_values));
+	if (width < 1.5) {
+	  return 1.5;
+	}
+	return width;
       }
     });
 

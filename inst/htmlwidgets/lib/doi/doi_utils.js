@@ -52,6 +52,7 @@ function DoiTreeInternal(tree_json, depth, parent) {
 
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
+  this.contains_partial_match = contains_partial_match;
   this.get_attr_array = get_attr_array;
   this.get_layout = get_layout;
   this.get_layout_bounds = get_layout_bounds;
@@ -99,10 +100,11 @@ function contains_node(node_id) {
   return children_indic.some(function(x) { return x; });
 }
 
-function contains_partial_match(sesarch_str) {
+function contains_partial_match(search_str) {
   var match_ix = this.name.toLowerCase().search(
-    search_str.toLowerCase
+    search_str.toLowerCase()
   );
+
 
   if (match_ix != -1) {
     return true;
@@ -114,7 +116,7 @@ function contains_partial_match(sesarch_str) {
 
   var children_indic = [];
   for (var i = 0; i < this.children.length; i++) {
-    var cur_indic = this.children[i].contains_partial_match(node_id);
+    var cur_indic = this.children[i].contains_partial_match(search_str);
     children_indic.push(cur_indic);
   }
   return children_indic.some(function(x) { return x; });
