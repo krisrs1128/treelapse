@@ -2,7 +2,6 @@
 function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"));
-  console.log(tree)
   doi_update(
     width,
     height,
@@ -156,19 +155,31 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return "text-" + d.data.name;
       },
       "x": function(d) {
-	return d.x;
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+
+	return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
       },
       "y": function(d) {
-	return d.y;
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+
+	return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
       },
       "fill": function(d) {
 	return scales.opacity(d.data.doi);
       },
       "font-size": function(d) {
 	if (d.data.doi === 0) {
-	  return 12;
+	  return 20;
 	}
-	return 7;
+	return 15;
       }
     });
 
@@ -182,10 +193,23 @@ function doi_update(width, height, values, tree, focus_node_id) {
     })
     .attrs({
       "x": function(d) {
-	return d.x;
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+
+	// a little over sqrt(2) / 2
+	return d.x + 0.72 * scales.size(d3.mean(cur_values));
       },
       "y": function(d) {
-	return d.y;
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+
+	return d.y - 0.72 * scales.size(d3.mean(cur_values));
       },
       "fill": function(d) {
 	return scales.opacity(d.data.doi);
@@ -194,7 +218,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	if (d.data.doi === 0) {
 	  return 20;
 	}
-	return 12;
+	return 15;
       }
     });
 
