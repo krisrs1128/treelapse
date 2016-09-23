@@ -18,7 +18,7 @@ function Tree(tree_json) {
 }
 
 function DoiTree(tree_json) {
-  return new DoiTreeInternal(tree_json, 0);
+  return new DoiTreeInternal(tree_json, 0, "none");
 }
 
 function TreeInternal(tree_json, depth) {
@@ -39,15 +39,13 @@ function TreeInternal(tree_json, depth) {
   }
 }
 
-function DoiTreeInternal(tree_json, depth) {
+function DoiTreeInternal(tree_json, depth, parent) {
   this.doi = null;
-  this.segment = null;
+  this.segment = parent;
   this.set_tree_fisheye = set_tree_fisheye;
   this.set_doi = set_doi;
-  this.set_segments = set_segments;
   this.get_block_dois = get_block_dois;
   this.trim_width = trim_width;
-  this.get_node_block = get_node_block;
   this.filter_block = filter_block;
   this.tree_block = tree_block;
 
@@ -64,7 +62,7 @@ function DoiTreeInternal(tree_json, depth) {
     this.children = [];
     for (var i = 0; i < tree_json.children.length; i++) {
       var subtree = tree_json.children[i];
-      this.children.push(new DoiTreeInternal(subtree, depth + 1));
+      this.children.push(new DoiTreeInternal(subtree, depth + 1, this.name));
     }
   }
 }
@@ -209,24 +207,6 @@ function set_tree_fisheye(doi) {
   }
 }
 
-function set_segments() {
-  if (this.segment === null) {
-    this.segment = 0;
-  }
-
-  if (typeof this.children == "undefined") return;
-
-
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].set_segments();
-
-    if (typeof this.children[i].children == "undefined") continue;
-    for (var j = 0; j < this.children[i].children.length; j++) {
-      this.children[i].children[j].segment = i;
-    }
-  }
-}
-
 /**
  * Get tree node positions
  **/
@@ -238,8 +218,6 @@ function get_layout(focus_node_id, display_dim, node_size) {
 
   var layout = cluster(hierarchy);
   var nodes = layout.descendants();
-
-  console.log(focus_node_id);
 
   var focus = nodes.filter(function(d) {
     return d.data.name == focus_node_id;
@@ -400,30 +378,6 @@ function average_block_dois(block_dois) {
   return average_dois;
 }
 
-function get_node_block(node_id) {
-  // if current block has the node, return block parameters
-  if (this.name == node_id) {
-    return {
-      "depth": this.depth,
-      "segment": this.segment
-    };
-  }
-
-  // search descendant subtree containing the node
-  var subtrees = this.children;
-  var result = null;
-  for (var i = 0; i < subtrees.length; i++) {
-    if(subtrees[i].contains_node(node_id)) {
-      result = subtrees[i].get_node_block(node_id);
-    }
-  }
-
-  if (result === null) {
-    throw new Error("No node with this ID");
-  }
-  return result;
-}
-
 /**
  * Trim the width of a tree until it fits within a certain width
  *
@@ -443,13 +397,6 @@ function get_node_block(node_id) {
  **/
 function trim_width(focus_node_id, display_dim, node_size) {
   var block_dois = this.get_block_dois();
-  var focus_node_block = this.get_node_block(focus_node_id);
-  console.log("dois")
-  console.log(average_block_dois(block_dois))
-  console.log(block_dois)
-  console.log(this)
-  console.log(focus_node_block)
-
   var average_dois = flatten_nested_object(
     average_block_dois(block_dois)
   );
@@ -466,19 +413,10 @@ function trim_width(focus_node_id, display_dim, node_size) {
     // find all blocks with the current DOI value
     for (var j = 0; j < average_dois.length; j++) {
       if (average_dois[j].value == sorted_dois[i]) {
-
-	var depth = average_dois[j].outer_key;
-	var segment = average_dois[j].inner_key;
-	if (depth != focus_node_block.depth || segment != focus_node_block.segment) {
-	  console.log("filtering")
-	  console.log(depth)
-	  console.log(segment)
-	  console.log(sorted_dois[i])
-	  this.filter_block(depth, segment);
-	} else {
-	  console.log("avoiding")
-	  console.log(focus_node_block)
-	}
+	this.filter_block(
+	  average_dois[j].outer_key,
+	  average_dois[j].inner_key
+	);
       }
     }
 
@@ -503,7 +441,6 @@ function trim_width(focus_node_id, display_dim, node_size) {
  **/
 function tree_block(focus_node_id, display_dim, node_size) {
   this.set_doi(focus_node_id);
-  this.set_segments();
   this.trim_width(focus_node_id, display_dim, node_size);
   return this.get_layout(focus_node_id, display_dim, node_size);
 }

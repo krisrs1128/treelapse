@@ -45,5 +45,5 @@ values <- data.frame(
 )
 
 install()
-doi_tree(values, taxa, "Bacteria", "Bacteria", width = 5000, height = 500)
+doi_tree(values, taxa, "Bacteria", "Bacteria", width = 1000, height = 500)
 ```

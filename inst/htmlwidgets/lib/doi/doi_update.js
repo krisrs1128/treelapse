@@ -2,6 +2,7 @@
 function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"));
+  console.log(tree)
   doi_update(
     width,
     height,
@@ -75,6 +76,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return scales.size(d3.mean(cur_values));
       }
     })
+    .text(function(d) { return d.data.depth + "-" + d.data.segment; })
     .on("click",
 	function(d) {
 	  return doi_update(
@@ -85,6 +87,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	    d.data.name
 	  );
 	});
+
 
   d3.selectAll(".tree_node")
     .transition(transitioner)
