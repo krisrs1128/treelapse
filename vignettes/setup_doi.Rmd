@@ -11,22 +11,7 @@ vignette: >
 
 ```{r, setup}
 library("treelapse")
-library("data.table")
-library("jsonlite")
-
-edgelist <- fread("../treelapse_expers/data/tax_el.csv")
-values <- fread("../treelapse_expers/data/input_df.csv")
-setnames(values, c("sample", "unit", "time", "value"))
-
-library("devtools")
-document()
-install()
-doi_tree(values, edgelist, "Bacteria", width = 2000, height = 700)
-```
-
-```{r, phyloseq}
 library("phyloseq")
-library("zoo")
 data(GlobalPatterns)
 
 GPr <- transform_sample_counts(GlobalPatterns, function(x) x / sum(x) )
@@ -44,6 +29,5 @@ values <- data.frame(
   stringsAsFactors = FALSE
 )
 
-install()
-doi_tree(values, taxa, "Bacteria", "Bacteria", width = 2000, height = 4000)
+doi_tree(values, taxa, "Bacteria", "Bacteria", width = 2000, height = 1000)
 ```
