@@ -86,7 +86,6 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return scales.size(d3.mean(cur_values));
       }
     })
-    .text(function(d) { return d.data.depth + "-" + d.data.segment; })
     .on("click",
 	function(d) {
 	  return doi_update(
@@ -147,4 +146,51 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return scales.opacity(d.target.data.doi);
       }
     });
+
+  // draw text
+  text_selection.enter()
+    .append("text")
+    .classed("tree_text", true)
+    .attrs({
+      "id": function(d) {
+	return "text-" + d.data.name;
+      },
+      "cx": function(d) {
+	return d.x;
+      },
+      "cy": function(d) {
+	return d.y;
+      },
+      "fill": function(d) {
+	return scales.opacity(d.data.doi);
+      },
+      "font-size": function(d) {
+	if (d.data.doi === 0) {
+	  return 12;
+	}
+	return 7;
+      }
+    });
+
+
+  d3.selectAll(".tree_text")
+    .transition(transitioner)
+    .attrs({
+      "cx": function(d) {
+	return d.x;
+      },
+      "cy": function(d) {
+	return d.y;
+      },
+      "fill": function(d) {
+	return scales.opacity(d.data.doi);
+      },
+      "font-size": function(d) {
+	if (d.data.doi === 0) {
+	  return 12;
+	}
+	return 7;
+      }
+    });
+
 }
