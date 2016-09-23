@@ -29,7 +29,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
   var layout = doi_tree.tree_block(
     focus_node_id,
     [width, height],
-    [25, 100] // node size
+    [40, 100] // node size
   );
 
   // bind to data
@@ -175,11 +175,12 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "fill": function(d) {
 	return scales.opacity(d.data.doi);
       },
+      "font-family": "Roboto",
       "font-size": function(d) {
 	if (d.data.doi === 0) {
 	  return 20;
 	}
-	return 15;
+	return 10;
       }
     });
 
@@ -214,11 +215,12 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "fill": function(d) {
 	return scales.opacity(d.data.doi);
       },
+      "font-family": "Roboto",
       "font-size": function(d) {
 	if (d.data.doi === 0) {
 	  return 20;
 	}
-	return 15;
+	return 10;
       }
     });
 
