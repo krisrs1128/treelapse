@@ -27,6 +27,9 @@ function setup_groups(svg) {
 
   svg.append("g")
     .attr("id", "nodes");
+
+  svg.append("g")
+    .attr("id", "text");
 }
 
 function link_id_fun(d) {

@@ -45,8 +45,16 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	function(d) { return d.data.name; }
       );
 
+  var text_selection = d3.select("#text")
+      .selectAll(".tree_text")
+      .data(
+	layout.descendants(),
+	function(d) { return d.data.name; }
+      );
+
   link_selection.exit().remove();
   node_selection.exit().remove();
+  text_selection.exit().remove();
 
   var transitioner = d3.transition()
       .duration(1000)
