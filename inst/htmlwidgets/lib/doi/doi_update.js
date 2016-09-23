@@ -16,7 +16,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
   var doi_tree = new DoiTree(tree);
   var layout = doi_tree.tree_block(
     focus_node_id,
-      -4, // min doi
+      -3, // min doi
     [width, height],
     [10, 10] // node size
   );

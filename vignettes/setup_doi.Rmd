@@ -30,7 +30,7 @@ library("zoo")
 data(GlobalPatterns)
 
 GPr <- transform_sample_counts(GlobalPatterns, function(x) x / sum(x) )
-GPfr <- filter_taxa(GPr, function(x) mean(x) > 1e-4, TRUE)
+GPfr <- filter_taxa(GPr, function(x) mean(x) > 1e-3, TRUE)
 taxa <- taxa_edgelist(tax_table(GPfr))
 
 values <- tree_sum(
@@ -44,5 +44,6 @@ values <- data.frame(
   stringsAsFactors = FALSE
 )
 
-doi_tree(values, taxa, "Bacteria", "Bacteria", width = 10000, height = 500)
+install()
+doi_tree(values, taxa, "Bacteria", "Bacteria", width = 1000, height = 500)
 ```

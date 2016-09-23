@@ -48,6 +48,7 @@ function DoiTreeInternal(tree_json, depth) {
   this.set_segments = set_segments;
   this.get_block_dois = get_block_dois;
   this.trim_width = trim_width;
+  this.get_node_block = get_node_block;
   this.filter_block = filter_block;
   this.tree_block = tree_block;
 
@@ -169,7 +170,7 @@ function filter_tree(values, threshold) {
  * // using tax_tree defined by src/processing/prepare_phylo.R
  * set_doi(tax_tree, "G:Ruminococcus", -2)
  **/
-function set_doi(focus_node_id, min_doi) {
+function set_doi(focus_node_id) {
   var desc_indic = this.contains_node(focus_node_id);
   if (!desc_indic) {
     this.set_tree_fisheye(-1);
@@ -177,7 +178,7 @@ function set_doi(focus_node_id, min_doi) {
     this.doi = 0;
     if (Object.keys(this).indexOf("children") != -1) {
       for (var i = 0; i < this.children.length; i++) {
-	this.children[i].set_doi(focus_node_id, min_doi);
+	this.children[i].set_doi(focus_node_id);
       }
     }
   }
@@ -238,6 +239,8 @@ function get_layout(focus_node_id, display_dim, node_size) {
 
   var layout = cluster(hierarchy);
   var nodes = layout.descendants();
+
+  console.log(focus_node_id);
 
   var focus = nodes.filter(function(d) {
     return d.data.name == focus_node_id;
@@ -360,11 +363,13 @@ function get_block_dois() {
 
   var block_dois = {};
   for (var i = 0; i < dois.length; i++) {
+
     // initialize if doesn't already exist
-    if (Object.keys(block_dois).indexOf(depths[i]) == -1) {
+    if (Object.keys(block_dois).indexOf(depths[i].toString()) == -1) {
       block_dois[depths[i]] = {};
     }
-    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i]) == -1) {
+
+    if (Object.keys(block_dois[depths[i]]).indexOf(segments[i].toString()) == -1) {
       block_dois[depths[i]][segments[i]] = [];
     }
 
@@ -408,6 +413,30 @@ function average_block_dois(block_dois) {
   return average_dois;
 }
 
+function get_node_block(node_id) {
+  // if current block has the node, return block parameters
+  if (this.name == node_id) {
+    return {
+      "depth": this.depth,
+      "segment": this.segment
+    };
+  }
+
+  // search descendant subtree containing the node
+  var subtrees = this.children;
+  var result = null;
+  for (var i = 0; i < subtrees.length; i++) {
+    if(subtrees[i].contains_node(node_id)) {
+      result = subtrees[i].get_node_block(node_id);
+    }
+  }
+
+  if (result === null) {
+    throw new Error("No node with this ID");
+  }
+  return result;
+}
+
 /**
  * Trim the width of a tree until it fits within a certain width
  *
@@ -427,6 +456,10 @@ function average_block_dois(block_dois) {
  **/
 function trim_width(focus_node_id, display_dim, node_size) {
   var block_dois = this.get_block_dois();
+  var focus_node_block = this.get_node_block(focus_node_id);
+  console.log("dois")
+  console.log(average_block_dois(block_dois))
+  console.log(block_dois)
   var average_dois = flatten_nested_object(
     average_block_dois(block_dois)
   );
@@ -436,14 +469,25 @@ function trim_width(focus_node_id, display_dim, node_size) {
   for (var i = 0; i < sorted_dois.length; i++) {
     cur_bounds = this.get_layout_bounds(focus_node_id, display_dim, node_size);
 
-    if (cur_bounds.x_max < display_dim[0] & cur_bounds.x_min > 0) {
+    if (cur_bounds.x_max <= display_dim[0] & cur_bounds.x_min >= 0) {
       break;
     }
 
     // find all blocks with the current DOI value
     for (var j = 0; j < average_dois.length; j++) {
       if (average_dois[j].value == sorted_dois[i]) {
-	this.filter_block(average_dois[j].outer_key, average_dois[j].inner_key);
+
+	var depth = average_dois[j].outer_key;
+	var segment = average_dois[j].inner_key;
+	if (depth != focus_node_block.depth || segment != focus_node_block.segment) {
+	  console.log("filtering")
+	  console.log(depth)
+	  console.log(segment)
+	  this.filter_block(depth, segment);
+	} else {
+	  console.log("avoiding")
+	  console.log(focus_node_block)
+	}
       }
     }
 
@@ -467,7 +511,7 @@ function trim_width(focus_node_id, display_dim, node_size) {
  * @return The filtered tree and nodes.
  **/
 function tree_block(focus_node_id, min_doi, display_dim, node_size) {
-  this.set_doi(focus_node_id, min_doi);
+  this.set_doi(focus_node_id);
   this.filter_doi(min_doi);
   this.set_segments();
   this.trim_width(focus_node_id, display_dim, node_size);
