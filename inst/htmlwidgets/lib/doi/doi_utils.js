@@ -43,7 +43,6 @@ function DoiTreeInternal(tree_json, depth) {
   this.doi = null;
   this.segment = null;
   this.set_tree_fisheye = set_tree_fisheye;
-  this.filter_doi = filter_doi;
   this.set_doi = set_doi;
   this.set_segments = set_segments;
   this.get_block_dois = get_block_dois;
@@ -293,18 +292,6 @@ function get_layout_bounds(focus_node_id, display_dim, node_size) {
 }
 
 /**
- * Filter away nodes unassociated with a DOI
- **/
-function filter_doi(min_doi) {
-  values = {
-    "value": this.get_attr_array("doi"),
-    "unit": this.get_attr_array("name")
-  };
-
-  this.filter_tree(values, min_doi);
-}
-
-/**
  * Filter nodes within a single tree block
  *
  * The tree-blocking algorithm requires filtering away blocks of
@@ -460,6 +447,9 @@ function trim_width(focus_node_id, display_dim, node_size) {
   console.log("dois")
   console.log(average_block_dois(block_dois))
   console.log(block_dois)
+  console.log(this)
+  console.log(focus_node_block)
+
   var average_dois = flatten_nested_object(
     average_block_dois(block_dois)
   );
@@ -483,6 +473,7 @@ function trim_width(focus_node_id, display_dim, node_size) {
 	  console.log("filtering")
 	  console.log(depth)
 	  console.log(segment)
+	  console.log(sorted_dois[i])
 	  this.filter_block(depth, segment);
 	} else {
 	  console.log("avoiding")
@@ -510,9 +501,8 @@ function trim_width(focus_node_id, display_dim, node_size) {
  *
  * @return The filtered tree and nodes.
  **/
-function tree_block(focus_node_id, min_doi, display_dim, node_size) {
+function tree_block(focus_node_id, display_dim, node_size) {
   this.set_doi(focus_node_id);
-  this.filter_doi(min_doi);
   this.set_segments();
   this.trim_width(focus_node_id, display_dim, node_size);
   return this.get_layout(focus_node_id, display_dim, node_size);

@@ -16,19 +16,18 @@ function doi_update(width, height, values, tree, focus_node_id) {
   var doi_tree = new DoiTree(tree);
   var layout = doi_tree.tree_block(
     focus_node_id,
-      -3, // min doi
     [width, height],
-    [10, 10] // node size
+    [10, 20] // node size
   );
 
   // setup scales used throughout
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([1, 8]),
-    "opacity": d3.scaleLinear()
-      .domain([-4, 0])
-      .range(["#DCDCDC", "#000000"]),
+      .range([2, 15]),
+    "opacity": d3.scalePow().exponent([0.35])
+      .domain(d3.extent(doi_tree.get_attr_array("doi")))
+      .range(["#EDEDED", "#000000"]),
   };
 
   // bind to data
