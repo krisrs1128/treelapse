@@ -155,10 +155,10 @@ function doi_update(width, height, values, tree, focus_node_id) {
       "id": function(d) {
 	return "text-" + d.data.name;
       },
-      "cx": function(d) {
+      "x": function(d) {
 	return d.x;
       },
-      "cy": function(d) {
+      "y": function(d) {
 	return d.y;
       },
       "fill": function(d) {
@@ -175,11 +175,16 @@ function doi_update(width, height, values, tree, focus_node_id) {
 
   d3.selectAll(".tree_text")
     .transition(transitioner)
+    .text(function(d) {
+      if (d.data.doi >= -1) {
+	return d.data.name;
+      }
+    })
     .attrs({
-      "cx": function(d) {
+      "x": function(d) {
 	return d.x;
       },
-      "cy": function(d) {
+      "y": function(d) {
 	return d.y;
       },
       "fill": function(d) {
@@ -187,9 +192,9 @@ function doi_update(width, height, values, tree, focus_node_id) {
       },
       "font-size": function(d) {
 	if (d.data.doi === 0) {
-	  return 12;
+	  return 20;
 	}
-	return 7;
+	return 12;
       }
     });
 
