@@ -27,6 +27,7 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	);
       },
       select: function(event, ui) {
+	$("#search_box").val(ui.item.label);
 	doi_update(
 	  width,
 	  height,
@@ -42,7 +43,6 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
     console.log("Focusing on " + focus_node_id);
     focus_node_id_outer = focus_node_id;
     var search_str = $("#search_box").val();
-    console.log(search_str);
 
     // essential DOI algorithm
     var tree_obj = new Tree(tree);
@@ -118,8 +118,6 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	},
 	"stroke": function(d) {
 	  var cur_tree = tree_obj.get_subtree(d.data.name);
-	  console.log(cur_tree.name);
-	  console.log(d.data.name);
 	  if (cur_tree.contains_partial_match(search_str)) {
 	    return "red";
 	  }
@@ -162,8 +160,6 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	},
 	"stroke": function(d) {
 	  var cur_tree = tree_obj.get_subtree(d.data.name);
-	  console.log(cur_tree.name);
-	  console.log(d.data.name);
 	  if (cur_tree.contains_partial_match(search_str)) {
 	    return "red";
 	  }
