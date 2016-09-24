@@ -9,8 +9,17 @@ function draw_doi(elem, width, height, values, tree, focus_node_id) {
     values,
     tree,
     focus_node_id,
-    "Acido"
+    ""
   );
+
+  var tree_obj = new Tree(tree);
+  var node_names = tree_obj.get_attr_array("name");
+  $(function() {
+    $("#search_box").autocomplete({
+      source: node_names,
+    });
+  });
+
 }
 
 function doi_update(width, height, values, tree, focus_node_id, search_str) {

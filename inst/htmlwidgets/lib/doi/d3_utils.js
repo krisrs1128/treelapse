@@ -34,17 +34,11 @@ function setup_search(elem) {
     .attr("id", "search");
 
   search.append("input")
-    .append("input")
     .attrs({
       "id": "search_box",
       "type": "text"
     });
-  search.append("input")
-    .attrs({
-      "id": "search_button",
-      "type": "button",
-      "value": "search"
-    });
+
 }
 
 function link_id_fun(d) {
