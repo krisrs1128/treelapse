@@ -22,8 +22,10 @@ function DoiTree(tree_json) {
 }
 
 function TreeInternal(tree_json, depth) {
+  this.get_subtree = get_subtree;
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
+  this.contains_partial_match = contains_partial_match;
   this.get_attr_array = get_attr_array;
   this.get_layout = get_layout;
   this.get_layout_bounds = get_layout_bounds;
@@ -49,8 +51,10 @@ function DoiTreeInternal(tree_json, depth, parent) {
   this.filter_block = filter_block;
   this.tree_block = tree_block;
 
+  this.get_subtree = get_subtree;
   this.filter_tree = filter_tree;
   this.contains_node = contains_node;
+  this.contains_partial_match = contains_partial_match;
   this.get_attr_array = get_attr_array;
   this.get_layout = get_layout;
   this.get_layout_bounds = get_layout_bounds;
@@ -93,6 +97,40 @@ function contains_node(node_id) {
   var children_indic = [];
   for (var i = 0; i < this.children.length; i++) {
     var cur_indic = this.children[i].contains_node(node_id);
+    children_indic.push(cur_indic);
+  }
+  return children_indic.some(function(x) { return x; });
+}
+
+function get_subtree(new_root) {
+  if (this.name == new_root) {
+    return this;
+  }
+
+  var subtrees = this.children;
+  for (var i = 0; i < subtrees.length; i++) {
+    if (subtrees[i].contains_node(new_root)) {
+      return subtrees[i].get_subtree(new_root);
+    }
+  }
+}
+
+function contains_partial_match(search_str) {
+  var match_ix = this.name.toLowerCase().search(
+    search_str.toLowerCase()
+  );
+
+  if (match_ix != -1) {
+    return true;
+  }
+
+  if (Object.keys(this).indexOf("children") == -1) {
+    return false;
+  }
+
+  var children_indic = [];
+  for (var i = 0; i < this.children.length; i++) {
+    var cur_indic = this.children[i].contains_partial_match(search_str);
     children_indic.push(cur_indic);
   }
   return children_indic.some(function(x) { return x; });

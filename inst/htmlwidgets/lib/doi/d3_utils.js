@@ -22,14 +22,23 @@ function setup_background(elem, width, height, fill) {
 }
 
 function setup_groups(svg) {
-  svg.append("g")
-    .attr("id", "links");
+  svg.selectAll("g")
+    .data(["highlighted_links", "links", "nodes", "text"]).enter()
+    .append("g")
+    .attr("id", function(d) { return d;});
+}
 
-  svg.append("g")
-    .attr("id", "nodes");
+function setup_search(elem) {
+  var search = d3.select(elem)
+    .append("g")
+    .attr("id", "search");
 
-  svg.append("g")
-    .attr("id", "text");
+  search.append("input")
+    .attrs({
+      "id": "search_box",
+      "type": "text"
+    });
+
 }
 
 function link_id_fun(d) {
