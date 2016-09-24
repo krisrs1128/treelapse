@@ -29,6 +29,5 @@ values <- data.frame(
   stringsAsFactors = FALSE
 )
 
-install()
 doi_tree(values, taxa, "Bacteria", "Bacteria", width = 2000, height = 1000)
 ```
