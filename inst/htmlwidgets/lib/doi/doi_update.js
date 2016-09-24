@@ -27,7 +27,6 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	);
       },
       select: function(event, ui) {
-      console.log(ui);
 	doi_update(
 	  width,
 	  height,
@@ -119,6 +118,8 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	},
 	"stroke": function(d) {
 	  var cur_tree = tree_obj.get_subtree(d.data.name);
+	  console.log(cur_tree.name);
+	  console.log(d.data.name);
 	  if (cur_tree.contains_partial_match(search_str)) {
 	    return "red";
 	  }
@@ -160,7 +161,10 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	  return scales.opacity(d.data.doi);
 	},
 	"stroke": function(d) {
-	  if (d.data.contains_partial_match(search_str)) {
+	  var cur_tree = tree_obj.get_subtree(d.data.name);
+	  console.log(cur_tree.name);
+	  console.log(d.data.name);
+	  if (cur_tree.contains_partial_match(search_str)) {
 	    return "red";
 	  }
 	},
