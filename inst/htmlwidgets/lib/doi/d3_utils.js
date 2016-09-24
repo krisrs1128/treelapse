@@ -23,7 +23,7 @@ function setup_background(elem, width, height, fill) {
 
 function setup_groups(svg) {
   svg.selectAll("g")
-    .data(["links", "nodes", "text"]).enter()
+    .data(["highlighted_links", "links", "nodes", "text"]).enter()
     .append("g")
     .attr("id", function(d) { return d;});
 }

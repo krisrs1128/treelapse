@@ -69,6 +69,10 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	.selectAll(".tree_link")
 	.data(layout.links(), link_id_fun);
 
+    var highlighted_link_selection = d3.select("#highlighted_links")
+	.selectAll(".highlighted_tree_link")
+	.data(layout.links(), link_id_fun);
+
     var node_selection = d3.select("#nodes")
 	.selectAll(".tree_node")
 	.data(
@@ -84,6 +88,7 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	);
 
     link_selection.exit().remove();
+    highlighted_link_selection.exit().remove();
     node_selection.exit().remove();
     text_selection.exit().remove();
 
@@ -115,24 +120,6 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	    d.data.name
 	  );
 	  return scales.size(d3.mean(cur_values));
-	},
-	"stroke": function(d) {
-	  var cur_tree = tree_obj.get_subtree(d.data.name);
-	  if (cur_tree.contains_partial_match(search_str)) {
-	    return "red";
-	  }
-	},
-	"stroke-width": function(d) {
-      	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-	  var width = 0.05 * scales.size(d3.mean(cur_values));
-	  if (width < 1.5) {
-	    return 1.5;
-	  }
-	  return width;
 	}
       })
       .on("click",
@@ -160,8 +147,8 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	},
 	"stroke": function(d) {
 	  var cur_tree = tree_obj.get_subtree(d.data.name);
-	  if (cur_tree.contains_partial_match(search_str)) {
-	    return "red";
+	  if (search_str != "" & cur_tree.contains_partial_match(search_str)) {
+	    return "#D66F62";
 	  }
 	},
 	"stroke-width": function(d) {
@@ -211,6 +198,43 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
 	"stroke": function(d) {
 	  return scales.opacity(d.target.data.doi);
 	}
+      });
+
+    // draw highlighted links
+    highlighted_link_selection.enter()
+      .append("path", "g")
+      .classed("highlighted_tree_link", true)
+      .styles({
+	"stroke-opacity": 0,
+	"fill": "none",
+	"stroke": "#D66F62",
+      });
+
+    d3.selectAll(".highlighted_tree_link")
+      .transition(transitioner)
+      .attrs({
+	"d": function(d) {
+	  return "M" + d.target.x + "," + d.target.y +
+            "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
+            " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
+            " " + d.source.x + "," + d.source.y;
+	},
+	"stroke-width": function(d) {
+	  var cur_tree = tree_obj.get_subtree(d.target.data.name);
+	  if (!(search_str != "" & cur_tree.contains_partial_match(search_str))) {
+	    return 0;
+	  }
+
+	  var cur_values = get_matching_subarray(
+	    values.value,
+	    values.unit,
+	    d.target.data.name
+	  );
+	  return 1.3 * scales.size(d3.mean(cur_values));
+	}
+      })
+      .styles({
+	"stroke-opacity": 1
       });
 
     // draw text
