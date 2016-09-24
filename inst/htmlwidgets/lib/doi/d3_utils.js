@@ -44,18 +44,3 @@ function setup_search(elem) {
 function link_id_fun(d) {
   return d.source.data.name + "-" + d.target.data.name;
 }
-
-function get_matches(names, search_str) {
-  var matches = [];
-  search_str = search_str.toLowerCase();
-  var lower_names = names.map(
-    function(d) { return d.toLowerCase(); }
-  );
-
-  for (var i = 0; i < names.length; i++) {
-    if (lower_names[i].search(search_str) != -1) {
-      matches.push(names[i]);
-    }
-  }
-  return matches;
-}
