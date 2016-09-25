@@ -1,6 +1,6 @@
 HTMLWidgets.widget({
 
-  name: 'doi_timebox_tree',
+  name: 'timebox_tree',
   type: 'output',
 
   factory: function(el, width, height) {
