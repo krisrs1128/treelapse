@@ -2,6 +2,7 @@
 
 export(doi_tree)
 export(taxa_edgelist)
+export(timebox_tree)
 export(tree_json)
 export(tree_sum)
 import(htmlwidgets)

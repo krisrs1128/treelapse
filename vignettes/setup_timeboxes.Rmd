@@ -15,7 +15,6 @@ library("phyloseq")
 library("plyr")
 library("dplyr")
 library("reshape2")
-data(GlobalPatterns)
 ```
 
 
@@ -67,4 +66,10 @@ mvalues <- do.call(rbind, values) %>%
   melt()
 
 colnames(mvalues) <- c("time", "unit", "value")
+```
+
+```{r}
+library("devtools")
+install()
+timebox_tree(mvalues, taxa, "Bacteria", 100, 100)
 ```
