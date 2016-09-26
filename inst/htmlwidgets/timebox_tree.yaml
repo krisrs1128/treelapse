@@ -18,6 +18,8 @@
     script:
     - doi_utils.js
     - doi_update.js
+    - timebox_utils.js
+    - timebox_update.js
     - d3_utils.js
   - name: roboto
     version: 0.0.0
