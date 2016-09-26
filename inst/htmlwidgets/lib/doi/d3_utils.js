@@ -21,9 +21,9 @@ function setup_background(elem, width, height, fill) {
 
 }
 
-function setup_groups(svg) {
+function setup_groups(svg, group_names) {
   svg.selectAll("g")
-    .data(["highlighted_links", "links", "nodes", "text"]).enter()
+    .data(group_names).enter()
     .append("g")
     .attr("id", function(d) { return d;});
 }

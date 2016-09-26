@@ -1,5 +1,4 @@
 HTMLWidgets.widget({
-
   name: 'timebox_tree',
   type: 'output',
 
@@ -7,7 +6,8 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
-	console.log("Nothing yet....")
+	console.log(x);
+	draw_timebox(el, width, height, x[0], x[1]);
       },
 
       resize: function(width, height) {}
