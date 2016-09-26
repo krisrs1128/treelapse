@@ -39,16 +39,12 @@ sample_info$DateColl <- (sample_info$DateColl - min(sample_info$DateColl)) / (36
 ```
 
 ```{r, get-values}
-dim(sample_info)
-dim(otu_table(PS))
-otu_table(PS)
-
 taxa <- taxa_edgelist(tax_table(PS))
 values <- list()
 
 for (i in seq_len(nrow(sample_info))) {
   print(i)
-  cur_values <- log(1 + otu_table(PS)[i, ]@.Data)
+  cur_values <- log(1 + log(1 + otu_table(PS)[i, ]@.Data))
   cur_values <- setNames(
     as.numeric(cur_values),
     colnames(cur_values)
@@ -61,15 +57,13 @@ for (i in seq_len(nrow(sample_info))) {
   )
 }
 
-
 mvalues <- do.call(rbind, values) %>%
   melt()
-
 colnames(mvalues) <- c("time", "unit", "value")
 ```
 
 ```{r}
 library("devtools")
 install()
-timebox_tree(mvalues, taxa, "Bacteria", 100, 100)
+timebox_tree(mvalues, taxa, "Bacteria", 700, 500)
 ```
