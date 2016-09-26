@@ -2,7 +2,7 @@
 function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
-  setup_groups(d3.select("svg"));
+  setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
   doi_update(
     width,
     height,
