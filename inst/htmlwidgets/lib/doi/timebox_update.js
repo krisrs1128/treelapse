@@ -27,6 +27,11 @@ function draw_timebox(elem, width, height, values, tree) {
   timebox_update(elem, width, height, values, tree, []);
 }
 
+function timebox_update(elem, width, height, values, tree, cur_lines) {
+  draw_ts(elem, values, cur_lines, width, height);
+  draw_tree(elem, values, cur_lines, width, height, tree);
+}
+
 function timebox_update_factory(elem, width, height, values, tree) {
   function f(cur_lines) {
     timebox_update(elem, width, height, values, tree, cur_lines);
@@ -47,10 +52,6 @@ function brush_fun(line_data, scales, update_fun, width, height) {
     units = [];
   }
   update_fun(units);
-}
-
-function timebox_update(elem, width, height, values, tree, cur_lines) {
-  draw_ts(elem, values, cur_lines, width, height);
 }
 
 function new_brush(line_data, scales, update_fun, width, height) {

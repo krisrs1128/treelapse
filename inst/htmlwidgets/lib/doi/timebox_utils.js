@@ -62,6 +62,32 @@ function draw_ts(elem, values, cur_lines, width, height) {
 
 }
 
+function draw_tree(elem, values, cur_lines, width, height, tree) {
+  var hierarchy = d3.hierarchy(tree);
+  var cluster = d3.cluster()
+      .size([width, 0.37 * height]);
+  var layout = cluster(hierarchy);
+
+  var node_selection = d3.select("#nodes")
+      .selectAll(".tree_node")
+      .data(layout.descendants());
+  node_selection.enter()
+    .append("circle")
+    .classed("tree_node", true)
+    .attrs({
+      "id": function(d) {
+	return "node-" + d.data.name;
+      },
+      "cx": function(d) {
+	return d.x;
+      },
+      "cy": function(d) {
+	return d.y;
+      },
+      "r": 2
+    });
+}
+
 function get_line_data(values, cur_unit) {
   var cur_times = get_matching_subarray(
     values.time,
