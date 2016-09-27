@@ -133,3 +133,54 @@ function brush_intersection(brushes, units, scales) {
     }
   return units;
 }
+
+function focus_brush(brush_ix) {
+
+
+  d3.selectAll(".brush")
+    .attrs({
+      "brush_selected": function (d) {
+	var cur_id = d3.select(this).attr("id");
+	if (cur_id == "brush-" + brush_ix) {
+	  return true;
+	}
+	return false;
+      },
+      "pointer-events": function(d) {
+	var cur_id = d3.select(this).attr("id");
+	if (cur_id == "brush-" + brush_ix) {
+	  return "all";
+	}
+	return "none";
+      },
+      "opacity": function(d) {
+	var cur_id = d3.select(this).attr("id");
+	if (cur_id == "brush-" + brush_ix) {
+	  return 1;
+	}
+	return 0.4;
+      }
+    });
+  d3.selectAll(".brush > rect")
+    .attrs({
+      "pointer-events": function(d) {
+	return d3.select(this.parentNode)
+	  .attr("pointer-events");
+      }
+    });
+}
+
+function change_focus() {
+  var brushes = d3.selectAll(".brush").nodes();
+
+  var brush_ix = 0;
+  for (var i = 0; i < brushes.length; i++) {
+    var value = brushes[i].attributes.brush_selected.value;
+    if(value === "true") {
+      brush_ix = i;
+    }
+  }
+
+  brush_ix = (brush_ix + 1) % brushes.length;
+  focus_brush(brush_ix);
+}

@@ -17,7 +17,8 @@ function draw_timebox(elem, width, height, values, tree) {
 
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["all_ts", "all_brushes", "nodes", "links"]);
-  add_button(elem, "new_brush", button_fun);
+  add_button(elem, "new box", button_fun);
+  add_button(elem, "change focus", change_focus);
   timebox_update(elem, width, height, values, tree, []);
 }
 
@@ -30,9 +31,10 @@ function timebox_update_factory(elem, width, height, values, tree) {
 }
 
 function brush_fun(line_data, scales, update_fun, width, height) {
-  if (all_brushes.length !== 0) {
+  var brushes = d3.selectAll(".brush").nodes();
+  if (brushes.length !== 0) {
     units = brush_intersection(
-      d3.selectAll("#all_brushes g").nodes(),
+      brushes,
       Object.keys(line_data),
       scales
     );
@@ -53,15 +55,12 @@ function new_brush(line_data, scales, update_fun, width, height) {
 	brush_fun(line_data, scales, update_fun, width, height);
       });
 
+  var n_brushes = d3.selectAll(".brush").nodes().length;
   d3.select("#all_brushes")
     .append("g")
     .classed("brush", true)
+    .attrs({"id": "brush-" + n_brushes})
     .call(brush);
 
-  var n_brushes = d3.selectAll("#all_brushes g").nodes().length;
-  d3.selectAll("#all_brushes g")
-    .attrs({
-      "id": function(d, i) { return i; },
-      "brush_selected": function(d, i) { return i == n_brushes - 1; }
-    });
+  focus_brush(n_brushes);
 }
