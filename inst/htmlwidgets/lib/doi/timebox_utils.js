@@ -86,6 +86,18 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
       },
       "r": 2
     });
+
+  d3.selectAll(".tree_node")
+    .transition()
+    .duration(700)
+    .attrs({
+      "fill": function(d) {
+	if (cur_lines.indexOf(d.data.name[0]) != -1) {
+	  return "#2D869F";
+	}
+	return "#696969";
+      }
+    });
 }
 
 function get_line_data(values, cur_unit) {
