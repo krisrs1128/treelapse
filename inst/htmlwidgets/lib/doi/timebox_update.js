@@ -30,26 +30,12 @@ function timebox_update_factory(elem, width, height, values, tree) {
 }
 
 function brush_fun(line_data, scales, update_fun, width, height) {
-  var all_brushes = d3.selectAll("#all_brushes g").nodes();
-  var units = Object.keys(line_data);
-
   if (all_brushes.length !== 0) {
-    for (var i = 0; i < all_brushes.length; i++) {
-      var box_extent = d3.brushSelection(all_brushes[i]);
-      box_extent = {
-	"time_min": scales.x.invert(box_extent[0][0]),
-	"value_min": scales.y.invert(box_extent[1][1]),
-	"time_max": scales.x.invert(box_extent[1][0]),
-	"value_max": scales.y.invert(box_extent[0][1])
-      };
-
-      units = intersect(
-	units,
-	lines_in_box(line_data, box_extent)
-      );
-
-    }
-
+    units = brush_intersection(
+      d3.selectAll("#all_brushes g").nodes(),
+      Object.keys(line_data),
+      scales
+    );
   } else {
     units = [];
   }

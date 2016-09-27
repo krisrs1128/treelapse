@@ -114,3 +114,22 @@ function lines_in_box(line_data, box_extent) {
   }
   return contained_ids;
 }
+
+function brush_intersection(brushes, units, scales) {
+    for (var i = 0; i < brushes.length; i++) {
+      var box_extent = d3.brushSelection(brushes[i]);
+      box_extent = {
+	"time_min": scales.x.invert(box_extent[0][0]),
+	"value_min": scales.y.invert(box_extent[1][1]),
+	"time_max": scales.x.invert(box_extent[1][0]),
+	"value_max": scales.y.invert(box_extent[0][1])
+      };
+
+      units = intersect(
+	units,
+	lines_in_box(line_data, box_extent)
+      );
+
+    }
+  return units;
+}
