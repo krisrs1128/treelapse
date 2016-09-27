@@ -135,8 +135,6 @@ function brush_intersection(brushes, units, scales) {
 }
 
 function focus_brush(brush_ix) {
-
-
   d3.selectAll(".brush")
     .attrs({
       "brush_selected": function (d) {
@@ -184,10 +182,3 @@ function change_focus() {
   brush_ix = (brush_ix + 1) % brushes.length;
   focus_brush(brush_ix);
 }
-
-jQuery.fn.d3Brush = function () {
-  this.each(function (i, e) {
-    var evt = new MouseEvent("brush");
-    e.dispatchEvent(evt);
-  });
-};
