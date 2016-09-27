@@ -44,3 +44,11 @@ function setup_search(elem) {
 function link_id_fun(d) {
   return d.source.data.name + "-" + d.target.data.name;
 }
+
+
+function add_button(elem, text, click_fun) {
+  d3.select(elem)
+    .append("button")
+    .on("click", click_fun)
+    .text(text);
+}

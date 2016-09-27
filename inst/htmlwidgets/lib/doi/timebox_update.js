@@ -1,16 +1,5 @@
 
 function draw_timebox(elem, width, height, values, tree) {
-  setup_background(elem, width, height, "#F7F7F7");
-  setup_groups(d3.select("svg"), ["all_ts", "all_brushes", "nodes", "links"]);
-  timebox_update(elem, width, height, values, tree, []);
-
-  var update_fun = timebox_update_factory(
-    elem,
-    width,
-    height,
-    values,
-    tree
-  );
 
   var units = d3.set(values.unit).values();
   var scales = get_scales(values, width, height);
@@ -20,7 +9,16 @@ function draw_timebox(elem, width, height, values, tree) {
     line_data[units[i]] = get_line_data(values, units[i]);
   }
 
-  new_brush(line_data, scales, update_fun, width, height);
+  var update_fun = timebox_update_factory(elem, width, height, values, tree);
+
+  function button_fun() {
+    new_brush(line_data, scales, update_fun, width, height);
+  }
+
+  setup_background(elem, width, height, "#F7F7F7");
+  setup_groups(d3.select("svg"), ["all_ts", "all_brushes", "nodes", "links"]);
+  add_button(elem, "new_brush", button_fun);
+  timebox_update(elem, width, height, values, tree, []);
 }
 
 function timebox_update_factory(elem, width, height, values, tree) {
@@ -32,7 +30,7 @@ function timebox_update_factory(elem, width, height, values, tree) {
 }
 
 function brush_fun(line_data, scales, update_fun, width, height) {
-  var all_brushes = d3.select("#all_brushes g").nodes();
+  var all_brushes = d3.selectAll("#all_brushes g").nodes();
   var units = Object.keys(line_data);
 
   if (all_brushes.length !== 0) {
