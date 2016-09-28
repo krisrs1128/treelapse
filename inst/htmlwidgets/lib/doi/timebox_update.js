@@ -64,7 +64,9 @@ function new_brush(line_data, scales, update_fun, width, height) {
   var brush = d3.brush()
       .on("brush", function() {
 	brush_fun(line_data, scales, update_fun, width, height);
-      });
+      })
+      .extent([[0, .4 * height], [width, height]]);
+
 
   var n_brushes = d3.selectAll(".brush").nodes().length;
   d3.select("#all_brushes")
