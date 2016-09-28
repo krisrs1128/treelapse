@@ -20,11 +20,16 @@ function draw_timebox(elem, width, height, values, tree) {
   }
 
   setup_background(elem, width, height, "#F7F7F7");
-  setup_groups(d3.select("svg"), ["all_ts", "all_brushes", "nodes", "links"]);
+  setup_groups(d3.select("svg"), ["all_ts", "all_brushes", "links", "nodes",]);
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", change_focus);
   add_button(elem, "remove box", remove_fun);
   timebox_update(elem, width, height, values, tree, []);
+}
+
+function timebox_update(elem, width, height, values, tree, cur_lines) {
+  draw_ts(elem, values, cur_lines, width, height);
+  draw_tree(elem, values, cur_lines, width, height, tree);
 }
 
 function timebox_update_factory(elem, width, height, values, tree) {
@@ -47,10 +52,6 @@ function brush_fun(line_data, scales, update_fun, width, height) {
     units = [];
   }
   update_fun(units);
-}
-
-function timebox_update(elem, width, height, values, tree, cur_lines) {
-  draw_ts(elem, values, cur_lines, width, height);
 }
 
 function new_brush(line_data, scales, update_fun, width, height) {

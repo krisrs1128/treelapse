@@ -62,6 +62,58 @@ function draw_ts(elem, values, cur_lines, width, height) {
 
 }
 
+function timebox_link_attrs(values, cur_lines, tree_obj) {
+  var attr_funs = link_attr_defaults();
+
+  attr_funs.stroke = function(d) {
+    var subtree = tree_obj.get_subtree(d.target.data.name[0]);
+    var descendants = subtree.get_attr_array("name");
+    if (intersect(descendants, cur_lines).length > 0) {
+      return "#2D869F";
+    }
+    return "#696969";
+  };
+
+  return attr_funs;
+}
+
+function timebox_node_attrs(values, cur_lines) {
+  var attr_funs = node_attr_defaults();
+
+  attr_funs.fill = function(d) {
+    if (cur_lines.indexOf(d.data.name[0]) != -1) {
+      return "#2D869F";
+    }
+    return "#696969";
+  };
+
+  return attr_funs;
+}
+
+function draw_tree(elem, values, cur_lines, width, height, tree) {
+  var hierarchy = d3.hierarchy(tree);
+  var cluster = d3.cluster()
+      .size([width, 0.37 * height]);
+  var layout = cluster(hierarchy);
+
+  // draw links
+  var tree_obj = new Tree(tree);
+  tree_links_base(
+    d3.select("#links"),
+    layout.links(),
+    "tree_link",
+    timebox_link_attrs(values, cur_lines, tree_obj)
+  );
+
+  // draw nodes
+  tree_nodes_base(
+    d3.select("#nodes"),
+    layout.descendants(),
+    "tree_node",
+    timebox_node_attrs(values, cur_lines)
+  );
+}
+
 function get_line_data(values, cur_unit) {
   var cur_times = get_matching_subarray(
     values.time,
