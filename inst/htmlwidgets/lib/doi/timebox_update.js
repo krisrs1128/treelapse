@@ -20,7 +20,13 @@ function draw_timebox(elem, width, height, values, tree) {
   }
 
   setup_background(elem, width, height, "#F7F7F7");
-  setup_groups(d3.select("svg"), ["all_ts", "all_brushes", "links", "nodes",]);
+  setup_groups(
+    d3.select("svg"),
+    ["all_ts", "all_brushes", "links", "nodes", "mouseover"]
+  );
+  d3.select("#mouseover")
+    .append("text");
+
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", change_focus);
   add_button(elem, "remove box", remove_fun);
