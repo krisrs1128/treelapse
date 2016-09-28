@@ -5,7 +5,10 @@ function get_scales(values, width, height) {
       .range([0, width]),
     "y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([height, 0.4 * height])
+      .range([height, 0.4 * height]),
+    "r": d3.scaleLinear()
+      .domain(d3.extent(values.value))
+      .range([2, 20])
   };
 }
 
@@ -71,20 +74,29 @@ function timebox_link_attrs(values, cur_lines, tree_obj) {
     if (intersect(descendants, cur_lines).length > 0) {
       return "#2D869F";
     }
-    return "#696969";
+    return "#F0F0F0";
   };
 
   return attr_funs;
 }
 
-function timebox_node_attrs(values, cur_lines) {
+function timebox_node_attrs(values, cur_lines, scales) {
   var attr_funs = node_attr_defaults();
+
+  attr_funs.r = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name[0]
+    );
+    return scales.r(d3.mean(cur_values));
+  };
 
   attr_funs.fill = function(d) {
     if (cur_lines.indexOf(d.data.name[0]) != -1) {
       return "#2D869F";
     }
-    return "#696969";
+    return "#F0F0F0";
   };
 
   return attr_funs;
@@ -95,6 +107,7 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
   var cluster = d3.cluster()
       .size([width, 0.37 * height]);
   var layout = cluster(hierarchy);
+  var scales = get_scales(values, width, height);
 
   // draw links
   var tree_obj = new Tree(tree);
@@ -110,7 +123,7 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
     d3.select("#nodes"),
     layout.descendants(),
     "tree_node",
-    timebox_node_attrs(values, cur_lines)
+    timebox_node_attrs(values, cur_lines, scales)
   );
 }
 
