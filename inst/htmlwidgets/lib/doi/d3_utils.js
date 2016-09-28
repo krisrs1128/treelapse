@@ -67,7 +67,6 @@ function node_attr_defaults() {
 function link_attr_defaults() {
   return {
     "id": function(d) {
-      console.log(d);
       return d.source.data.name + "-" + d.target.data.name;
     },
     "fill": function(d) { return "none"; },
