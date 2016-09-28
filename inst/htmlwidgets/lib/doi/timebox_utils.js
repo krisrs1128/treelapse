@@ -62,42 +62,34 @@ function draw_ts(elem, values, cur_lines, width, height) {
 
 }
 
+function timebox_attr_funs(values, cur_lines) {
+  var attr_funs = default_attr_funs();
+
+  attr_funs.fill = function(d) {
+    if (cur_lines.indexOf(d.data.name[0]) != -1) {
+      return "#2D869F";
+    }
+    return "#696969";
+  };
+
+  return attr_funs;
+}
+
 function draw_tree(elem, values, cur_lines, width, height, tree) {
   var hierarchy = d3.hierarchy(tree);
   var cluster = d3.cluster()
       .size([width, 0.37 * height]);
   var layout = cluster(hierarchy);
 
-  var node_selection = d3.select("#nodes")
-      .selectAll(".tree_node")
-      .data(layout.descendants());
-  node_selection.enter()
-    .append("circle")
-    .classed("tree_node", true)
-    .attrs({
-      "id": function(d) {
-	return "node-" + d.data.name;
-      },
-      "cx": function(d) {
-	return d.x;
-      },
-      "cy": function(d) {
-	return d.y;
-      },
-      "r": 2
-    });
+  var attr_funs = timebox_attr_funs(values, cur_lines);
 
-  d3.selectAll(".tree_node")
-    .transition()
-    .duration(700)
-    .attrs({
-      "fill": function(d) {
-	if (cur_lines.indexOf(d.data.name[0]) != -1) {
-	  return "#2D869F";
-	}
-	return "#696969";
-      }
-    });
+  // draw nodes
+  tree_nodes_base(
+    d3.select("#nodes"),
+    layout.descendants(),
+    "tree_node",
+    attr_funs
+  );
 }
 
 function get_line_data(values, cur_unit) {
