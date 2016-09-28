@@ -134,6 +134,25 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
     "tree_node",
     timebox_node_attrs(values, cur_lines, scales)
   );
+
+  d3.selectAll(".tree_node")
+    .on("mouseover",
+	function(d) {
+	  console.log(d3.select(this));
+	  console.log(d.x);
+	  var r = parseFloat(d3.select(this).attr("r"));
+
+	  d3.select("#mouseover")
+	    .attr("transform", "translate(" + (d.x + 2 * Math.sqrt(r))+
+		   "," + (d.y - 2 * Math.sqrt(r)) + ")");
+
+	  d3.select("#mouseover > text")
+	    .text(d.data.name[0])
+	    .attrs({
+	      "font-size": 11,
+	      "font-family": "roboto"
+	    });
+	});
 }
 
 function get_line_data(values, cur_unit) {
