@@ -52,7 +52,7 @@ function add_button(elem, text, click_fun) {
     .text(text);
 }
 
-function default_attr_funs() {
+function node_attr_defaults() {
   return {
     "id": function(d) { return d.data.name; },
     "x": function(d) { return d.x; },
@@ -61,6 +61,24 @@ function default_attr_funs() {
     "r": function(d) { return 2; },
     "stroke": function(d) { return "black"; },
     "stroke_width": function(d) { return 0; },
+  };
+}
+
+function link_attr_defaults() {
+  return {
+    "id": function(d) {
+      console.log(d);
+      return d.source.data.name + "-" + d.target.data.name;
+    },
+    "fill": function(d) { return "none"; },
+    "stroke": function(d) { return "black"; },
+    "stroke_width": function(d) { return 2; },
+    "d": function(d) {
+      return "M" + d.target.x + "," + d.target.y +
+        "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
+        " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
+        " " + d.source.x + "," + d.source.y;
+    }
   };
 }
 
@@ -98,4 +116,34 @@ function tree_nodes_base(elem, nodes, class_name, attr_funs) {
 	"stroke-width": attr_funs.stroke_width
       });
 
+}
+
+function tree_links_base(elem, links, class_name, attr_funs) {
+  var transitioner = d3.transition()
+      .duration(1000)
+      .ease(d3.easeCubic);
+
+  var link_selection = elem.selectAll("." + class_name)
+      .data(links, attr_funs.id);
+
+  link_selection.exit().remove();
+
+  link_selection.enter()
+    .append("path", "g")
+    .classed(class_name, true)
+    .attrs({
+      "id": attr_funs.id,
+      "fill": attr_funs.fill,
+      "stroke": attr_funs.stroke,
+      "stroke-width": attr_funs.stroke_width
+    });
+
+    d3.selectAll("." + class_name)
+      .transition(transitioner)
+      .attrs({
+	"fill": attr_funs.fill,
+	"stroke": attr_funs.stroke,
+	"stroke-width": attr_funs.stroke_width,
+	"d": attr_funs.d
+      });
 }
