@@ -8,7 +8,7 @@ function get_scales(values, width, height) {
       .range([height, 0.4 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([2, 20])
+      .range([0.5, 40])
   };
 }
 
@@ -65,7 +65,7 @@ function draw_ts(elem, values, cur_lines, width, height) {
 
 }
 
-function timebox_link_attrs(values, cur_lines, tree_obj) {
+function timebox_link_attrs(values, cur_lines, tree_obj, scales) {
   var attr_funs = link_attr_defaults();
 
   attr_funs.stroke = function(d) {
@@ -75,6 +75,15 @@ function timebox_link_attrs(values, cur_lines, tree_obj) {
       return "#2D869F";
     }
     return "#F0F0F0";
+  };
+
+  attr_funs.stroke_width = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.target.data.name[0]
+    );
+    return scales.r(d3.mean(cur_values));
   };
 
   return attr_funs;
@@ -89,7 +98,7 @@ function timebox_node_attrs(values, cur_lines, scales) {
       values.unit,
       d.data.name[0]
     );
-    return scales.r(d3.mean(cur_values));
+    return 1.2 * scales.r(d3.mean(cur_values));
   };
 
   attr_funs.fill = function(d) {
@@ -115,7 +124,7 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
     d3.select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(values, cur_lines, tree_obj)
+    timebox_link_attrs(values, cur_lines, tree_obj, scales)
   );
 
   // draw nodes
