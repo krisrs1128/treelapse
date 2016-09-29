@@ -1,0 +1,32 @@
+ dependencies:
+  - name: d3
+    version: 4.2.3
+    src: htmlwidgets/lib/d3/
+    script: d3.min.js
+  - name: d3-selection-multi
+    version: 0.4.1
+    src: htmlwidgets/lib/d3-selection-multi/
+    script: d3-selection-multi.v0.4.min.js
+  - name: jquery
+    version: 2.2.1
+    src: htmlwidgets/lib/jquery
+    script: jquery-2.2.1.js
+  - name: doi
+    version: 0.0.0
+    src: htmlwidgets/lib/doi
+    stylesheet: style.css
+    script:
+    - sankey_utils.js
+    - sankey_update.js
+    - doi_utils.js
+    - doi_update.js
+    - d3_utils.js
+  - name: jquery-ui
+    version: 1.12.1
+    src: htmlwidgets/lib/jquery-ui-1.12.1
+    stylesheet: jquery-ui.css
+    script: jquery-ui.js
+  - name: roboto
+    version: 0.0.0
+    src: htmlwidgets/lib/font
+    stylesheet: roboto.css
