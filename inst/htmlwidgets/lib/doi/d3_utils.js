@@ -55,7 +55,7 @@ function add_button(elem, text, click_fun) {
 function node_attr_defaults() {
   return {
     "id": function(d) { return d.data.name; },
-    "cx": function(d) { console.log(d); return d.x; },
+    "cx": function(d) { return d.x; },
     "cy": function(d) { return d.y; },
     "fill": function(d) { return "black"; },
     "r": function(d) { return 2; },
@@ -71,7 +71,7 @@ function link_attr_defaults() {
     },
     "fill": function(d) { return "none"; },
     "stroke": function(d) { return "black"; },
-    "stroke_width": function(d) { return 2; },
+    "stroke-width": function(d) { return 2; },
     "d": function(d) {
       return "M" + d.target.x + "," + d.target.y +
         "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
@@ -114,19 +114,9 @@ function tree_links_base(elem, links, class_name, attr_funs) {
   link_selection.enter()
     .append("path", "g")
     .classed(class_name, true)
-    .attrs({
-      "id": attr_funs.id,
-      "fill": attr_funs.fill,
-      "stroke": attr_funs.stroke,
-      "stroke-width": attr_funs.stroke_width
-    });
+    .attrs(attr_funs);
 
-    d3.selectAll("." + class_name)
-      .transition(transitioner)
-      .attrs({
-	"fill": attr_funs.fill,
-	"stroke": attr_funs.stroke,
-	"stroke-width": attr_funs.stroke_width,
-	"d": attr_funs.d
-      });
+  d3.selectAll("." + class_name)
+    .transition(transitioner)
+    .attrs(attr_funs);
 }

@@ -571,7 +571,10 @@ function doi_node_attrs(values, scales, tree_obj, search_str) {
 
 function doi_link_attrs(values, scales) {
   var attrs = link_attr_defaults();
-  attrs.stroke_width = function(d) {
+  attrs.stroke = function(d) {
+    return scales.fill(d.target.data.doi);
+  };
+  attrs["stroke-width"] = function(d) {
     var cur_values = get_matching_subarray(
       values.value,
       values.unit,
@@ -580,9 +583,6 @@ function doi_link_attrs(values, scales) {
     return scales.size(d3.mean(cur_values));
   };
 
-  attrs.stroke = function(d) {
-    return scales.fill(d.target.data.doi);
-  };
   return attrs;
 }
 
