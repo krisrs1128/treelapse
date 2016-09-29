@@ -81,40 +81,24 @@ function link_attr_defaults() {
   };
 }
 
-function tree_nodes_base(elem, nodes, class_name, attr_funs) {
+function selection_update(svg_type, elem, data, class_name, attr_funs) {
   var transitioner = d3.transition()
       .duration(1000)
       .ease(d3.easeCubic);
 
-  var node_selection = elem.selectAll("." + class_name)
-      .data(nodes, attr_funs.id);
+  var selection = elem.selectAll("." + class_name)
+      .data(data, attr_funs.id);
 
-  node_selection.exit().remove();
+  // fade in
+  enter_attr_funs = jQuery.extend({}, attr_funs);
+  attr_funs.opacity = 1;
+  enter_attr_funs.opacity = 0;
 
-  node_selection.enter()
-    .append("circle")
+  selection.exit().remove();
+  selection.enter()
+    .append(svg_type)
     .classed(class_name, true)
-    .attrs(attr_funs);
-
-    d3.selectAll("." + class_name)
-      .transition(transitioner)
-      .attrs(attr_funs);
-}
-
-function tree_links_base(elem, links, class_name, attr_funs) {
-  var transitioner = d3.transition()
-      .duration(1000)
-      .ease(d3.easeCubic);
-
-  var link_selection = elem.selectAll("." + class_name)
-      .data(links, attr_funs.id);
-
-  link_selection.exit().remove();
-
-  link_selection.enter()
-    .append("path", "g")
-    .classed(class_name, true)
-    .attrs(attr_funs);
+    .attrs(enter_attr_funs);
 
   d3.selectAll("." + class_name)
     .transition(transitioner)

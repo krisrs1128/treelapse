@@ -63,21 +63,24 @@ function doi_update(width, height, values, tree, focus_node_id) {
       .duration(1000)
       .ease(d3.easeCubic);
 
-  tree_nodes_base(
+  selection_update(
+    "circle",
     d3.select("#nodes"),
     layout.descendants(),
     "tree_node",
     doi_node_attrs(values, scales, tree_obj, search_str)
   );
 
-  tree_links_base(
+  selection_update(
+    "path",
     d3.select("#links"),
     layout.links(),
     "tree_link",
     doi_link_attrs(values, scales)
   );
 
-  tree_links_base(
+  selection_update(
+    "path",
     d3.select("#highlighted_links"),
     layout.links(),
     "highlighted_tree_links",

@@ -589,7 +589,7 @@ function doi_link_attrs(values, scales) {
 
 function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
   var attrs = link_attr_defaults();
-  attrs.stroke_width = function(d) {
+  attrs["stroke-width"] = function(d) {
     var cur_tree = tree_obj.get_subtree(d.target.data.name);
     if (!(search_str !== "" & cur_tree.contains_partial_match(search_str))) {
       return 0;
