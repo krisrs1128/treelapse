@@ -68,11 +68,11 @@ for (i in seq_len(nrow(sample_otu))) {
 
 mvalues <- do.call(rbind, values) %>%
   melt()
-colnames(mvalues) <- c("cst", "unit", "value")
+colnames(mvalues) <- c("group", "unit", "value")
 ```
 
 ```{r}
 library("devtools")
 install()
-# sankey vis
+doi_sankey(mvalues, taxa, "Bacteria", "Bacteria", 700, 400)
 ```
