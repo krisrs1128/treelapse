@@ -73,12 +73,15 @@ function doi_update(width, height, values, tree, focus_node_id) {
     d3.select("#links"),
     layout.links(),
     "tree_link",
-    doi_link_attrs(values, scales, tree_obj, search_str)
+    doi_link_attrs(values, scales)
   );
 
-  var highlighted_link_selection = d3.select("#highlighted_links")
-      .selectAll(".highlighted_tree_link")
-      .data(layout.links(), link_id_fun);
+  tree_links_base(
+    d3.select("#highlighted_links"),
+    layout.links(),
+    "highlighted_tree_links",
+    doi_highlight_link_attrs(values, scales, tree_obj, search_str)
+  );
 
   var text_selection = d3.select("#text")
       .selectAll(".tree_text")
@@ -87,7 +90,6 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	function(d) { return d.data.name; }
       );
 
-  highlighted_link_selection.exit().remove();
   text_selection.exit().remove();
 
   d3.selectAll(".tree_node")
@@ -101,44 +103,6 @@ function doi_update(width, height, values, tree, focus_node_id) {
   	    d.data.name
   	  );
   	});
-
-
-  // draw highlighted links
-  highlighted_link_selection.enter()
-    .append("path", "g")
-    .classed("highlighted_tree_link", true)
-    .styles({
-      "stroke-opacity": 0,
-      "fill": "none",
-      "stroke": "#D66F62",
-    });
-
-  d3.selectAll(".highlighted_tree_link")
-    .transition(transitioner)
-    .attrs({
-      "d": function(d) {
-	return "M" + d.target.x + "," + d.target.y +
-          "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
-          " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
-          " " + d.source.x + "," + d.source.y;
-      },
-      "stroke-width": function(d) {
-	var cur_tree = tree_obj.get_subtree(d.target.data.name);
-	if (!(search_str != "" & cur_tree.contains_partial_match(search_str))) {
-	  return 0;
-	}
-
-	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.target.data.name
-	);
-	return 1.3 * scales.size(d3.mean(cur_values));
-      }
-    })
-    .styles({
-      "stroke-opacity": 1
-    });
 
   // draw text
   text_selection.enter()

@@ -571,7 +571,7 @@ function doi_node_attrs(values, scales, tree_obj, search_str) {
   return attrs;
 }
 
-function doi_link_attrs(values, scales, tree_obj, search_str) {
+function doi_link_attrs(values, scales) {
   var attrs = link_attr_defaults();
   attrs.stroke_width = function(d) {
     var cur_values = get_matching_subarray(
@@ -585,5 +585,26 @@ function doi_link_attrs(values, scales, tree_obj, search_str) {
   attrs.stroke = function(d) {
     return scales.fill(d.target.data.doi);
   };
+  return attrs;
+}
+
+
+function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
+  var attrs = link_attr_defaults();
+  attrs.stroke_width = function(d) {
+    var cur_tree = tree_obj.get_subtree(d.target.data.name);
+    if (!(search_str !== "" & cur_tree.contains_partial_match(search_str))) {
+      return 0;
+    }
+
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.target.data.name
+    );
+    return 1.3 * scales.size(d3.mean(cur_values));
+  };
+
+
   return attrs;
 }
