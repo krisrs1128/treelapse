@@ -21,6 +21,7 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
   var node_names = tree_obj.get_attr_array("name");
   $(function() {
     $("#search_box").autocomplete({
+      minLength: 0,
       source: node_names,
       search: function(event, ui) {
 	doi_update_wrapper(focus_node_id_outer);

@@ -605,6 +605,6 @@ function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
     return 1.3 * scales.size(d3.mean(cur_values));
   };
 
-
+  attrs.stroke = function(d) { return "#D66F62";};
   return attrs;
 }
