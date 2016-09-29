@@ -47,7 +47,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
       .range([3, 35]),
-    "opacity": d3.scalePow().exponent([1e-15])
+    "fill": d3.scalePow().exponent([1e-15])
       .domain(d3.extent(doi_tree.get_attr_array("doi")))
       .range(["#F7F7F7", "#000000"]),
   };
@@ -56,6 +56,17 @@ function doi_update(width, height, values, tree, focus_node_id) {
     focus_node_id,
     [width, height],
     [40, 100] // node size
+  );
+
+  var transitioner = d3.transition()
+      .duration(1000)
+      .ease(d3.easeCubic);
+
+  tree_nodes_base(
+    d3.select("#nodes"),
+    layout.descendants(),
+    "tree_node",
+    doi_node_attrs(values, scales, tree_obj, search_str)
   );
 
   // bind to data
@@ -67,13 +78,6 @@ function doi_update(width, height, values, tree, focus_node_id) {
       .selectAll(".highlighted_tree_link")
       .data(layout.links(), link_id_fun);
 
-  var node_selection = d3.select("#nodes")
-      .selectAll(".tree_node")
-      .data(
-	layout.descendants(),
-	function(d) { return d.data.name; }
-      );
-
   var text_selection = d3.select("#text")
       .selectAll(".tree_text")
       .data(
@@ -83,81 +87,19 @@ function doi_update(width, height, values, tree, focus_node_id) {
 
   link_selection.exit().remove();
   highlighted_link_selection.exit().remove();
-  node_selection.exit().remove();
   text_selection.exit().remove();
 
-  var transitioner = d3.transition()
-      .duration(1000)
-      .ease(d3.easeCubic);
-
-  // draw nodes
-  node_selection.enter()
-    .append("circle")
-    .classed("tree_node", true)
-    .attrs({
-      "id": function(d) {
-	return "node-" + d.data.name;
-      },
-      "cx": function(d) {
-	return d.x;
-      },
-      "cy": function(d) {
-	return d.y;
-      },
-      "fill": function(d) {
-	return scales.opacity(d.data.doi);
-      },
-      "r": function(d) {
-	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.data.name
-	);
-	return scales.size(d3.mean(cur_values));
-      }
-    })
-    .on("click",
-	function(d) {
-	  return doi_update(
-	    width,
-	    height,
-	    values,
-	    tree,
-	    d.data.name
-	  );
-	});
-
   d3.selectAll(".tree_node")
-    .transition(transitioner)
-    .attrs({
-      "cx": function(d) {
-	return d.x;
-      },
-      "cy": function(d) {
-	return d.y;
-      },
-      "fill": function(d) {
-	return scales.opacity(d.data.doi);
-      },
-      "stroke": function(d) {
-	var cur_tree = tree_obj.get_subtree(d.data.name);
-	if (search_str != "" & cur_tree.contains_partial_match(search_str)) {
-	  return "#D66F62";
-	}
-      },
-      "stroke-width": function(d) {
-      	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.data.name
-	);
-	var width = 0.05 * scales.size(d3.mean(cur_values));
-	if (width < 1.5) {
-	  return 1.5;
-	}
-	return width;
-      }
-    });
+    .on("click",
+  	function(d) {
+  	  return doi_update(
+  	    width,
+  	    height,
+  	    values,
+  	    tree,
+  	    d.data.name
+  	  );
+  	});
 
   // draw links
   link_selection.enter()
@@ -190,7 +132,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
     .styles({
       "stroke-opacity": 1,
       "stroke": function(d) {
-	return scales.opacity(d.target.data.doi);
+	return scales.fill(d.target.data.doi);
       }
     });
 
@@ -258,7 +200,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
       },
       "fill": function(d) {
-	return scales.opacity(d.data.doi);
+	return scales.fill(d.data.doi);
       },
       "font-family": "Roboto",
       "font-size": function(d) {
@@ -298,7 +240,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
 	return d.y - 0.72 * scales.size(d3.mean(cur_values));
       },
       "fill": function(d) {
-	return scales.opacity(d.data.doi);
+	return scales.fill(d.data.doi);
       },
       "font-family": "Roboto",
       "font-size": function(d) {

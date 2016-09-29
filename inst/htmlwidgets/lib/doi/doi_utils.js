@@ -534,3 +534,39 @@ function unique_average_dois(flattened_dois) {
     )).values()
     .sort(function(a, b) { return a - b;});
 }
+
+function doi_node_attrs(values, scales, tree_obj, search_str) {
+  var attrs = node_attr_defaults();
+
+  attrs.fill = function(d) { return scales.fill(d.data.doi); };
+
+  attrs.r = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+    return scales.size(d3.mean(cur_values));
+  };
+
+  attrs.stroke = function(d) {
+    var cur_tree = tree_obj.get_subtree(d.data.name);
+    if (search_str !== "" & cur_tree.contains_partial_match(search_str)) {
+      return "#D66F62";
+    }
+  };
+  attrs.stroke_width = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+    var width = 0.05 * scales.size(d3.mean(cur_values));
+    if (width < 1.5) {
+      return 1.5;
+    }
+    return width;
+  };
+
+  return attrs;
+}
