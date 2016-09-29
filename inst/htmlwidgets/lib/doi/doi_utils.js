@@ -570,3 +570,20 @@ function doi_node_attrs(values, scales, tree_obj, search_str) {
 
   return attrs;
 }
+
+function doi_link_attrs(values, scales, tree_obj, search_str) {
+  var attrs = link_attr_defaults();
+  attrs.stroke_width = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.target.data.name
+    );
+    return scales.size(d3.mean(cur_values));
+  };
+
+  attrs.stroke = function(d) {
+    return scales.fill(d.target.data.doi);
+  };
+  return attrs;
+}
