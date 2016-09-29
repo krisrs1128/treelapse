@@ -66,12 +66,6 @@ for (i in seq_len(nrow(sample_otu))) {
 }
 
 
-# now melt and merge
-sample_info <- cbind(
-  Var1 = seq_len(nrow(sample_info)),
-  sample_info[, c("D2Del", "CST")]
-)
-
 mvalues <- do.call(rbind, values) %>%
   melt()
 colnames(mvalues) <- c("cst", "unit", "value")
@@ -80,5 +74,5 @@ colnames(mvalues) <- c("cst", "unit", "value")
 ```{r}
 library("devtools")
 install()
-
+# sankey vis
 ```
