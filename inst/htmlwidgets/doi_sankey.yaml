@@ -7,6 +7,10 @@
     version: 0.4.1
     src: htmlwidgets/lib/d3-selection-multi/
     script: d3-selection-multi.v0.4.min.js
+  - name: d3-scale-chromatic
+    version: 1.0.1
+    src: htmlwidgets/lib/d3-scale-chromatic/
+    script: d3-scale-chromatic.v1.min.js
   - name: jquery
     version: 2.2.1
     src: htmlwidgets/lib/jquery
