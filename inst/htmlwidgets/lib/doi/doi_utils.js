@@ -534,3 +534,120 @@ function unique_average_dois(flattened_dois) {
     )).values()
     .sort(function(a, b) { return a - b;});
 }
+
+function doi_node_attrs(values, scales, tree_obj, search_str) {
+  var attrs = node_attr_defaults();
+
+  attrs.fill = function(d) { return scales.fill(d.data.doi); };
+  attrs.r = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+    return scales.size(d3.mean(cur_values));
+  };
+  attrs.stroke = function(d) {
+    var cur_tree = tree_obj.get_subtree(d.data.name);
+    if (search_str !== "" & cur_tree.contains_partial_match(search_str)) {
+      return "#D66F62";
+    }
+  };
+  attrs["stroke-width"] = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+    var width = 0.05 * scales.size(d3.mean(cur_values));
+    if (width < 1.5) {
+      return 1.5;
+    }
+    return width;
+  };
+
+  return attrs;
+}
+
+function doi_link_attrs(values, scales) {
+  var attrs = link_attr_defaults();
+
+  attrs.stroke = function(d) {
+    return scales.fill(d.target.data.doi);
+  };
+
+  attrs["stroke-width"] = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.target.data.name
+    );
+    return scales.size(d3.mean(cur_values));
+  };
+
+  return attrs;
+}
+
+function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
+  var attrs = link_attr_defaults();
+
+  attrs["stroke-width"] = function(d) {
+    var cur_tree = tree_obj.get_subtree(d.target.data.name);
+    if (!(search_str !== "" & cur_tree.contains_partial_match(search_str))) {
+      return 0;
+    }
+
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.target.data.name
+    );
+    return 1.3 * scales.size(d3.mean(cur_values));
+  };
+
+  attrs.stroke = function(d) { return "#D66F62";};
+  return attrs;
+}
+
+function doi_text_attrs(values, scales) {
+  var attrs = text_attr_defaults();
+
+  attrs.x = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+
+    return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+  };
+
+  attrs.y = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+
+    return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+  };
+
+  attrs.fill = function(d) {
+	return scales.fill(d.data.doi);
+  };
+
+  attrs.text = function(d) {
+    if (d.data.doi >= -1) {
+      return d.data.name;
+    }
+  };
+
+  attrs["font-size"] = function(d) {
+    if (d.data.doi === 0) {
+      return 20;
+    }
+    return 10;
+  };
+
+  return attrs;
+}

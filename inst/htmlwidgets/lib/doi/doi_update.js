@@ -1,5 +1,5 @@
 
-function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
+function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
@@ -8,311 +8,87 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
     height,
     values,
     tree,
-    focus_node_id_outer
+    focus_node_id
   );
 
-  // define search box
+}
+
+function doi_update(width, height, values, tree, focus_node_id) {
+  function doi_update_wrapper(focus_node_id) {
+    doi_update(width, height, values, tree, focus_node_id);
+  }
+
+  console.log("Focusing on " + focus_node_id);
+  var search_str = $("#search_box").val();
+
+  // essential DOI algorithm
   var tree_obj = new Tree(tree);
+  var doi_tree = new DoiTree(tree);
+  doi_tree.set_doi();
+
+  // setup search box
   var node_names = tree_obj.get_attr_array("name");
   $(function() {
     $("#search_box").autocomplete({
+      minLength: 0,
       source: node_names,
       search: function(event, ui) {
-	doi_update(
-	  width,
-	  height,
-	  values,
-	  tree,
-	  focus_node_id_outer
-	);
+	doi_update_wrapper(focus_node_id);
       },
       select: function(event, ui) {
 	$("#search_box").val(ui.item.label);
-	doi_update(
-	  width,
-	  height,
-	  values,
-	  tree,
-	  focus_node_id_outer
-	);
+	doi_update_wrapper(focus_node_id);
       }
     });
   });
 
-  function doi_update(width, height, values, tree, focus_node_id) {
-    console.log("Focusing on " + focus_node_id);
-    focus_node_id_outer = focus_node_id;
-    var search_str = $("#search_box").val();
+  var scales = {
+    "size": d3.scaleLinear()
+      .domain([0, d3.max(values.value)])
+      .range([3, 35]),
+    "fill": d3.scalePow().exponent([1e-15])
+      .domain(d3.extent(doi_tree.get_attr_array("doi")))
+      .range(["#F7F7F7", "#000000"]),
+  };
 
-    // essential DOI algorithm
-    var tree_obj = new Tree(tree);
-    var doi_tree = new DoiTree(tree);
-    doi_tree.set_doi();
+  var layout = doi_tree.tree_block(
+    focus_node_id,
+    [width, height],
+    [40, 100] // node size
+  );
 
-    var scales = {
-      "size": d3.scaleLinear()
-	.domain([0, d3.max(values.value)])
-	.range([3, 35]),
-      "opacity": d3.scalePow().exponent([1e-15])
-	.domain(d3.extent(doi_tree.get_attr_array("doi")))
-	.range(["#F7F7F7", "#000000"]),
-    };
+  selection_update(
+    "circle",
+    d3.select("#nodes"),
+    layout.descendants(),
+    "tree_node",
+    doi_node_attrs(values, scales, tree_obj, search_str)
+  );
 
-    var layout = doi_tree.tree_block(
-      focus_node_id,
-      [width, height],
-      [40, 100] // node size
-    );
+  selection_update(
+    "path",
+    d3.select("#links"),
+    layout.links(),
+    "tree_link",
+    doi_link_attrs(values, scales)
+  );
 
-    // bind to data
-    var link_selection = d3.select("#links")
-	.selectAll(".tree_link")
-	.data(layout.links(), link_id_fun);
+  selection_update(
+    "path",
+    d3.select("#highlighted_links"),
+    layout.links(),
+    "highlighted_tree_links",
+    doi_highlight_link_attrs(values, scales, tree_obj, search_str)
+  );
 
-    var highlighted_link_selection = d3.select("#highlighted_links")
-	.selectAll(".highlighted_tree_link")
-	.data(layout.links(), link_id_fun);
+  selection_update(
+    "text",
+    d3.select("#text"),
+    layout.descendants(),
+    "tree_text",
+    doi_text_attrs(values, scales)
+  );
 
-    var node_selection = d3.select("#nodes")
-	.selectAll(".tree_node")
-	.data(
-	  layout.descendants(),
-	  function(d) { return d.data.name; }
-	);
-
-    var text_selection = d3.select("#text")
-	.selectAll(".tree_text")
-	.data(
-	  layout.descendants(),
-	  function(d) { return d.data.name; }
-	);
-
-    link_selection.exit().remove();
-    highlighted_link_selection.exit().remove();
-    node_selection.exit().remove();
-    text_selection.exit().remove();
-
-    var transitioner = d3.transition()
-	.duration(1000)
-	.ease(d3.easeCubic);
-
-    // draw nodes
-    node_selection.enter()
-      .append("circle")
-      .classed("tree_node", true)
-      .attrs({
-	"id": function(d) {
-	  return "node-" + d.data.name;
-	},
-	"cx": function(d) {
-	  return d.x;
-	},
-	"cy": function(d) {
-	  return d.y;
-	},
-	"fill": function(d) {
-	  return scales.opacity(d.data.doi);
-	},
-	"r": function(d) {
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-	  return scales.size(d3.mean(cur_values));
-	}
-      })
-      .on("click",
-	  function(d) {
-	    return doi_update(
-	      width,
-	      height,
-	      values,
-	      tree,
-	      d.data.name
-	    );
-	  });
-
-    d3.selectAll(".tree_node")
-      .transition(transitioner)
-      .attrs({
-	"cx": function(d) {
-	  return d.x;
-	},
-	"cy": function(d) {
-	  return d.y;
-	},
-	"fill": function(d) {
-	  return scales.opacity(d.data.doi);
-	},
-	"stroke": function(d) {
-	  var cur_tree = tree_obj.get_subtree(d.data.name);
-	  if (search_str != "" & cur_tree.contains_partial_match(search_str)) {
-	    return "#D66F62";
-	  }
-	},
-	"stroke-width": function(d) {
-      	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-	  var width = 0.05 * scales.size(d3.mean(cur_values));
-	  if (width < 1.5) {
-	    return 1.5;
-	  }
-	  return width;
-	}
-      });
-
-    // draw links
-    link_selection.enter()
-      .append("path", "g")
-      .classed("tree_link", true)
-      .styles({
-	"stroke-opacity": 0,
-	"fill": "none",
-	"stroke-width": function(d) {
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.target.data.name
-	  );
-	  return scales.size(d3.mean(cur_values));
-	},
-	"stroke": "black",
-      });
-
-    d3.selectAll(".tree_link")
-      .transition(transitioner)
-      .attrs({
-	"d": function(d) {
-	  return "M" + d.target.x + "," + d.target.y +
-            "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
-            " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
-            " " + d.source.x + "," + d.source.y;
-	}
-      })
-      .styles({
-	"stroke-opacity": 1,
-	"stroke": function(d) {
-	  return scales.opacity(d.target.data.doi);
-	}
-      });
-
-    // draw highlighted links
-    highlighted_link_selection.enter()
-      .append("path", "g")
-      .classed("highlighted_tree_link", true)
-      .styles({
-	"stroke-opacity": 0,
-	"fill": "none",
-	"stroke": "#D66F62",
-      });
-
-    d3.selectAll(".highlighted_tree_link")
-      .transition(transitioner)
-      .attrs({
-	"d": function(d) {
-	  return "M" + d.target.x + "," + d.target.y +
-            "C" + d.target.x + "," + (d.target.y + d.source.y) / 2 +
-            " " + d.source.x + "," +  (d.target.y + d.source.y) / 2 +
-            " " + d.source.x + "," + d.source.y;
-	},
-	"stroke-width": function(d) {
-	  var cur_tree = tree_obj.get_subtree(d.target.data.name);
-	  if (!(search_str != "" & cur_tree.contains_partial_match(search_str))) {
-	    return 0;
-	  }
-
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.target.data.name
-	  );
-	  return 1.3 * scales.size(d3.mean(cur_values));
-	}
-      })
-      .styles({
-	"stroke-opacity": 1
-      });
-
-    // draw text
-    text_selection.enter()
-      .append("text")
-      .classed("tree_text", true)
-      .attrs({
-	"id": function(d) {
-	  return "text-" + d.data.name;
-	},
-	"x": function(d) {
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-
-	  return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
-	},
-	"y": function(d) {
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-
-	  return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
-	},
-	"fill": function(d) {
-	  return scales.opacity(d.data.doi);
-	},
-	"font-family": "Roboto",
-	"font-size": function(d) {
-	  if (d.data.doi === 0) {
-	    return 20;
-	  }
-	  return 10;
-	}
-      });
-
-
-    d3.selectAll(".tree_text")
-      .transition(transitioner)
-      .text(function(d) {
-	if (d.data.doi >= -1) {
-	  return d.data.name;
-	}
-      })
-      .attrs({
-	"x": function(d) {
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-
-	  // a little over sqrt(2) / 2
-	  return d.x + 0.72 * scales.size(d3.mean(cur_values));
-	},
-	"y": function(d) {
-	  var cur_values = get_matching_subarray(
-	    values.value,
-	    values.unit,
-	    d.data.name
-	  );
-
-	  return d.y - 0.72 * scales.size(d3.mean(cur_values));
-	},
-	"fill": function(d) {
-	  return scales.opacity(d.data.doi);
-	},
-	"font-family": "Roboto",
-	"font-size": function(d) {
-	  if (d.data.doi === 0) {
-	    return 20;
-	  }
-	  return 10;
-	}
-      });
-  }
+  d3.selectAll(".tree_node")
+    .on("click", function(d) { return doi_update_wrapper(d.data.name); });
 }
