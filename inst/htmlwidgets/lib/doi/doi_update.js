@@ -1,5 +1,5 @@
 
-function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
+function draw_doi(elem, width, height, values, tree, focus_node_id) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
@@ -8,41 +8,39 @@ function draw_doi(elem, width, height, values, tree, focus_node_id_outer) {
     height,
     values,
     tree,
-    focus_node_id_outer
+    focus_node_id
   );
 
+}
 
+function doi_update(width, height, values, tree, focus_node_id) {
   function doi_update_wrapper(focus_node_id) {
     doi_update(width, height, values, tree, focus_node_id);
   }
 
-  // define search box
-  var tree_obj = new Tree(tree);
-  var node_names = tree_obj.get_attr_array("name");
-  $(function() {
-    $("#search_box").autocomplete({
-      minLength: 0,
-      source: node_names,
-      search: function(event, ui) {
-	doi_update_wrapper(focus_node_id_outer);
-      },
-      select: function(event, ui) {
-	$("#search_box").val(ui.item.label);
-	doi_update_wrapper(focus_node_id_outer);
-      }
-    });
-  });
-}
-
-function doi_update(width, height, values, tree, focus_node_id) {
   console.log("Focusing on " + focus_node_id);
-  focus_node_id_outer = focus_node_id;
   var search_str = $("#search_box").val();
 
   // essential DOI algorithm
   var tree_obj = new Tree(tree);
   var doi_tree = new DoiTree(tree);
   doi_tree.set_doi();
+
+  // setup search box
+  var node_names = tree_obj.get_attr_array("name");
+  $(function() {
+    $("#search_box").autocomplete({
+      minLength: 0,
+      source: node_names,
+      search: function(event, ui) {
+	doi_update_wrapper(focus_node_id);
+      },
+      select: function(event, ui) {
+	$("#search_box").val(ui.item.label);
+	doi_update_wrapper(focus_node_id);
+      }
+    });
+  });
 
   var scales = {
     "size": d3.scaleLinear()
@@ -92,14 +90,5 @@ function doi_update(width, height, values, tree, focus_node_id) {
   );
 
   d3.selectAll(".tree_node")
-    .on("click",
-  	function(d) {
-  	  return doi_update(
-  	    width,
-  	    height,
-  	    values,
-  	    tree,
-  	    d.data.name
-  	  );
-  	});
+    .on("click", function(d) { return doi_update_wrapper(d.data.name); });
 }
