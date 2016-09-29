@@ -586,7 +586,6 @@ function doi_link_attrs(values, scales) {
   return attrs;
 }
 
-
 function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
   var attrs = link_attr_defaults();
   attrs["stroke-width"] = function(d) {
@@ -604,5 +603,48 @@ function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
   };
 
   attrs.stroke = function(d) { return "#D66F62";};
+  return attrs;
+}
+
+function doi_text_attrs(values, scales) {
+  var attrs = text_attr_defaults();
+
+  attrs.x = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+
+    return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+  };
+
+  attrs.y = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+
+    return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+  };
+
+  attrs.fill = function(d) {
+	return scales.fill(d.data.doi);
+  };
+
+  attrs.text = function(d) {
+    if (d.data.doi >= -1) {
+      return d.data.name;
+    }
+  };
+
+  attrs["font-size"] = function(d) {
+    if (d.data.doi === 0) {
+      return 20;
+    }
+    return 10;
+  };
+
   return attrs;
 }

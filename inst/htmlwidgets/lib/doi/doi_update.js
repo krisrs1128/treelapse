@@ -59,10 +59,6 @@ function doi_update(width, height, values, tree, focus_node_id) {
     [40, 100] // node size
   );
 
-  var transitioner = d3.transition()
-      .duration(1000)
-      .ease(d3.easeCubic);
-
   selection_update(
     "circle",
     d3.select("#nodes"),
@@ -87,14 +83,13 @@ function doi_update(width, height, values, tree, focus_node_id) {
     doi_highlight_link_attrs(values, scales, tree_obj, search_str)
   );
 
-  var text_selection = d3.select("#text")
-      .selectAll(".tree_text")
-      .data(
-	layout.descendants(),
-	function(d) { return d.data.name; }
-      );
-
-  text_selection.exit().remove();
+  selection_update(
+    "text",
+    d3.select("#text"),
+    layout.descendants(),
+    "tree_text",
+    doi_text_attrs(values, scales)
+  );
 
   d3.selectAll(".tree_node")
     .on("click",
@@ -107,82 +102,4 @@ function doi_update(width, height, values, tree, focus_node_id) {
   	    d.data.name
   	  );
   	});
-
-  // draw text
-  text_selection.enter()
-    .append("text")
-    .classed("tree_text", true)
-    .attrs({
-      "id": function(d) {
-	return "text-" + d.data.name;
-      },
-      "x": function(d) {
-	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.data.name
-	);
-
-	return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
-      },
-      "y": function(d) {
-	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.data.name
-	);
-
-	return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
-      },
-      "fill": function(d) {
-	return scales.fill(d.data.doi);
-      },
-      "font-family": "Roboto",
-      "font-size": function(d) {
-	if (d.data.doi === 0) {
-	  return 20;
-	}
-	return 10;
-      }
-    });
-
-
-  d3.selectAll(".tree_text")
-    .transition(transitioner)
-    .text(function(d) {
-      if (d.data.doi >= -1) {
-	return d.data.name;
-      }
-    })
-    .attrs({
-      "x": function(d) {
-	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.data.name
-	);
-
-	// a little over sqrt(2) / 2
-	return d.x + 0.72 * scales.size(d3.mean(cur_values));
-      },
-      "y": function(d) {
-	var cur_values = get_matching_subarray(
-	  values.value,
-	  values.unit,
-	  d.data.name
-	);
-
-	return d.y - 0.72 * scales.size(d3.mean(cur_values));
-      },
-      "fill": function(d) {
-	return scales.fill(d.data.doi);
-      },
-      "font-family": "Roboto",
-      "font-size": function(d) {
-	if (d.data.doi === 0) {
-	  return 20;
-	}
-	return 10;
-      }
-    });
 }
