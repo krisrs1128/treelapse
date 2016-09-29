@@ -20,7 +20,7 @@ taxa <- taxa_edgelist(tax_table(GPfr))
 
 values <- tree_sum(
   data.frame(taxa),
-  log(1 + apply(otu_table(GPfr)@.Data, 1, mean))
+  sqrt(apply(otu_table(GPfr)@.Data, 1, mean))
 )
 
 values <- data.frame(
