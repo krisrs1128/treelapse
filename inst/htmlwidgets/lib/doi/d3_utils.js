@@ -55,12 +55,12 @@ function add_button(elem, text, click_fun) {
 function node_attr_defaults() {
   return {
     "id": function(d) { return d.data.name; },
-    "x": function(d) { return d.x; },
-    "y": function(d) { return d.y; },
+    "cx": function(d) { console.log(d); return d.x; },
+    "cy": function(d) { return d.y; },
     "fill": function(d) { return "black"; },
     "r": function(d) { return 2; },
     "stroke": function(d) { return "black"; },
-    "stroke_width": function(d) { return 0; },
+    "stroke-width": function(d) { return 0; },
   };
 }
 
@@ -94,27 +94,11 @@ function tree_nodes_base(elem, nodes, class_name, attr_funs) {
   node_selection.enter()
     .append("circle")
     .classed(class_name, true)
-    .attrs({
-      "id": attr_funs.id,
-      "cx": attr_funs.x,
-      "cy": attr_funs.y,
-      "fill": attr_funs.fill,
-      "r": attr_funs.r,
-      "stroke": attr_funs.stroke,
-      "stroke-width": attr_funs.stroke_width
-    });
+    .attrs(attr_funs);
 
     d3.selectAll("." + class_name)
       .transition(transitioner)
-      .attrs({
-	"cx": attr_funs.x,
-	"cy": attr_funs.y,
-	"fill": attr_funs.fill,
-	"r": attr_funs.r,
-	"stroke": attr_funs.stroke,
-	"stroke-width": attr_funs.stroke_width
-      });
-
+      .attrs(attr_funs);
 }
 
 function tree_links_base(elem, links, class_name, attr_funs) {

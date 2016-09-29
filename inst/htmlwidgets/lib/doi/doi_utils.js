@@ -539,7 +539,6 @@ function doi_node_attrs(values, scales, tree_obj, search_str) {
   var attrs = node_attr_defaults();
 
   attrs.fill = function(d) { return scales.fill(d.data.doi); };
-
   attrs.r = function(d) {
     var cur_values = get_matching_subarray(
       values.value,
@@ -548,14 +547,13 @@ function doi_node_attrs(values, scales, tree_obj, search_str) {
     );
     return scales.size(d3.mean(cur_values));
   };
-
   attrs.stroke = function(d) {
     var cur_tree = tree_obj.get_subtree(d.data.name);
     if (search_str !== "" & cur_tree.contains_partial_match(search_str)) {
       return "#D66F62";
     }
   };
-  attrs.stroke_width = function(d) {
+  attrs["stroke-width"] = function(d) {
     var cur_values = get_matching_subarray(
       values.value,
       values.unit,
