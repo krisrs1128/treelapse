@@ -1,6 +1,5 @@
-// placeholder
-
 function draw_sankey(elem, width, height, values, tree, focus_node_id) {
+  setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["links", "text"]);
   sankey_update(
@@ -23,6 +22,23 @@ function sankey_update(width, height, values, tree, focus_node_id) {
   var tree_obj = new Tree(tree);
   var doi_tree = new DoiTree(tree);
   doi_tree.set_doi();
+
+  // setup search box
+  var node_names = tree_obj.get_attr_array("name");
+  $(function() {
+    $("#search_box").autocomplete({
+      minLength: 0,
+      delay: 500,
+      source: node_names,
+      search: function(event, ui) {
+	sankey_update_wrapper(focus_node_id);
+      },
+      select: function(event, ui) {
+	$("#search_box").val(ui.item.label);
+	sankey_update_wrapper(focus_node_id);
+      }
+    });
+  });
 
   var groups = d3.set(values.group).values();
   var scales = {
@@ -63,7 +79,14 @@ function sankey_update(width, height, values, tree, focus_node_id) {
       d3.select("#links"),
       layout.links(),
       "tree_link_" + groups[i],
-      sankey_link_attrs(values, scales, groups[i], centers)
+      sankey_link_attrs(
+	values,
+	scales,
+	groups[i],
+	centers,
+	tree_obj,
+	$("#search_box").val()
+      )
     );
   }
 

@@ -82,7 +82,7 @@ function edge_centers(x_pos, edgelist, values, scale, center_type) {
   return centers;
 }
 
-function sankey_link_attrs(values, scales, group, centers) {
+function sankey_link_attrs(values, scales, group, centers, tree, search_str) {
   var attrs = link_attr_defaults();
   attrs.opacity = 0.1;
   attrs.stroke = scales.fill(group);
@@ -119,7 +119,14 @@ function sankey_link_attrs(values, scales, group, centers) {
       })[0].width;
   };
 
-  attrs["stroke-opacity"] = 0.8;
+
+  attrs["stroke-opacity"] = function(d) {
+    var cur_tree = tree.get_subtree(d.target.data.name);
+    if (cur_tree.contains_partial_match(search_str)) {
+      return 0.8;
+    }
+    return 0.2;
+  };
 
   return attrs;
 }
