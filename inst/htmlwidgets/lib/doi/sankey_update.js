@@ -29,5 +29,26 @@ function sankey_update(width, height, values, tree, focus_node_id) {
       .domain(groups)
   };
 
+  var layout = doi_tree.tree_block(
+    focus_node_id,
+    [width, height],
+    [40, 100] // node size
+  );
 
+  var x_pos = layout.descendants()
+      .map(function(d) {
+	return {"unit": d.data.name, "x": d.x};
+      });
+
+  var centers = edge_centers(x_pos, values, scales.size);
+
+  for (var i = 0; i < groups.length; i++) {
+    selection_update(
+      "path",
+      d3.select("#links"),
+      layout.links(),
+      "tree_link_" + groups[i],
+      sankey_link_attrs(values, scales, groups[i], centers)
+    );
+  }
 }
