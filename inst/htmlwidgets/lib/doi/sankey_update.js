@@ -2,7 +2,7 @@
 
 function draw_sankey(elem, width, height, values, tree, focus_node_id) {
   setup_background(elem, width, height, "#F7F7F7");
-  setup_groups(d3.select("svg"), ["links"]);
+  setup_groups(d3.select("svg"), ["links", "text"]);
   sankey_update(
     width,
     height,
@@ -66,6 +66,14 @@ function sankey_update(width, height, values, tree, focus_node_id) {
       sankey_link_attrs(values, scales, groups[i], centers)
     );
   }
+
+  selection_update(
+    "text",
+    d3.select("#text"),
+    layout.descendants(),
+    "tree_text",
+    sankey_text_attrs(values, scales)
+  );
 
   d3.selectAll("[class^='tree_link']")
     .on("click", function(d) {
