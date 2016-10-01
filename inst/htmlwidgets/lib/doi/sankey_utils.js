@@ -88,14 +88,14 @@ function sankey_link_attrs(values, scales, group, centers) {
   attrs.stroke = scales.fill(group);
 
   attrs.d = function(d) {
-    var target_center = centers["source"]
+    var target_center = centers.source
 	.filter(function(center) {
 	  return (center.target == d.target.data.name) &&
 	    (center.group == group);
 	})[0]
 	.x;
 
-    var source_center = centers["target"]
+    var source_center = centers.target
 	.filter(function(center) {
 	  return (center.source == d.source.data.name) &&
 	    (center.group == group) &&
@@ -110,13 +110,15 @@ function sankey_link_attrs(values, scales, group, centers) {
   };
 
   attrs["stroke-width"] = function(d) {
-    return centers["source"]
+    return centers.source
       .filter(function(center) {
 	return (center.group == group) &&
 	  (center.target == d.target.data.name);
       })[0]
       .width;
   };
+
+  attrs["stroke-opacity"] = 0.8;
 
   return attrs;
 }
