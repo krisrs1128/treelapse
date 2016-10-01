@@ -24,7 +24,7 @@ function sankey_update(width, height, values, tree, focus_node_id) {
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([3, 35]),
+      .range([0, 35]),
     "fill": d3.scaleOrdinal(d3.schemeSet3)
       .domain(groups)
   };
@@ -40,7 +40,20 @@ function sankey_update(width, height, values, tree, focus_node_id) {
 	return {"unit": d.data.name, "x": d.x};
       });
 
-  var centers = edge_centers(x_pos, values, scales.size);
+  var edgelist = layout.links()
+      .map(function(d) {
+	return {
+	  "source": d.source.data.name,
+	  "target": d.target.data.name
+	};
+      });
+
+  var centers = {
+    "source": edge_centers(x_pos, edgelist, values, scales.size, "source"),
+    "target": edge_centers(x_pos, edgelist, values, scales.size, "target")
+  };
+
+  console.log(centers);
 
   for (var i = 0; i < groups.length; i++) {
     selection_update(

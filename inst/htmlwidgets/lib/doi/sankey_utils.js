@@ -12,7 +12,19 @@ function offset_x(x, widths) {
   return new_x;
 }
 
-function edge_centers(x_pos, values, scale) {
+function compare(a,b) {
+  if (a.group < b.group)
+    return -1;
+  if (a.group > b.group)
+    return 1;
+  if (a.target < b.target)
+    return -1;
+  if (a.target > b.target)
+    return 1;
+  return 0;
+}
+
+function edge_centers(x_pos, edgelist, values, scale, center_type) {
   reshaped_values = values.unit.map(function(unit, i) {
     return {
       "unit": unit,
@@ -23,16 +35,33 @@ function edge_centers(x_pos, values, scale) {
 
   centers = [];
   for (var i = 0; i < x_pos.length; i++) {
-    var widths = reshaped_values
+    if (center_type == "target") {
+      var cur_targets = edgelist
+	  .filter(function(d) { return d.source == x_pos[i].unit; })
+	  .map(function(d) { return d.target; });
+
+      // case we're at a leaf, no need to offset according to children
+      if (cur_targets.length === 0) {
+	cur_targets = [x_pos[i].unit];
+      }
+    } else if (center_type == "source") {
+      var cur_targets = [x_pos[i].unit];
+    }
+
+    var cur_values = reshaped_values
 	.filter(function(d) {
-	  return d.unit == x_pos[i].unit;
-	})
+	  return cur_targets.indexOf(d.unit) != -1;
+	});
+
+    var widths = cur_values
 	.map(function(d) {
 	  return {
+	    "target": d.unit,
 	    "group": d.group,
 	    "width": scale(d.value)
 	  };
-	});
+	})
+	.sort(compare);
 
     var cur_coords = offset_x(
       x_pos[i].x,
@@ -41,7 +70,8 @@ function edge_centers(x_pos, values, scale) {
 
     for (var j = 0; j < cur_coords.length; j++) {
       centers.push({
-	"unit": x_pos[i].unit,
+	"source": x_pos[i].unit,
+	"target": widths[j].target,
 	"group": widths[j].group,
 	"x": cur_coords[j],
 	"width": widths[j].width
@@ -58,15 +88,18 @@ function sankey_link_attrs(values, scales, group, centers) {
   attrs.stroke = scales.fill(group);
 
   attrs.d = function(d) {
-    var target_center = centers
+    var target_center = centers["source"]
 	.filter(function(center) {
-	  return center.unit == d.target.data.name && center.group == group;
+	  return (center.target == d.target.data.name) &&
+	    (center.group == group);
 	})[0]
 	.x;
 
-    var source_center = centers
+    var source_center = centers["target"]
 	.filter(function(center) {
-	  return center.unit == d.source.data.name && center.group == group;
+	  return (center.source == d.source.data.name) &&
+	    (center.group == group) &&
+	    (center.target == d.target.data.name);
 	})[0]
 	.x;
 
@@ -77,9 +110,10 @@ function sankey_link_attrs(values, scales, group, centers) {
   };
 
   attrs["stroke-width"] = function(d) {
-    return centers
+    return centers["source"]
       .filter(function(center) {
-	return center.unit == d.target.data.name && center.group == group;
+	return (center.group == group) &&
+	  (center.target == d.target.data.name);
       })[0]
       .width;
   };
