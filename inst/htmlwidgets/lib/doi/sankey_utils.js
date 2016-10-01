@@ -123,3 +123,36 @@ function sankey_link_attrs(values, scales, group, centers) {
 
   return attrs;
 }
+
+function sankey_text_attrs(values, scales) {
+  var attrs = text_attr_defaults();
+
+  attrs.x = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.name
+    );
+
+    return d.x + 0.5 * scales.size(d3.sum(cur_values)) + 5;
+  };
+
+  attrs.y = function(d) { return d.y; };
+
+  attrs.fill = "#474747";
+
+  attrs.text = function(d) {
+    if (d.data.doi >= -1) {
+      return d.data.name;
+    }
+  };
+
+  attrs["font-size"] = function(d) {
+    if (d.data.doi === 0) {
+      return 20;
+    }
+    return 10;
+  };
+
+  return attrs;
+}
