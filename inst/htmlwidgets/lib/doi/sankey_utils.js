@@ -88,20 +88,22 @@ function sankey_link_attrs(values, scales, group, centers) {
   attrs.stroke = scales.fill(group);
 
   attrs.d = function(d) {
+
+    // targets need to be based on overall abundance of edge flowing in, not
+    // widths of each descendant edge
     var target_center = centers.source
 	.filter(function(center) {
 	  return (center.target == d.target.data.name) &&
 	    (center.group == group);
-	})[0]
-	.x;
+	})[0].x;
 
+    // sources need to be based abundances of edges flowing out
     var source_center = centers.target
 	.filter(function(center) {
 	  return (center.source == d.source.data.name) &&
 	    (center.group == group) &&
 	    (center.target == d.target.data.name);
-	})[0]
-	.x;
+	})[0].x;
 
     return "M" + target_center + "," + d.target.y +
       "C" + target_center + "," + (d.target.y + d.source.y) / 2 +
@@ -114,8 +116,7 @@ function sankey_link_attrs(values, scales, group, centers) {
       .filter(function(center) {
 	return (center.group == group) &&
 	  (center.target == d.target.data.name);
-      })[0]
-      .width;
+      })[0].width;
   };
 
   attrs["stroke-opacity"] = 0.8;
