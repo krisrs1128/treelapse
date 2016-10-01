@@ -14,8 +14,8 @@ function draw_doi(elem, width, height, values, tree, focus_node_id) {
 }
 
 function doi_update(width, height, values, tree, focus_node_id) {
-  function doi_update_wrapper(focus_node_id) {
-    doi_update(width, height, values, tree, focus_node_id);
+  function doi_update_wrapper(x) {
+    doi_update(width, height, values, tree, x);
   }
 
   console.log("Focusing on " + focus_node_id);
