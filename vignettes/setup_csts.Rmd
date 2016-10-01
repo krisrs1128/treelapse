@@ -72,7 +72,5 @@ colnames(mvalues) <- c("group", "unit", "value")
 ```
 
 ```{r}
-library("devtools")
-install()
-doi_sankey(mvalues, taxa, "Bacteria", "Bacteria", 700, 400)
+doi_sankey(mvalues, taxa, "Bacteria", "Bacteria", 2000, 400)
 ```
