@@ -7,7 +7,7 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
-	console.log("empty...");
+	draw_sankey(el, width, height, x[0], x[1], x[2]);
       },
 
       resize: function(width, height) {}
