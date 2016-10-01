@@ -17,7 +17,6 @@ function sankey_update(width, height, values, tree, focus_node_id) {
   }
 
   console.log("Focusing on " + focus_node_id);
-  var search_str = $("#search_box").val();
 
   // essential DOI algorithm
   var tree_obj = new Tree(tree);
@@ -29,6 +28,7 @@ function sankey_update(width, height, values, tree, focus_node_id) {
   $(function() {
     $("#search_box").autocomplete({
       minLength: 0,
+      delay: 500,
       source: node_names,
       search: function(event, ui) {
 	sankey_update_wrapper(focus_node_id);
@@ -79,7 +79,14 @@ function sankey_update(width, height, values, tree, focus_node_id) {
       d3.select("#links"),
       layout.links(),
       "tree_link_" + groups[i],
-      sankey_link_attrs(values, scales, groups[i], centers)
+      sankey_link_attrs(
+	values,
+	scales,
+	groups[i],
+	centers,
+	tree_obj,
+	$("#search_box").val()
+      )
     );
   }
 
