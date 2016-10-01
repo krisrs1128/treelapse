@@ -13,6 +13,10 @@ function draw_sankey(elem, width, height, values, tree, focus_node_id) {
 }
 
 function sankey_update(width, height, values, tree, focus_node_id) {
+  function sankey_update_wrapper(x) {
+    sankey_update(width, height, values, tree, x);
+  }
+
   console.log("Focusing on " + focus_node_id);
 
   // essential DOI algorithm
@@ -53,8 +57,6 @@ function sankey_update(width, height, values, tree, focus_node_id) {
     "target": edge_centers(x_pos, edgelist, values, scales.size, "target")
   };
 
-  console.log(centers);
-
   for (var i = 0; i < groups.length; i++) {
     selection_update(
       "path",
@@ -64,4 +66,9 @@ function sankey_update(width, height, values, tree, focus_node_id) {
       sankey_link_attrs(values, scales, groups[i], centers)
     );
   }
+
+  d3.selectAll("[class^='tree_link']")
+    .on("click", function(d) {
+      return sankey_update_wrapper(d.target.data.name);
+    });
 }
