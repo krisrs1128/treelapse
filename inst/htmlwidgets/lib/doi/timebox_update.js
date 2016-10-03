@@ -1,8 +1,7 @@
 
-function draw_timebox(elem, width, height, values, tree) {
-
+function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var units = d3.set(values.unit).values();
-  var scales = get_scales(values, width, height);
+  var scales = get_scales(values, width, height, 0, 10);
 
   line_data = {};
   for (var i = 0; i < units.length; i++) {
@@ -33,9 +32,9 @@ function draw_timebox(elem, width, height, values, tree) {
   timebox_update(elem, width, height, values, tree, []);
 }
 
-function timebox_update(elem, width, height, values, tree, cur_lines) {
-  draw_ts(elem, values, cur_lines, width, height);
-  draw_tree(elem, values, cur_lines, width, height, tree);
+function timebox_update(elem, width, height, values, tree, cur_lines, size_min, size_max) {
+  draw_ts(elem, values, cur_lines, width, height, size_min, size_max);
+  draw_tree(elem, values, cur_lines, width, height, tree, size_min, size_max);
 }
 
 function timebox_update_factory(elem, width, height, values, tree) {

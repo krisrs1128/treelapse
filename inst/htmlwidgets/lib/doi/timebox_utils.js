@@ -1,4 +1,4 @@
-function get_scales(values, width, height) {
+function get_scales(values, width, height, size_min, size_max) {
   return {
     "x": d3.scaleLinear()
       .domain(d3.extent(values.time))
@@ -8,12 +8,12 @@ function get_scales(values, width, height) {
       .range([height, 0.4 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.5, 4])
+      .range([size_min, size_max])
   };
 }
 
 
-function draw_ts(elem, values, cur_lines, width, height) {
+function draw_ts(elem, values, cur_lines, width, height, size_min, size_max) {
   var units = d3.set(values.unit).values();
   var ts_selection = d3.select("#all_ts")
       .selectAll(".ts_line")
@@ -21,7 +21,7 @@ function draw_ts(elem, values, cur_lines, width, height) {
 
   ts_selection.exit().remove();
 
-  var scales = get_scales(values, width, height);
+  var scales = get_scales(values, width, height, size_min, size_max);
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
@@ -66,6 +66,8 @@ function draw_ts(elem, values, cur_lines, width, height) {
 }
 
 function timebox_link_attrs(values, cur_lines, scales) {
+  console.log(scales.r)
+  console.log(scales.r(10))
   var attr_funs = link_attr_defaults();
 
   attr_funs.stroke = "#F0F0F0";
