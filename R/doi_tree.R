@@ -11,7 +11,9 @@ doi_tree <- function(values,
                      width = NULL,
                      height = NULL,
                      size_min = 0,
-                     size_max = 20) {
+                     size_max = 20,
+                     leaf_width = 40,
+                     leaf_height = 100) {
   if (is.null(focus_node_id)) {
     focus_node_id  <- edges[1, 1]
   }
@@ -25,7 +27,9 @@ doi_tree <- function(values,
     toJSON(tree_json(edges, root)),
     focus_node_id,
     size_min,
-    size_max
+    size_max,
+    leaf_width,
+    leaf_height
   )
 
   # create widget
