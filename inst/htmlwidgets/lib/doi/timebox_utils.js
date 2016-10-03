@@ -12,8 +12,7 @@ function get_scales(values, width, height, size_min, size_max) {
   };
 }
 
-
-function draw_ts(elem, values, cur_lines, width, height, size_min, size_max) {
+function draw_ts(elem, values, cur_lines, scales) {
   var units = d3.set(values.unit).values();
   var ts_selection = d3.select("#all_ts")
       .selectAll(".ts_line")
@@ -21,7 +20,6 @@ function draw_ts(elem, values, cur_lines, width, height, size_min, size_max) {
 
   ts_selection.exit().remove();
 
-  var scales = get_scales(values, width, height, size_min, size_max);
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
@@ -66,10 +64,7 @@ function draw_ts(elem, values, cur_lines, width, height, size_min, size_max) {
 }
 
 function timebox_link_attrs(values, cur_lines, scales) {
-  console.log(scales.r)
-  console.log(scales.r(10))
   var attr_funs = link_attr_defaults();
-
   attr_funs.stroke = "#F0F0F0";
 
   attr_funs.stroke_width = function(d) {
@@ -106,12 +101,13 @@ function timebox_node_attrs(values, cur_lines, scales) {
   return attr_funs;
 }
 
-function draw_tree(elem, values, cur_lines, width, height, tree) {
+function draw_tree(elem, values, cur_lines, tree, scales) {
   var hierarchy = d3.hierarchy(tree);
+
+  // width + height info are in the scales
   var cluster = d3.cluster()
-      .size([width, 0.37 * height]);
+      .size([scales.x.range()[1], 0.37 * scales.y.range()[0]]);
   var layout = cluster(hierarchy);
-  var scales = get_scales(values, width, height);
 
   // draw links
   selection_update(
