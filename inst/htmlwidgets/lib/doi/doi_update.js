@@ -1,5 +1,5 @@
 
-function draw_doi(elem, width, height, values, tree, focus_node_id) {
+function draw_doi(elem, width, height, values, tree, focus_node_id, size_min, size_max) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
@@ -8,14 +8,16 @@ function draw_doi(elem, width, height, values, tree, focus_node_id) {
     height,
     values,
     tree,
-    focus_node_id
+    focus_node_id,
+    size_min,
+    size_max
   );
 
 }
 
-function doi_update(width, height, values, tree, focus_node_id) {
+function doi_update(width, height, values, tree, focus_node_id, size_min, size_max) {
   function doi_update_wrapper(x) {
-    doi_update(width, height, values, tree, x);
+    doi_update(width, height, values, tree, x, size_min, size_max);
   }
 
   console.log("Focusing on " + focus_node_id);
@@ -45,7 +47,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([3, 35]),
+      .range([size_min, size_max]),
     "fill": d3.scalePow().exponent([1e-15])
       .domain(d3.extent(doi_tree.get_attr_array("doi")))
       .range(["#F7F7F7", "#000000"]),
