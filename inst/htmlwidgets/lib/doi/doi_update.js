@@ -1,5 +1,14 @@
 
-function draw_doi(elem, width, height, values, tree, focus_node_id) {
+function draw_doi(elem,
+		  width,
+		  height,
+		  values,
+		  tree,
+		  focus_node_id,
+		  size_min,
+		  size_max,
+		  leaf_width,
+		  leaf_height) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
@@ -8,14 +17,36 @@ function draw_doi(elem, width, height, values, tree, focus_node_id) {
     height,
     values,
     tree,
-    focus_node_id
+    focus_node_id,
+    size_min,
+    size_max,
+    leaf_width,
+    leaf_height
   );
 
 }
 
-function doi_update(width, height, values, tree, focus_node_id) {
+function doi_update(width,
+		    height,
+		    values,
+		    tree,
+		    focus_node_id,
+		    size_min,
+		    size_max,
+		    leaf_width,
+		    leaf_height) {
   function doi_update_wrapper(x) {
-    doi_update(width, height, values, tree, x);
+    doi_update(
+      width,
+      height,
+      values,
+      tree,
+      x,
+      size_min,
+      size_max,
+      leaf_width,
+      leaf_height
+    );
   }
 
   console.log("Focusing on " + focus_node_id);
@@ -28,24 +59,24 @@ function doi_update(width, height, values, tree, focus_node_id) {
 
   // setup search box
   var node_names = tree_obj.get_attr_array("name");
-  $(function() {
-    $("#search_box").autocomplete({
-      minLength: 0,
-      source: node_names,
-      search: function(event, ui) {
-	doi_update_wrapper(focus_node_id);
-      },
-      select: function(event, ui) {
-	$("#search_box").val(ui.item.label);
-	doi_update_wrapper(focus_node_id);
-      }
-    });
-  });
+   $(function() {
+     $("#search_box").autocomplete({
+       minLength: 0,
+       source: node_names,
+       search: function(event, ui) {
+   	doi_update_wrapper(focus_node_id);
+       },
+       select: function(event, ui) {
+   	$("#search_box").val(ui.item.label);
+   	doi_update_wrapper(focus_node_id);
+       }
+     });
+   });
 
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([3, 35]),
+      .range([size_min, size_max]),
     "fill": d3.scalePow().exponent([1e-15])
       .domain(d3.extent(doi_tree.get_attr_array("doi")))
       .range(["#F7F7F7", "#000000"]),
@@ -54,7 +85,7 @@ function doi_update(width, height, values, tree, focus_node_id) {
   var layout = doi_tree.tree_block(
     focus_node_id,
     [width, height],
-    [40, 100] // node size
+    [leaf_width, leaf_height]
   );
 
   selection_update(

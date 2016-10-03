@@ -4,8 +4,16 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-doi_tree <- function(values, edges, focus_node_id = NULL, root = NULL,
-                     width = NULL, height = NULL) {
+doi_tree <- function(values,
+                     edges,
+                     focus_node_id = NULL,
+                     root = NULL,
+                     width = NULL,
+                     height = NULL,
+                     size_min = 0,
+                     size_max = 20,
+                     leaf_width = 10,
+                     leaf_height = 100) {
   if (is.null(focus_node_id)) {
     focus_node_id  <- edges[1, 1]
   }
@@ -17,7 +25,11 @@ doi_tree <- function(values, edges, focus_node_id = NULL, root = NULL,
   x <- list(
     values,
     toJSON(tree_json(edges, root)),
-    focus_node_id
+    focus_node_id,
+    size_min,
+    size_max,
+    leaf_width,
+    leaf_height
   )
 
   # create widget

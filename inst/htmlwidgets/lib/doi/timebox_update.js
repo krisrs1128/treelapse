@@ -1,15 +1,14 @@
 
-function draw_timebox(elem, width, height, values, tree) {
-
+function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var units = d3.set(values.unit).values();
-  var scales = get_scales(values, width, height);
+  var scales = get_scales(values, width, height, size_min, size_max);
 
   line_data = {};
   for (var i = 0; i < units.length; i++) {
     line_data[units[i]] = get_line_data(values, units[i]);
   }
 
-  var update_fun = timebox_update_factory(elem, width, height, values, tree);
+  var update_fun = timebox_update_factory(elem, values, tree, [], scales);
 
   function add_fun() {
     new_brush(line_data, scales, update_fun, width, height);
@@ -30,17 +29,17 @@ function draw_timebox(elem, width, height, values, tree) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", change_focus);
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, width, height, values, tree, []);
+  timebox_update(elem, values, tree, [], scales);
 }
 
-function timebox_update(elem, width, height, values, tree, cur_lines) {
-  draw_ts(elem, values, cur_lines, width, height);
-  draw_tree(elem, values, cur_lines, width, height, tree);
+function timebox_update(elem, values, tree, cur_lines, scales) {
+  draw_ts(elem, values, cur_lines, scales);
+  draw_tree(elem, values, cur_lines, tree, scales);
 }
 
-function timebox_update_factory(elem, width, height, values, tree) {
+function timebox_update_factory(elem, values, tree, cur_lines, scales) {
   function f(cur_lines) {
-    timebox_update(elem, width, height, values, tree, cur_lines);
+    timebox_update(elem, values, tree, cur_lines, scales);
   }
 
   return f;

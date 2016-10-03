@@ -72,5 +72,5 @@ colnames(mvalues) <- c("group", "unit", "value")
 ```
 
 ```{r}
-doi_sankey(mvalues, taxa, "Bacteria", "Bacteria", 2000, 400)
+doi_sankey(mvalues, taxa, "Bacteria", "Bacteria", 800, 400)
 ```
