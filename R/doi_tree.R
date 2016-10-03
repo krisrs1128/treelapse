@@ -12,7 +12,7 @@ doi_tree <- function(values,
                      height = NULL,
                      size_min = 0,
                      size_max = 20,
-                     leaf_width = 40,
+                     leaf_width = 10,
                      leaf_height = 100) {
   if (is.null(focus_node_id)) {
     focus_node_id  <- edges[1, 1]

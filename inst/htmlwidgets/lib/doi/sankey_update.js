@@ -4,17 +4,22 @@ function draw_sankey(elem,
 		     values,
 		     tree,
 		     focus_node_id,
-		     size_max) {
+		     size_max,
+		     leaf_width,
+		     leaf_height) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["links", "text"]);
+
   sankey_update(
     width,
     height,
     values,
     tree,
     focus_node_id,
-    size_max
+    size_max,
+    leaf_width,
+    leaf_height
   );
 }
 
@@ -23,9 +28,21 @@ function sankey_update(width,
 		       values,
 		       tree,
 		       focus_node_id,
-		       size_max) {
+		       size_max,
+		       leaf_width,
+		       leaf_height) {
+
   function sankey_update_wrapper(x) {
-    sankey_update(width, height, values, tree, x, size_max);
+    sankey_update(
+      width,
+      height,
+      values,
+      tree,
+      x,
+      size_max,
+      leaf_width,
+      leaf_height
+    );
   }
 
   console.log("Focusing on " + focus_node_id);
@@ -64,7 +81,7 @@ function sankey_update(width,
   var layout = doi_tree.tree_block(
     focus_node_id,
     [width, height],
-    [40, 100] // node size
+    [leaf_width, leaf_height]
   );
 
   var x_pos = layout.descendants()
