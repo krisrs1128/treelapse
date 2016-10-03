@@ -1,4 +1,10 @@
-function draw_sankey(elem, width, height, values, tree, focus_node_id) {
+function draw_sankey(elem,
+		     width,
+		     height,
+		     values,
+		     tree,
+		     focus_node_id,
+		     size_max) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["links", "text"]);
@@ -7,13 +13,19 @@ function draw_sankey(elem, width, height, values, tree, focus_node_id) {
     height,
     values,
     tree,
-    focus_node_id
+    focus_node_id,
+    size_max
   );
 }
 
-function sankey_update(width, height, values, tree, focus_node_id) {
+function sankey_update(width,
+		       height,
+		       values,
+		       tree,
+		       focus_node_id,
+		       size_max) {
   function sankey_update_wrapper(x) {
-    sankey_update(width, height, values, tree, x);
+    sankey_update(width, height, values, tree, x, size_max);
   }
 
   console.log("Focusing on " + focus_node_id);
@@ -44,7 +56,7 @@ function sankey_update(width, height, values, tree, focus_node_id) {
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([0, 35]),
+      .range([0, size_max]),
     "fill": d3.scaleOrdinal(d3.schemeSet3)
       .domain(groups)
   };

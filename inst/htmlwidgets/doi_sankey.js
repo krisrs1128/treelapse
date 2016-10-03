@@ -7,7 +7,16 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
-	draw_sankey(el, width, height, x[0], x[1], x[2]);
+	draw_sankey(
+	  el,
+	  width,
+	  height,
+	  x[0],
+	  x[1],
+	  x[2],
+	  x[3],
+	  x[4]
+	);
       },
 
       resize: function(width, height) {}

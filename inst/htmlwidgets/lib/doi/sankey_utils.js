@@ -24,7 +24,11 @@ function compare(a,b) {
   return 0;
 }
 
-function edge_centers(x_pos, edgelist, values, scale, center_type) {
+function edge_centers(x_pos,
+		      edgelist,
+		      values,
+		      scale,
+		      center_type) {
   reshaped_values = values.unit.map(function(unit, i) {
     return {
       "unit": unit,
@@ -82,7 +86,12 @@ function edge_centers(x_pos, edgelist, values, scale, center_type) {
   return centers;
 }
 
-function sankey_link_attrs(values, scales, group, centers, tree, search_str) {
+function sankey_link_attrs(values,
+			   scales,
+			   group,
+			   centers,
+			   tree,
+			   search_str) {
   var attrs = link_attr_defaults();
   attrs.opacity = 0.1;
   attrs.stroke = scales.fill(group);
