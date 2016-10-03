@@ -8,7 +8,7 @@ function get_scales(values, width, height) {
       .range([height, 0.4 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.5, 40])
+      .range([0.5, 4])
   };
 }
 
@@ -65,17 +65,10 @@ function draw_ts(elem, values, cur_lines, width, height) {
 
 }
 
-function timebox_link_attrs(values, cur_lines, tree_obj, scales) {
+function timebox_link_attrs(values, cur_lines, scales) {
   var attr_funs = link_attr_defaults();
 
-  attr_funs.stroke = function(d) {
-    var subtree = tree_obj.get_subtree(d.target.data.name[0]);
-    var descendants = subtree.get_attr_array("name");
-    if (intersect(descendants, cur_lines).length > 0) {
-      return "#2D869F";
-    }
-    return "#F0F0F0";
-  };
+  attr_funs.stroke = "#F0F0F0";
 
   attr_funs.stroke_width = function(d) {
     var cur_values = get_matching_subarray(
@@ -119,16 +112,17 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
   var scales = get_scales(values, width, height);
 
   // draw links
-  var tree_obj = new Tree(tree);
-  tree_links_base(
+  selection_update(
+    "path",
     d3.select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(values, cur_lines, tree_obj, scales)
+    timebox_link_attrs(values, cur_lines, scales)
   );
 
   // draw nodes
-  tree_nodes_base(
+  selection_update(
+    "circle",
     d3.select("#nodes"),
     layout.descendants(),
     "tree_node",
