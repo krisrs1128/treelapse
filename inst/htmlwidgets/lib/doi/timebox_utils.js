@@ -8,7 +8,7 @@ function get_scales(values, width, height) {
       .range([height, 0.4 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.5, 40])
+      .range([0.5, 4])
   };
 }
 
@@ -120,7 +120,8 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
 
   // draw links
   var tree_obj = new Tree(tree);
-  tree_links_base(
+  selection_update(
+    "path",
     d3.select("#links"),
     layout.links(),
     "tree_link",
@@ -128,7 +129,8 @@ function draw_tree(elem, values, cur_lines, width, height, tree) {
   );
 
   // draw nodes
-  tree_nodes_base(
+  selection_update(
+    "circle",
     d3.select("#nodes"),
     layout.descendants(),
     "tree_node",
