@@ -1,21 +1,8 @@
-
-function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
+function draw_tree_ts(elem, width, height, values, tree, scales) {
   var units = d3.set(values.unit).values();
-  var scales = get_scales(values, width, height, size_min, size_max);
-
   line_data = {};
   for (var i = 0; i < units.length; i++) {
     line_data[units[i]] = get_line_data(values, units[i]);
-  }
-
-  var update_fun = timebox_update_factory(elem, values, tree, [], scales);
-
-  function add_fun() {
-    new_brush(line_data, scales, update_fun, width, height);
-  }
-
-  function remove_fun() {
-    remove_brush(line_data, scales, update_fun, width, height);
   }
 
   setup_background(elem, width, height, "#F7F7F7");
@@ -25,6 +12,26 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   );
   d3.select("#mouseover")
     .append("text");
+}
+
+function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
+  var scales = get_scales(values, width, height, size_min, size_max);
+  draw_tree_ts(elem, width, height, values, tree, scales);
+  treebox_update(elem, values, tree, [], scales);
+}
+
+function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
+  var scales = get_scales(values, width, height, size_min, size_max);
+  draw_tree_ts(elem, width, height, values, tree, scales);
+  var update_fun = timebox_update_factory(elem, values, tree, [], scales);
+
+  function add_fun() {
+    new_brush(line_data, scales, update_fun, width, height);
+  }
+
+  function remove_fun() {
+    remove_brush(line_data, scales, update_fun, width, height);
+  }
 
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", change_focus);
@@ -43,6 +50,11 @@ function timebox_update_factory(elem, values, tree, cur_lines, scales) {
   }
 
   return f;
+}
+
+function treebox_update(elem, values, tree, cur_lines, scales) {
+  draw_ts(elem, values, cur_lines, scales);
+  draw_tree(elem, values, cur_lines, tree, scales);
 }
 
 function brush_fun(line_data, scales, update_fun, width, height) {
