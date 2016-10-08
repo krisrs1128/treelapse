@@ -63,7 +63,11 @@ colnames(mvalues) <- c("time", "unit", "value")
 ```
 
 ```{r}
-library("devtools")
-install()
 timebox_tree(mvalues, taxa, "Bacteria", 700, 500)
 ```
+
+```{r}
+library("devtools")
+install()
+treebox(mvalues, taxa, "Bacteria", 700, 500)
+````

@@ -18,6 +18,8 @@
     script:
     - doi_utils.js
     - doi_update.js
+    - ts_utils.js
+    - ts_update.js
     - treebox_utils.js
     - treebox_update.js
     - d3_utils.js
