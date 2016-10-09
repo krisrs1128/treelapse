@@ -69,5 +69,5 @@ timebox_tree(mvalues, taxa, "Bacteria", 700, 500)
 ```{r}
 library("devtools")
 install()
-treebox(mvalues, taxa, "Bacteria", 700, 500)
-````
+treebox(mvalues, taxa, "Bacteria", 700, 500, size_min = 2, size_max = 100)
+```

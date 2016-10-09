@@ -20,8 +20,6 @@
     - doi_update.js
     - ts_utils.js
     - ts_update.js
-    - treebox_utils.js
-    - treebox_update.js
     - d3_utils.js
   - name: roboto
     version: 0.0.0

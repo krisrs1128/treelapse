@@ -39,7 +39,7 @@ function draw_ts(elem, values, cur_lines, scales) {
     });
 
   d3.selectAll(".ts_line").transition()
-    .duration(700)
+    .duration(100)
     .attrs({
       "stroke": function(d) {
 	if (cur_lines.indexOf(d) != -1) {
@@ -165,57 +165,25 @@ function get_line_data(values, cur_unit) {
 }
 
 function intersect(a, b) {
-    var t;
-    if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
-    return a.filter(function (e) {
-        if (b.indexOf(e) !== -1) return true;
-    });
+  var t;
+  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
+  return a.filter(function (e) {
+    if (b.indexOf(e) !== -1) return true;
+  });
 }
 
-function point_in_box(point, box_extent) {
-  return (point.time >= box_extent.time_min) &&
-    (point.time <= box_extent.time_max) &&
-    (point.value >= box_extent.value_min) &&
-    (point.value <= box_extent.value_max);
-}
-
-function line_in_box(line_data, box_extent) {
-  for (var i = 0; i < line_data.length; i++) {
-    var cur_check = point_in_box(line_data[i], box_extent);
-    if (cur_check) {
-      return true;
-    }
+function union(a, b) {
+  var obj = {};
+  for (var i = a.length - 1; i >= 0; --i)
+     obj[a[i]] = a[i];
+  for (var i = b.length - 1; i >= 0; --i)
+     obj[b[i]] = b[i];
+  var res = [];
+  for (var k in obj) {
+    if (obj.hasOwnProperty(k))  // <-- optional
+      res.push(obj[k]);
   }
-  return false;
-}
-
-function lines_in_box(line_data, box_extent) {
-  var contained_ids = [];
-  for (var line_id in line_data) {
-    if (line_in_box(line_data[line_id], box_extent)) {
-      contained_ids.push(line_id);
-    }
-  }
-  return contained_ids;
-}
-
-function brush_intersection(brushes, units, scales) {
-    for (var i = 0; i < brushes.length; i++) {
-      var box_extent = d3.brushSelection(brushes[i]);
-      box_extent = {
-	"time_min": scales.x.invert(box_extent[0][0]),
-	"value_min": scales.y.invert(box_extent[1][1]),
-	"time_max": scales.x.invert(box_extent[1][0]),
-	"value_max": scales.y.invert(box_extent[0][1])
-      };
-
-      units = intersect(
-	units,
-	lines_in_box(line_data, box_extent)
-      );
-
-    }
-  return units;
+  return res;
 }
 
 function focus_brush(brush_ix) {
@@ -265,4 +233,85 @@ function change_focus() {
 
   brush_ix = (brush_ix + 1) % brushes.length;
   focus_brush(brush_ix);
+}
+
+function get_box_extent(brush, scales) {
+  var box_extent = d3.brushSelection(brush);
+  return {
+    "time_min": scales.x.invert(box_extent[0][0]),
+    "value_min": scales.y.invert(box_extent[1][1]),
+    "time_max": scales.x.invert(box_extent[1][0]),
+    "value_max": scales.y.invert(box_extent[0][1])
+  };
+}
+
+function brush_ts_intersection(brushes, units, scales) {
+  for (var i = 0; i < brushes.length; i++) {
+    var box_extent = get_box_extent(brushes[i], scales);
+    units = union(
+      units,
+      lines_in_box(line_data, box_extent)
+    );
+
+  }
+  return units;
+}
+
+function point_in_box(point, box_extent) {
+  return (point.time >= box_extent.time_min) &&
+    (point.time <= box_extent.time_max) &&
+    (point.value >= box_extent.value_min) &&
+    (point.value <= box_extent.value_max);
+}
+
+function line_in_box(line_data, box_extent) {
+  for (var i = 0; i < line_data.length; i++) {
+    var cur_check = point_in_box(line_data[i], box_extent);
+    if (cur_check) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function lines_in_box(line_data, box_extent) {
+  var contained_ids = [];
+  for (var line_id in line_data) {
+    if (line_in_box(line_data[line_id], box_extent)) {
+      contained_ids.push(line_id);
+    }
+  }
+  return contained_ids;
+}
+
+function brush_nodes_union(brushes, units) {
+  units = [];  // overwrite, so can still use new_brush() arguments
+  var scales = {
+    "x": d3.scaleLinear(),
+    "y": d3.scaleLinear()
+  };
+
+  for (var i = 0; i < brushes.length; i++) {
+    var box_extent = get_box_extent(brushes[i], scales);
+    units = union(
+      units,
+      nodes_in_box(box_extent)
+    );
+
+  }
+  return units;
+}
+
+function nodes_in_box(box_extent) {
+  var nodes = d3.selectAll(".tree_node")
+      .filter(function(d) {
+	return d.x >= box_extent.time_min &&
+	  d.x <= box_extent.time_max &&
+	  d.y >= box_extent.value_max &&
+	  d.y <= box_extent.value_min;
+      }).nodes();
+  var node_ids = nodes.map(
+    function(d) { return d.id; }
+  );
+  return node_ids;
 }
