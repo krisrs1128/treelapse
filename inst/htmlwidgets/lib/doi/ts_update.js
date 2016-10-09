@@ -1,4 +1,4 @@
-function draw_tree_ts(elem, width, height, values, tree, scales) {
+function setup_tree_ts(elem, width, height, values, tree, scales) {
   var units = d3.set(values.unit).values();
   line_data = {};
   for (var i = 0; i < units.length; i++) {
@@ -10,13 +10,15 @@ function draw_tree_ts(elem, width, height, values, tree, scales) {
     d3.select("svg"),
     ["all_ts", "links", "nodes", "all_brushes", "mouseover"]
   );
+
   d3.select("#mouseover")
     .append("text");
+  return line_data;
 }
 
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
-  var scales = get_scales(values, width, height, size_min, size_max);
-  draw_tree_ts(elem, width, height, values, tree, scales);
+  var scales = get_scales(values, 0.9 * width, height, size_min, size_max);
+  var line_data = setup_tree_ts(elem, width, height, values, tree, scales);
 
   var update_fun = update_factory(
     treebox_update,
@@ -56,7 +58,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
-  draw_tree_ts(elem, width, height, values, tree, scales);
+  var line_data = setup_tree_ts(elem, width, height, values, tree, scales);
   var update_fun = update_factory(
     timebox_update,
     elem,
@@ -66,7 +68,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
-  var brush_extent = [[0, 0.4 * height], [width, height]];
+  var brush_extent = [[0, 0.43 * height], [width, height]];
 
   function add_fun() {
     new_brush(
@@ -94,8 +96,8 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 }
 
 function timebox_update(elem, values, tree, cur_lines, scales) {
-  draw_ts(elem, values, cur_lines, scales);
-  draw_tree(elem, values, cur_lines, tree, scales);
+  draw_ts(elem, values, cur_lines, scales, false);
+  draw_tree(elem, values, cur_lines, tree, scales, true);
 }
 
 function update_factory(base_fun, elem, values, tree, cur_lines, scales) {
@@ -107,8 +109,8 @@ function update_factory(base_fun, elem, values, tree, cur_lines, scales) {
 }
 
 function treebox_update(elem, values, tree, cur_lines, scales) {
-  draw_ts(elem, values, cur_lines, scales);
-  draw_tree(elem, values, cur_lines, tree, scales);
+  draw_ts(elem, values, cur_lines, scales, true);
+  draw_tree(elem, values, cur_lines, tree, scales, false);
 }
 
 function brush_fun(line_data, scales, update_fun, combine_fun) {
