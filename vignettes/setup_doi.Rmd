@@ -10,24 +10,7 @@ vignette: >
 ---
 
 ```{r, setup}
-library("treelapse")
-library("phyloseq")
-data(GlobalPatterns)
+```
 
-GPr <- transform_sample_counts(GlobalPatterns, function(x) x / sum(x) )
-GPfr <- filter_taxa(GPr, function(x) mean(x) > 1e-3, TRUE)
-taxa <- taxa_edgelist(tax_table(GPfr))
-
-values <- tree_sum(
-  data.frame(taxa),
-  sqrt(apply(otu_table(GPfr)@.Data, 1, mean))
-)
-
-values <- data.frame(
-  unit = names(values),
-  value = values,
-  stringsAsFactors = FALSE
-)
-
-doi_tree(values, taxa, "Bacteria", "Bacteria", 800, 400)
+```{r, visualize}
 ```
