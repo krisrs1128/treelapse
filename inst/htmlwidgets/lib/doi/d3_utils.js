@@ -10,7 +10,7 @@ function setup_background(elem, width, height, fill) {
 	height: height
       });
 
-  var rect = d3.select("svg")
+  var rect = svg_elem
       .append("rect")
       .attrs({
 	id: "background_rect",
@@ -29,13 +29,14 @@ function setup_groups(svg, group_names) {
 }
 
 function setup_search(elem) {
+
   var search = d3.select(elem)
-    .append("g")
-    .attr("id", "search");
+      .append("g")
+      .attr("id", "search" + d3.select(elem).attr("id"));
 
   search.append("input")
     .attrs({
-      "id": "search_box",
+      "id": "search_box" + d3.select(elem).attr("id"),
       "type": "text"
     });
 
@@ -112,12 +113,13 @@ function text_attr_defaults() {
   };
 }
 
-function selection_update(svg_type, elem, data, class_name, attr_funs) {
+function selection_update(svg_type, selection, data, class_name, attr_funs, duration) {
   var transitioner = d3.transition()
-      .duration(1000)
+      .duration(duration)
       .ease(d3.easeCubic);
 
-  var selection = elem.selectAll("." + class_name)
+  var new_selection = selection
+      .selectAll("." + class_name)
       .data(data, attr_funs.id);
 
   // fade in
@@ -125,13 +127,14 @@ function selection_update(svg_type, elem, data, class_name, attr_funs) {
   attr_funs.opacity = 1;
   enter_attr_funs.opacity = 0;
 
-  selection.exit().remove();
-  selection.enter()
+  new_selection.exit().remove();
+  new_selection.enter()
     .append(svg_type)
     .classed(class_name, true)
     .attrs(enter_attr_funs);
 
-  d3.selectAll("." + class_name)
+  selection
+    .selectAll("." + class_name)
     .text(attr_funs.text) // empty if not a text selection
     .transition(transitioner)
     .attrs(attr_funs);

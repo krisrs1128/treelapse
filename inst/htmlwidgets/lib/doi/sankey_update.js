@@ -9,9 +9,13 @@ function draw_sankey(elem,
 		     leaf_height) {
   setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
-  setup_groups(d3.select("svg"), ["links", "text"]);
+  setup_groups(
+    d3.select(elem).select("svg"),
+    ["links", "text"]
+  );
 
   sankey_update(
+    elem,
     width,
     height,
     values,
@@ -23,7 +27,8 @@ function draw_sankey(elem,
   );
 }
 
-function sankey_update(width,
+function sankey_update(elem,
+		       width,
 		       height,
 		       values,
 		       tree,
@@ -34,6 +39,7 @@ function sankey_update(width,
 
   function sankey_update_wrapper(x) {
     sankey_update(
+      elem,
       width,
       height,
       values,
@@ -54,8 +60,9 @@ function sankey_update(width,
 
   // setup search box
   var node_names = tree_obj.get_attr_array("name");
+  var search_id = "#search_box" + d3.select(elem).attr("id");
   $(function() {
-    $("#search_box").autocomplete({
+    $(search_id).autocomplete({
       minLength: 0,
       delay: 500,
       source: node_names,
@@ -63,7 +70,7 @@ function sankey_update(width,
 	sankey_update_wrapper(focus_node_id);
       },
       select: function(event, ui) {
-	$("#search_box").val(ui.item.label);
+	$(search_id).val(ui.item.label);
 	sankey_update_wrapper(focus_node_id);
       }
     });
@@ -105,7 +112,7 @@ function sankey_update(width,
   for (var i = 0; i < groups.length; i++) {
     selection_update(
       "path",
-      d3.select("#links"),
+      d3.select(elem).select("#links"),
       layout.links(),
       "tree_link_" + groups[i],
       sankey_link_attrs(
@@ -114,20 +121,23 @@ function sankey_update(width,
 	groups[i],
 	centers,
 	tree_obj,
-	$("#search_box").val()
-      )
+	$(search_id).val()
+      ),
+      1000
     );
   }
 
   selection_update(
     "text",
-    d3.select("#text"),
+    d3.select(elem).select("#text"),
     layout.descendants(),
     "tree_text",
-    sankey_text_attrs(values, scales)
+    sankey_text_attrs(values, scales),
+    1000
   );
 
-  d3.selectAll("[class^='tree_link']")
+  d3.select(elem)
+    .selectAll("[class^='tree_link']")
     .on("click", function(d) {
       return sankey_update_wrapper(d.target.data.name);
     });
