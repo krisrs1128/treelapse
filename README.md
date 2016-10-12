@@ -14,7 +14,8 @@ devtools::install_github("krisrs1128/treelapse", build_vignettes = TRUE)
 ```
 
 The `build_vignettes` argument makes sure the vignettes can be viewed
-immediately after installation.
+immediately after installation (this will make it take longer to install,
+it should finish in less than 2 minutes though).
 
 ## Examples ##
 
