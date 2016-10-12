@@ -35,7 +35,7 @@ sample_info <- sample_data(ps)
 sample_info$CST <- clust
 
 
-## ---- get-values ----
+## ---- get_values ----
 sample_otu <- cbind(sample_info[, c("CST")], otu_table(ps)) %>%
   group_by(CST) %>%
   summarise_each(funs(mean))
@@ -44,7 +44,7 @@ taxa <- taxa_edgelist(tax_table(ps))
 values <- list()
 for (i in seq_len(nrow(sample_otu))) {
   print(i)
-  cur_values <- asinh(sample_otu[i, -1])
+  cur_values <- sample_otu[i, -1]
   cur_values <- setNames(
     as.numeric(cur_values),
     colnames(cur_values)
@@ -61,6 +61,3 @@ colnames(mvalues) <- c("group", "unit", "value")
 ## ---- visualize ----
 doi_sankey(mvalues, taxa, "Bacteria", "Bacteria", 1100, 500,
            leaf_width = 15, leaf_height = 75)
-
-save(mvalues, file = "cst_mvalues.RData")
-save(taxa, file = "cst_taxa.RData")
