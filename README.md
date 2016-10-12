@@ -1,9 +1,9 @@
 # treelapse
 
-This is an R package for interactive visualization of tree structured
-data. Motivated by the problem of describing abundances (and time series of
-abundances) across evolutionarily related microbes, we designed
-representations inspired by literature in the Data Visualization community.
+This is an R package for interactive visualization of counts and time series
+arranged along trees. Motivated by the problem of describing abundances of
+evolutionarily related microbes, we designed representations inspired by
+literature in the Data Visualization community.
 
 ## Installation ##
 
@@ -42,8 +42,8 @@ It also includes a few utilities for structuring data into the required form.
 * `tree_sum()`: Aggregate counts from leaves to internal nodes, given a tree
 structure.
 * `taxa_edgelist()`: Create an edgelist from a taxonomic tables whose columns
-are different levels in the hierarchy and rows are leaves. The $ij^{th$} element
-is leaf $i$'s ancestors at level $j$.
+are different levels in the hierarchy and rows are leaves. The `ij`th element
+is leaf `i`'s ancestors at level `j`.
 
 ## References ##
 
