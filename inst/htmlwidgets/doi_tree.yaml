@@ -18,6 +18,10 @@
     script:
     - doi_utils.js
     - doi_update.js
+    - ts_utils.js
+    - ts_update.js
+    - sankey_utils.js
+    - sankey_update.js
     - d3_utils.js
   - name: jquery-ui
     version: 1.12.1

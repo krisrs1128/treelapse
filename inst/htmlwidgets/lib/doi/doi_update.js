@@ -13,6 +13,7 @@ function draw_doi(elem,
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
   doi_update(
+    elem,
     width,
     height,
     values,
@@ -26,7 +27,8 @@ function draw_doi(elem,
 
 }
 
-function doi_update(width,
+function doi_update(elem,
+		    width,
 		    height,
 		    values,
 		    tree,
@@ -37,6 +39,7 @@ function doi_update(width,
 		    leaf_height) {
   function doi_update_wrapper(x) {
     doi_update(
+      elem,
       width,
       height,
       values,
@@ -50,7 +53,8 @@ function doi_update(width,
   }
 
   console.log("Focusing on " + focus_node_id);
-  var search_str = $("#search_box").val();
+  var search_id = "#search_box" + d3.select(elem).attr("id");
+  var search_str = $(search_id).val();
 
   // essential DOI algorithm
   var tree_obj = new Tree(tree);
@@ -60,14 +64,14 @@ function doi_update(width,
   // setup search box
   var node_names = tree_obj.get_attr_array("name");
    $(function() {
-     $("#search_box").autocomplete({
+     $(search_id).autocomplete({
        minLength: 0,
        source: node_names,
        search: function(event, ui) {
    	doi_update_wrapper(focus_node_id);
        },
        select: function(event, ui) {
-   	$("#search_box").val(ui.item.label);
+   	$(search_id).val(ui.item.label);
    	doi_update_wrapper(focus_node_id);
        }
      });
@@ -90,36 +94,41 @@ function doi_update(width,
 
   selection_update(
     "circle",
-    d3.select("#nodes"),
+    d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    doi_node_attrs(values, scales, tree_obj, search_str)
+    doi_node_attrs(values, scales, tree_obj, search_str),
+    1000
   );
 
   selection_update(
     "path",
-    d3.select("#links"),
+    d3.select(elem).select("#links"),
     layout.links(),
     "tree_link",
-    doi_link_attrs(values, scales)
+    doi_link_attrs(values, scales),
+    1000
   );
 
   selection_update(
     "path",
-    d3.select("#highlighted_links"),
+    d3.select(elem).select("#highlighted_links"),
     layout.links(),
     "highlighted_tree_links",
-    doi_highlight_link_attrs(values, scales, tree_obj, search_str)
+    doi_highlight_link_attrs(values, scales, tree_obj, search_str),
+    1000
   );
 
   selection_update(
     "text",
-    d3.select("#text"),
+    d3.select(elem).select("#text"),
     layout.descendants(),
     "tree_text",
-    doi_text_attrs(values, scales)
+    doi_text_attrs(values, scales),
+    1000
   );
 
-  d3.selectAll(".tree_node")
+  d3.select(elem).
+    selectAll(".tree_node")
     .on("click", function(d) { return doi_update_wrapper(d.data.name); });
 }
