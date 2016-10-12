@@ -4,14 +4,14 @@ author: "Kris Sankaran"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{DOI Trees for Microbial Abundance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo = FALSE}
 library("knitr")
-read_chunk("setup_csts.R")
+read_chunk("setup_doi.R")
 ```
 
 ```{r, setup}

@@ -4,7 +4,7 @@ author: "Kris Sankaran"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Time and Treeboxes for Microbial Abundance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,8 +23,8 @@ read_chunk("setup_timeboxes.R")
 ```{r, get-values}
 ```
 
-```{r, timebox_vis}
+```{r, timebox-vis}
 ```
 
-```{r, treebox_vis}
+```{r, treebox-vis}
 ```
