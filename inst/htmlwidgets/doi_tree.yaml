@@ -28,7 +28,6 @@
     src: htmlwidgets/lib/jquery-ui-1.12.1
     stylesheet: jquery-ui.css
     script: jquery-ui.js
-    all_files: true
   - name: roboto
     version: 0.0.0
     src: htmlwidgets/lib/font
