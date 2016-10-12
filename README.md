@@ -32,6 +32,11 @@ To list the available vignettes, run
 browseVignettes("treelapse")
 ```
 
+Examples of the compiled vignettes are available at,
+- [DOI Trees](http://statweb.stanford.edu/~kriss1/setup_doi.html)
+- [DOI Sankeys](http://statweb.stanford.edu/~kriss1/setup_csts.html)
+- [Timeboxes and Treeboxes](http://statweb.stanford.edu/~kriss1/setup_timeboxes.html)
+
 `treelapse` currently supports three kinds displays
 
 * DOI Trees: Navigate large trees according to the Degree-of-Interest (DOI)
