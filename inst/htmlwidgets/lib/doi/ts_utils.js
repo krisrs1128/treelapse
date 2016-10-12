@@ -14,7 +14,8 @@ function get_scales(values, width, height, size_min, size_max) {
 
 function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
   var units = d3.set(values.unit).values();
-  var ts_selection = d3.select("#all_ts")
+  var ts_selection = d3.select(elem)
+      .select("#all_ts")
       .selectAll(".ts_line")
       .data(units);
 
@@ -38,7 +39,9 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
       }
     });
 
-  d3.selectAll(".ts_line").transition()
+  d3.select(elem)
+    .selectAll(".ts_line")
+    .transition()
     .duration(100)
     .attrs({
       "stroke": function(d) {
@@ -62,20 +65,22 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
     });
 
   if (mouseover_text) {
-    d3.selectAll(".ts_line")
+    ts_selection
       .on("mouseover",
 	  function(d) {
 	    var cur_data = get_line_data(values, d);
 	    var cur_y = cur_data[cur_data.length - 1].value;
 	    var cur_x = cur_data[cur_data.length - 1].time;
 
-	    d3.select("#mouseover")
+	    d3.select(elem)
+	      .select("#mouseover")
 	      .attrs({
 		"transform": "translate(" + (5 + scales.x(cur_x)) + "," +
 		  scales.y(cur_y) + ")"
 	      });
 
-	    d3.select("#mouseover > text")
+	    d3.select(elem)
+	      .select("#mouseover > text")
 	      .text(d)
 	      .attrs({
 		"font-size": 11,
@@ -135,33 +140,38 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
   // draw links
   selection_update(
     "path",
-    d3.select("#links"),
+    d3.select(elem).select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(values, cur_lines, scales)
+    timebox_link_attrs(values, cur_lines, scales),
+    100
   );
 
   // draw nodes
   selection_update(
     "circle",
-    d3.select("#nodes"),
+    d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    timebox_node_attrs(values, cur_lines, scales)
+    timebox_node_attrs(values, cur_lines, scales),
+    100
   );
 
   if (mouseover_text) {
-    d3.selectAll(".tree_node")
+    d3.select(elem)
+      .selectAll(".tree_node")
       .on("mouseover",
 	  function(d) {
 	    var r = parseFloat(d3.select(this).attr("r"));
-	    d3.select("#mouseover")
+	    d3.select(elem)
+	      .select("#mouseover")
 	      .attrs({
 		"transform": "translate(" + (d.x + 2 * Math.sqrt(r))+
 		  "," + (d.y - 2 * Math.sqrt(r)) + ")"
 	      });
 
-	    d3.select("#mouseover > text")
+	    d3.select(elem)
+	      .select("#mouseover > text")
 	      .text(d.data.name[0])
 	      .attrs({
 		"font-size": 11,
@@ -211,8 +221,9 @@ function union(a, b) {
   return res;
 }
 
-function focus_brush(brush_ix) {
-  d3.selectAll(".brush")
+function focus_brush(elem, brush_ix) {
+  d3.select(elem)
+    .selectAll(".brush")
     .attrs({
       "brush_selected": function (d) {
 	var cur_id = d3.select(this).attr("id");
@@ -236,7 +247,8 @@ function focus_brush(brush_ix) {
 	return 0.4;
       }
     });
-  d3.selectAll(".brush > rect")
+  d3.select(elem)
+    .selectAll(".brush > rect")
     .attrs({
       "pointer-events": function(d) {
 	return d3.select(this.parentNode)
@@ -245,8 +257,9 @@ function focus_brush(brush_ix) {
     });
 }
 
-function change_focus() {
-  var brushes = d3.selectAll(".brush").nodes();
+function change_focus(elem) {
+  var brushes = d3.select(elem)
+      .selectAll(".brush").nodes();
 
   var brush_ix = 0;
   for (var i = 0; i < brushes.length; i++) {
@@ -257,7 +270,7 @@ function change_focus() {
   }
 
   brush_ix = (brush_ix + 1) % brushes.length;
-  focus_brush(brush_ix);
+  focus_brush(elem, brush_ix);
 }
 
 function get_box_extent(brush, scales) {
@@ -270,7 +283,7 @@ function get_box_extent(brush, scales) {
   };
 }
 
-function brush_ts_intersection(brushes, units, scales) {
+function brush_ts_intersection(elem, brushes, units, scales) {
   for (var i = 0; i < brushes.length; i++) {
     var box_extent = get_box_extent(brushes[i], scales);
     units = intersect(
@@ -309,7 +322,7 @@ function lines_in_box(line_data, box_extent) {
   return contained_ids;
 }
 
-function brush_nodes_union(brushes, units) {
+function brush_nodes_union(elem, brushes, units) {
   units = [];  // overwrite, so can still use new_brush() arguments
   var scales = {
     "x": d3.scaleLinear(),
@@ -320,15 +333,16 @@ function brush_nodes_union(brushes, units) {
     var box_extent = get_box_extent(brushes[i], scales);
     units = union(
       units,
-      nodes_in_box(box_extent)
+      nodes_in_box(elem, box_extent)
     );
 
   }
   return units;
 }
 
-function nodes_in_box(box_extent) {
-  var nodes = d3.selectAll(".tree_node")
+function nodes_in_box(elem, box_extent) {
+  var nodes = d3.select(elem)
+      .selectAll(".tree_node")
       .filter(function(d) {
 	return d.x >= box_extent.time_min &&
 	  d.x <= box_extent.time_max &&

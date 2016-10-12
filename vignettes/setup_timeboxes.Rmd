@@ -17,7 +17,6 @@ library("dplyr")
 library("reshape2")
 ```
 
-
 ```{r, get-data}
 pregnancy_path <- "http://statweb.stanford.edu/~susan/papers/Pregnancy/PregnancyClosed15.Rdata"
 tmp <- tempfile()
@@ -26,9 +25,9 @@ load(tmp)
 
 # just one person, one type of sample
 PS <- PS %>%
-  subset_samples(SubjectID %in% c("10101") &
-                 BodySite == "Vaginal_Swab") %>%
-  filter_taxa(function(x) sum(x > 1) > 0.01 * length(x), TRUE)
+  subset_samples(SubjectID %in% c("10028") &
+                   BodySite == "Vaginal_Swab") %>%
+  filter_taxa(function(x) sd(x) > .00001, TRUE)
 
 # setup dates
 sample_info <- sample_data(PS)
@@ -44,7 +43,7 @@ values <- list()
 
 for (i in seq_len(nrow(sample_info))) {
   print(i)
-  cur_values <- log(1 + log(1 + otu_table(PS)[i, ]@.Data))
+  cur_values <- asinh(otu_table(PS)[i, ]@.Data)
   cur_values <- setNames(
     as.numeric(cur_values),
     colnames(cur_values)
@@ -63,9 +62,9 @@ colnames(mvalues) <- c("time", "unit", "value")
 ```
 
 ```{r}
-timebox_tree(mvalues, taxa, "Bacteria", 700, 500, size_min = 2, size_max = 100)
+timebox_tree(mvalues, taxa, "Bacteria", 700, 500, size_min = 1, size_max = 20)
 ```
 
 ```{r}
-treebox(mvalues, taxa, "Bacteria", 700, 500, size_min = 2, size_max = 100)
+treebox(mvalues, taxa, "Bacteria", 700, 500, size_min = 1, size_max = 30)
 ```

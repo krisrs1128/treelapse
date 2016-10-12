@@ -7,11 +7,12 @@ function setup_tree_ts(elem, width, height, values, tree, scales) {
 
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
-    d3.select("svg"),
+    d3.select(elem).select("svg"),
     ["all_ts", "links", "nodes", "all_brushes", "mouseover"]
   );
 
-  d3.select("#mouseover")
+  d3.select(elem)
+    .select("#mouseover")
     .append("text");
   return line_data;
 }
@@ -33,6 +34,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 
   function add_fun() {
     new_brush(
+      elem,
       line_data,
       scales,
       update_fun,
@@ -43,6 +45,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 
   function remove_fun() {
     remove_brush(
+      elem,
       line_data,
       scales,
       update_fun,
@@ -51,7 +54,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   }
 
   add_button(elem, "new box", add_fun);
-  add_button(elem, "change focus", change_focus);
+  add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
   treebox_update(elem, values, tree, [], scales);
 }
@@ -72,6 +75,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 
   function add_fun() {
     new_brush(
+      elem,
       line_data,
       scales,
       update_fun,
@@ -82,6 +86,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 
   function remove_fun() {
     remove_brush(
+      elem,
       line_data,
       scales,
       update_fun,
@@ -90,7 +95,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   }
 
   add_button(elem, "new box", add_fun);
-  add_button(elem, "change focus", change_focus);
+  add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
   timebox_update(elem, values, tree, [], scales);
 }
@@ -113,10 +118,13 @@ function treebox_update(elem, values, tree, cur_lines, scales) {
   draw_tree(elem, values, cur_lines, tree, scales, false);
 }
 
-function brush_fun(line_data, scales, update_fun, combine_fun) {
-  var brushes = d3.selectAll(".brush").nodes();
+function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
+  var brushes = d3.select(elem)
+      .selectAll(".brush")
+      .nodes();
   if (brushes.length !== 0) {
     units = combine_fun(
+      elem,
       brushes,
       Object.keys(line_data),
       scales
@@ -127,10 +135,11 @@ function brush_fun(line_data, scales, update_fun, combine_fun) {
   update_fun(units);
 }
 
-function new_brush(line_data, scales, update_fun, extent, combine_fun) {
+function new_brush(elem, line_data, scales, update_fun, extent, combine_fun) {
   var brush = d3.brush()
       .on("brush", function() {
 	brush_fun(
+	  elem,
 	  line_data,
 	  scales,
 	  update_fun,
@@ -139,19 +148,23 @@ function new_brush(line_data, scales, update_fun, extent, combine_fun) {
       })
       .extent(extent);
 
-  var n_brushes = d3.selectAll(".brush").nodes().length;
-  d3.select("#all_brushes")
+  var n_brushes = d3.select(elem)
+      .selectAll(".brush")
+      .nodes().length;
+  d3.select(elem)
+    .select("#all_brushes")
     .append("g")
     .classed("brush", true)
     .attrs({"id": "brush-" + n_brushes})
     .call(brush);
 
-  focus_brush(n_brushes);
+  focus_brush(elem, n_brushes);
 }
 
-function remove_brush(line_data, scales, update_fun, combine_fun) {
+function remove_brush(elem, line_data, scales, update_fun, combine_fun) {
   var brush_ix = 0;
-  d3.selectAll(".brush").filter(
+  d3.select(elem)
+    .selectAll(".brush").filter(
     function(d, i) {
       if(d3.select(this).attr("brush_selected") === "true") {
 	brush_ix = i;
@@ -161,14 +174,18 @@ function remove_brush(line_data, scales, update_fun, combine_fun) {
     }).remove();
 
   // renumber brushes
-  d3.selectAll(".brush")
+  d3.select(elem)
+    .selectAll(".brush")
     .attr("id", function(d, i) {
       return "brush-" + i;
     });
 
-  var n_brushes = d3.selectAll(".brush").nodes().length;
-  focus_brush(brush_ix % n_brushes);
+  var n_brushes = d3.select(elem)
+      .selectAll(".brush")
+      .nodes().length;
+  focus_brush(elem, brush_ix % n_brushes);
   brush_fun(
+    elem,
     line_data,
     scales,
     update_fun,
