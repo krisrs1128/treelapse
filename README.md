@@ -47,7 +47,7 @@ is leaf `i`'s ancestors at level `j`.
 
 ## References ##
 
-The essential ideas behind the visualization in this package come from these
+The essential ideas behind the visualizations in this package come from these
 papers.
 
 * Heer, Jeffrey, and Stuart K. Card. “DOITrees Revisited: Scalable, Space-Constrained Visualization of Hierarchical Data.” Proceedings of the Working Conference on Advanced Visual Interfaces, ACM, 2004, pp. 421–424.
