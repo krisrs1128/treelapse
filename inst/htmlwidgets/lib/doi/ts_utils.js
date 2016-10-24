@@ -29,6 +29,7 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
     .append("path")
     .classed("ts_line", true)
     .attrs({
+      "id": function(d) { return d; },
       "fill": "none",
       "stroke": "#303030",
       "stroke-width": 0,
@@ -283,7 +284,22 @@ function get_box_extent(brush, scales) {
   };
 }
 
-function brush_ts_intersection(elem, brushes, units, scales) {
+/**
+ * Return ids of time series going through intersection of brushes
+ *
+ * @param elem {d3 selection} The html selection on which all the time series to
+ *     check are located.
+ * @param brushes {array of d3-brush} An array containing all the d3-brushes on
+ *     the display.
+ * @return units {array of strings} The ids for tree nodes contained in any of
+ *     the specified brushes.
+ **/
+function brush_ts_intersection(elem, brushes, scales) {
+  var units = d3.select(elem)
+      .selectAll(".ts_line")
+      .nodes()
+      .map(function(d) { return d.id; });
+
   for (var i = 0; i < brushes.length; i++) {
     var box_extent = get_box_extent(brushes[i], scales);
     units = intersect(
@@ -295,6 +311,20 @@ function brush_ts_intersection(elem, brushes, units, scales) {
   return units;
 }
 
+/**
+ * Check whether an individual point is contained within the box_extent
+ *
+ * @param point {object} An object of the form {"time": float, "value": float}.
+ * @param box_extent {Object} An object specifying the bounds for nodes which we
+ *     should return as "in the box". It must have the keys,
+ *       - x_min {float} The minimum x-value for the node to in order for it to
+ *             be returned.
+ *       - x_max {float} Same, for maximum x-value.
+ *       - y_min {float} Same, for minimum y-value.
+ *       - y_max {float} Same, for maximum y-value.
+ * @return {bool} An indicator of whether the given point goes through the
+ *     box_extent.
+ **/
 function point_in_box(point, box_extent) {
   return (point.time >= box_extent.x_min) &&
     (point.time <= box_extent.x_max) &&
@@ -302,6 +332,21 @@ function point_in_box(point, box_extent) {
     (point.value <= box_extent.y_max);
 }
 
+/**
+ * Check whether a line contains any points within the box_extent
+ *
+ * @param line_data {array of ["time": float, "value": float]} An array specifying the time
+ *     series structure. Each array element is a length two [time, value] array.
+ * @param box_extent {Object} An object specifying the bounds for nodes which we
+ *     should return as "in the box". It must have the keys,
+ *       - x_min {float} The minimum x-value for the node to in order for it to
+ *             be returned.
+ *       - x_max {float} Same, for maximum x-value.
+ *       - y_min {float} Same, for minimum y-value.
+ *       - y_max {float} Same, for maximum y-value.
+ * @return {bool} An indicator of whether the specified line has any points
+ *     going through the box_extent.
+ **/
 function line_in_box(line_data, box_extent) {
   for (var i = 0; i < line_data.length; i++) {
     var cur_check = point_in_box(line_data[i], box_extent);
@@ -312,6 +357,25 @@ function line_in_box(line_data, box_extent) {
   return false;
 }
 
+/**
+ * Return ids associated with any time series contained in a given brush
+ *
+ * @param line_data {object} An object whose keys are IDs for time series. For
+ *     example
+ *             {"a": [{"time": 0, "value": 1}, ...],
+ *              "b": [{"time": 0, "value": 3}, ...]}
+ *     are two time series with ids "a" and "b" (the first coordinate is time,
+ *     the second coordinate is its value).
+ * @param box_extent {Object} An object specifying the bounds for nodes which we
+ *     should return as "in the box". It must have the keys,
+ *       - x_min {float} The minimum x-value for the node to in order for it to
+ *             be returned.
+ *       - x_max {float} Same, for maximum x-value.
+ *       - y_min {float} Same, for minimum y-value.
+ *       - y_max {float} Same, for maximum y-value.
+ * @return contained_ids {array of string} The IDs for each time series that has
+ *      at least one timepoint / value pair going through the box_extent.
+ **/
 function lines_in_box(line_data, box_extent) {
   var contained_ids = [];
   for (var line_id in line_data) {
@@ -322,8 +386,19 @@ function lines_in_box(line_data, box_extent) {
   return contained_ids;
 }
 
-function brush_nodes_union(elem, brushes, units) {
-  units = [];  // overwrite, so can still use new_brush() arguments
+/**
+ * Return tree node ids contained in any existing brush's extents
+ *
+ * @param elem {d3 selection} The html selection on which all the .tree_nodes to
+ *     check are located.
+ * @param brushes {array of d3-brush} An array containing all the d3-brushes on
+ *     the display.
+ * @units {array} This should be empty. It is required so that we can use
+ *     new_brush() as a wrapper for both the union and intersection methods.
+ * @return units {array of strings} The ids for tree nodes contained in any of
+ *     the specified brushes.
+ **/
+function brush_nodes_union(elem, brushes) {
   var scales = {
     "x": d3.scaleLinear(),
     "y": d3.scaleLinear()
@@ -340,6 +415,21 @@ function brush_nodes_union(elem, brushes, units) {
   return units;
 }
 
+/**
+ * Return tree node ids contained within a brush's extent
+ *
+ * @param elem {d3 selection} The html selection on which all the .tree_nodes to
+ *     check are located.
+ * @param box_extent {Object} An object specifying the bounds for nodes which we
+ *     should return as "in the box". It must have the keys,
+ *       - x_min {float} The minimum x-value for the node to in order for it to
+ *             be returned.
+ *       - x_max {float} Same, for maximum x-value.
+ *       - y_min {float} Same, for minimum y-value.
+ *       - y_max {float} Same, for maximum y-value.
+ * @return node_ids {array of strings} The ids for tree nodes contained in the
+ *     given box_extent.
+ **/
 function nodes_in_box(elem, box_extent) {
   var nodes = d3.select(elem)
       .selectAll(".tree_node")
