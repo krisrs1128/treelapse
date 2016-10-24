@@ -8,7 +8,7 @@
 /**
  * Setup and draw the DOI tree
  *
- * @param  {d3 selection} elem The html selection on which the DOI tree display
+ * @param {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
  * @param {float} width The width of the display's rectangle background.
  * @param {float} height The height the display's rectangle background.
@@ -63,7 +63,7 @@ function draw_doi(elem,
 /**
  * DOI Tree updating function
  *
- * This redraws a DOI tree centered around (and with DOI distribution defiend
+ * This redraws a DOI tree centered around (and with DOI distribution defined
  * by)the current focus node.
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
