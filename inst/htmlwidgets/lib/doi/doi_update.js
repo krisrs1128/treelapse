@@ -1,3 +1,9 @@
+/*******************************************************************************
+* @fileoverview Wrappers that update DOI trees according to user interaction.
+* @see_also doi_utils.js
+*
+* @author kriss1@stanford.edu
+*******************************************************************************/
 
 /**
  * Setup and draw the DOI tree

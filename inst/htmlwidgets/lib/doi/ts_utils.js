@@ -13,6 +13,7 @@
  * Return the scales required for positioning in time + treeboxes
  *
  * @param {object} values An object with three subarrays,
+ *       - time {array of float} The times associated with Tree nodes.
  *       - value {array of float} The y values associated with Tree nodes.
  *       - unit {array of string} The node names associated with values.
  *     The i^th element in each of the three arrays correspond to the same
@@ -513,8 +514,7 @@ function line_in_box(line_data, box_extent) {
  *     example
  *             {"a": [{"time": 0, "value": 1}, ...],
  *              "b": [{"time": 0, "value": 3}, ...]}
- *     are two time series with ids "a" and "b" (the first coordinate is time,
- *     the second coordinate is its value).
+ *     are two time series with ids "a" and "b".
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
  *       - x_min {float} The minimum x-value for the node to in order for it to
