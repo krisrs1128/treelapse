@@ -1,6 +1,9 @@
 /*******************************************************************************
-* Functions to calculate degree-of-interest related quantities. We
-* are following http://vis.stanford.edu/papers/doitrees-revisited
+* @fileoverview Functions for calculating degree-of-interest related quantities.
+*     We are following http://vis.stanford.edu/papers/doitrees-revisited
+* @see_also doi_update.js
+*
+* @author kriss1@stanford.edu
 *******************************************************************************/
 
 /*******************************************************************************

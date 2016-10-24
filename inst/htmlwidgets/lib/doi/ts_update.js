@@ -126,7 +126,6 @@ function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
     units = combine_fun(
       elem,
       brushes,
-      Object.keys(line_data),
       scales
     );
   } else {
