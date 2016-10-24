@@ -151,11 +151,11 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
  *       - unit {array of string} The node names associated with values.
  *     The i^th element in each of the three arrays correspond to the same
  *     entity.
- * @param cur_lines {array of string} An array of IDs for the time series /
+ * @param {array of string} cur_lines An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
  *     rest).
- * @param scales {dictionary of d3-scales} An object with keys "r"  giving
+ * @param {dictionary of d3-scales} scales An object with keys "r"  giving
  *     the scale from which the radius of the tree nodes are calculated / width
  *     of tree edges.
  * @return {dictionary of functions} A dictionary containing functions that can
