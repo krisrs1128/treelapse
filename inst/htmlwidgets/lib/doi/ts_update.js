@@ -99,7 +99,8 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 	  [scales.zoom_y.invert(cur_extent[1][1]),
 	   scales.zoom_y.invert(cur_extent[0][1])]
 	);
-	update_fun([], scales);
+	var units = selected_ts(elem, brush_ts_intersection, scales);
+	update_fun(units, scales);
       })
       .extent([[0.8 * width, 0], [width, 0.37 * height]]);
 
@@ -157,7 +158,7 @@ function treebox_update(elem, values, tree, cur_lines, scales) {
   draw_tree(elem, values, cur_lines, tree, scales, false);
 }
 
-function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
+function selected_ts(elem, combine_fun, scales) {
   var brushes = d3.select(elem)
       .selectAll(".brush")
       .nodes();
@@ -170,7 +171,11 @@ function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
   } else {
     units = [];
   }
-  console.log(scales.x.domain())
+  return units;
+}
+
+function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
+  var units = selected_ts(elem, combine_fun, scales);
   update_fun(units, scales);
 }
 
