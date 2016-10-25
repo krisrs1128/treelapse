@@ -104,7 +104,6 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
       })
       .extent([[0.8 * width, 0], [width, 0.37 * height]]);
 
-  console.log(zoom_brush);
   d3.select("#zoom_ts")
     .append("g")
     .classed("zoom_brush", "true")
