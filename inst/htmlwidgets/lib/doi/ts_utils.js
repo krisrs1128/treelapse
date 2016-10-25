@@ -108,6 +108,11 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
 	}
 	return 0.5;
       },
+      "d": function(d) {
+	return line_fun(
+	  get_line_data(values, d)
+	);
+      },
       "opacity": function(d) {
 	if(cur_lines.indexOf(d) != -1) {
 	  return 0.9;

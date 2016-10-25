@@ -26,10 +26,10 @@ function setup_background(elem, width, height, fill) {
   var rect = svg_elem
       .append("rect")
       .attrs({
-	id: "background_rect",
-	width: width,
-	height: height,
-	fill: fill
+	"id": "background_rect",
+	"width": width,
+	"height": height,
+	"fill": fill
       });
 }
 
@@ -45,7 +45,7 @@ function setup_background(elem, width, height, fill) {
  **/
 function setup_groups(elem, group_names) {
   elem.selectAll("g")
-    .data(group_names).enter()
+    .data(group_names, function(d) { return d; }).enter()
     .append("g")
     .attr("id", function(d) { return d;});
 }

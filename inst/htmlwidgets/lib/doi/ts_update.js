@@ -8,7 +8,22 @@ function setup_tree_ts(elem, width, height, values, tree, scales) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
-    ["all_ts", "links", "nodes", "all_brushes", "mouseover"]
+    ["all_ts"]
+  );
+
+  d3.select(elem)
+    .select("svg")
+    .append("rect")
+    .attrs({
+      "id": "tree_backdrop",
+      "height": 0.43 * height,
+      "width": width,
+      "fill": "#F7F7F7"
+    });
+
+  setup_groups(
+    d3.select(elem).select("svg"),
+    ["zoom_ts", "links", "nodes", "all_brushes", "mouseover"]
   );
 
   d3.select(elem)
@@ -71,6 +86,29 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
+  var zoom_scales = draw_zoom(elem, values, width, height);
+  var zoom_brush = d3.brush()
+      .on("brush", function() {
+	cur_extent = d3.brushSelection(
+	  d3.select("#zoom_ts").select(".zoom_brush").node()
+	);
+	scales.x.domain(
+	  [zoom_scales.x.invert(cur_extent[0][0]),
+	   zoom_scales.x.invert(cur_extent[1][0])]
+	);
+	scales.y.domain(
+	  [zoom_scales.y.invert(cur_extent[1][1]),
+	   zoom_scales.y.invert(cur_extent[0][1])]
+	);
+	update_fun([], scales);
+      })
+      .extent([[0, 0], [0.2 * width, 0.2 * height]]);
+
+  d3.select("#zoom_ts")
+    .append("g")
+    .classed("zoom_brush", "true")
+    .call(zoom_brush);
+
   var brush_extent = [[0, 0.43 * height], [width, height]];
 
   function add_fun() {
@@ -100,14 +138,59 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   timebox_update(elem, values, tree, [], scales);
 }
 
+function draw_zoom(elem, values, width, height) {
+  d3.select(elem)
+    .select("#zoom_ts")
+    .append("rect")
+    .attrs({
+      "id": "zoom_rect",
+      "width": 0.2 * width,
+      "height": 0.2 * height,
+      "fill": "#e0e0e0",
+    });
+
+  var zoom_scales = {
+    "x": d3.scaleLinear()
+      .domain(d3.extent(values.time))
+      .range([0, 0.2 * width]),
+    "y": d3.scaleLinear()
+      .domain(d3.extent(values.value))
+      .range([0.2 * height, 0])
+  };
+
+  var line_fun = d3.line()
+      .x(function(d) { return zoom_scales.x(d.time); })
+      .y(function(d) { return zoom_scales.y(d.value); });
+
+  var units = d3.set(values.unit).values();
+  d3.select(elem)
+    .select("#zoom_ts")
+    .selectAll(".zoom_ts_line")
+    .data(units).enter()
+    .append("path")
+    .classed("zoom_ts_line", true)
+    .attrs({
+      "stroke": "#5E5E5E",
+      "stroke-width": 0.4,
+      "fill": "none",
+      "d": function(d) {
+	var cur_data = get_line_data(values, d);
+	return line_fun(
+	  get_line_data(values, d)
+	);
+      }
+    });
+  return zoom_scales;
+}
+
 function timebox_update(elem, values, tree, cur_lines, scales) {
   draw_ts(elem, values, cur_lines, scales, false);
   draw_tree(elem, values, cur_lines, tree, scales, true);
 }
 
-function update_factory(base_fun, elem, values, tree, cur_lines, scales) {
-  function f(cur_lines) {
-    base_fun(elem, values, tree, cur_lines, scales);
+function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales) {
+  function f(cur_lines, cur_scales) {
+    base_fun(elem, values, tree, cur_lines, cur_scales);
   }
 
   return f;
@@ -131,7 +214,8 @@ function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
   } else {
     units = [];
   }
-  update_fun(units);
+  console.log(scales.x.domain())
+  update_fun(units, scales);
 }
 
 function new_brush(elem, line_data, scales, update_fun, extent, combine_fun) {
