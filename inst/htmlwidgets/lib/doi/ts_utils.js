@@ -36,7 +36,13 @@ function get_scales(values, width, height, size_min, size_max) {
       .range([height, 0.43 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([size_min, size_max])
+      .range([size_min, size_max]),
+    "zoom_x": d3.scaleLinear()
+      .domain(d3.extent(values.time))
+      .range([0.8 * width, width]),
+    "zoom_y": d3.scaleLinear()
+      .domain(d3.extent(values.value))
+      .range([0.37 * height, 0])
   };
 }
 
@@ -254,7 +260,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
 
   // width + height info are in the scales
   var cluster = d3.cluster()
-      .size([scales.x.range()[1], 0.37 * scales.y.range()[0]]);
+      .size([0.8 * scales.x.range()[1], 0.37 * scales.y.range()[0]]);
   var layout = cluster(hierarchy);
 
   // draw links
@@ -301,6 +307,32 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
 	  });
   }
 }
+
+function draw_zoom(elem, values, cur_lines, scales) {
+  var line_fun = d3.line()
+      .x(function(d) { return scales.zoom_x(d.time); })
+      .y(function(d) { return scales.zoom_y(d.value); });
+
+  var units = d3.set(values.unit).values();
+  d3.select(elem)
+    .select("#zoom_ts")
+    .selectAll(".zoom_ts_line")
+    .data(units).enter()
+    .append("path")
+    .classed("zoom_ts_line", true)
+    .attrs({
+      "stroke": "#5E5E5E",
+      "stroke-width": 0.4,
+      "fill": "none",
+      "d": function(d) {
+	var cur_data = get_line_data(values, d);
+	return line_fun(
+	  get_line_data(values, d)
+	);
+      }
+    });
+}
+
 
 /*******************************************************************************
 * Functions required for doing timebox / treebox querying using brush extents
