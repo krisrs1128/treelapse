@@ -270,8 +270,9 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
     .attrs({
       "id": function(d) { return d; },
       "fill": "none",
-      "stroke": "#303030",
-      "stroke-width": 0,
+      "stroke": "#696969",
+      "stroke-width": 0.5,
+      "opacity": 0.1,
       "d": function(d) {
 	return line_fun(
 	  get_line_data(values, d)
