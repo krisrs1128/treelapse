@@ -42,7 +42,7 @@ function get_scales(values, width, height, size_min, size_max) {
       .range([0.8 * width, width]),
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.37 * height, 0.1 * height])
+      .range([0.15 * height, 0.05 * height])
   };
 }
 

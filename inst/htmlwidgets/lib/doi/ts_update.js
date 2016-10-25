@@ -102,7 +102,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 	var units = selected_ts(elem, brush_ts_intersection, scales);
 	update_fun(units, scales);
       })
-      .extent([[0.8 * width, 0], [width, 0.37 * height]]);
+      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
   d3.select("#zoom_ts")
     .append("g")
