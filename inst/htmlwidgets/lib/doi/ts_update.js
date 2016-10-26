@@ -8,7 +8,22 @@ function setup_tree_ts(elem, width, height, values, tree, scales) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
-    ["all_ts", "links", "nodes", "all_brushes", "mouseover"]
+    ["all_ts"]
+  );
+
+  d3.select(elem)
+    .select("svg")
+    .append("rect")
+    .attrs({
+      "id": "tree_backdrop",
+      "height": 0.43 * height,
+      "width": width,
+      "fill": "#F7F7F7"
+    });
+
+  setup_groups(
+    d3.select(elem).select("svg"),
+    ["zoom_ts", "links", "nodes", "all_brushes", "mouseover"]
   );
 
   d3.select(elem)
@@ -71,6 +86,29 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
+  var zoom_brush = d3.brush()
+      .on("brush", function() {
+	cur_extent = d3.brushSelection(
+	  d3.select("#zoom_ts").select(".zoom_brush").node()
+	);
+	scales.x.domain(
+	  [scales.zoom_x.invert(cur_extent[0][0]),
+	   scales.zoom_x.invert(cur_extent[1][0])]
+	);
+	scales.y.domain(
+	  [scales.zoom_y.invert(cur_extent[1][1]),
+	   scales.zoom_y.invert(cur_extent[0][1])]
+	);
+	var units = selected_ts(elem, brush_ts_intersection, scales);
+	update_fun(units, scales);
+      })
+      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+
+  d3.select("#zoom_ts")
+    .append("g")
+    .classed("zoom_brush", "true")
+    .call(zoom_brush);
+
   var brush_extent = [[0, 0.43 * height], [width, height]];
 
   function add_fun() {
@@ -101,13 +139,14 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 }
 
 function timebox_update(elem, values, tree, cur_lines, scales) {
+  draw_zoom(elem, values, cur_lines, scales);
   draw_ts(elem, values, cur_lines, scales, false);
   draw_tree(elem, values, cur_lines, tree, scales, true);
 }
 
-function update_factory(base_fun, elem, values, tree, cur_lines, scales) {
-  function f(cur_lines) {
-    base_fun(elem, values, tree, cur_lines, scales);
+function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales) {
+  function f(cur_lines, cur_scales) {
+    base_fun(elem, values, tree, cur_lines, cur_scales);
   }
 
   return f;
@@ -118,7 +157,7 @@ function treebox_update(elem, values, tree, cur_lines, scales) {
   draw_tree(elem, values, cur_lines, tree, scales, false);
 }
 
-function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
+function selected_ts(elem, combine_fun, scales) {
   var brushes = d3.select(elem)
       .selectAll(".brush")
       .nodes();
@@ -131,7 +170,12 @@ function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
   } else {
     units = [];
   }
-  update_fun(units);
+  return units;
+}
+
+function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
+  var units = selected_ts(elem, combine_fun, scales);
+  update_fun(units, scales);
 }
 
 function new_brush(elem, line_data, scales, update_fun, extent, combine_fun) {

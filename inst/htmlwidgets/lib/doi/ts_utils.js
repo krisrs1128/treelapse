@@ -36,7 +36,13 @@ function get_scales(values, width, height, size_min, size_max) {
       .range([height, 0.43 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([size_min, size_max])
+      .range([size_min, size_max]),
+    "zoom_x": d3.scaleLinear()
+      .domain(d3.extent(values.time))
+      .range([0.8 * width, width]),
+    "zoom_y": d3.scaleLinear()
+      .domain(d3.extent(values.value))
+      .range([0.15 * height, 0.05 * height])
   };
 }
 
@@ -64,60 +70,10 @@ function get_scales(values, width, height, size_min, size_max) {
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
 function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
-  var units = d3.set(values.unit).values();
-  var ts_selection = d3.select(elem)
-      .select("#all_ts")
-      .selectAll(".ts_line")
-      .data(units);
-
-  ts_selection.exit().remove();
-
-  var line_fun = d3.line()
-      .x(function(d) { return scales.x(d.time); })
-      .y(function(d) { return scales.y(d.value); });
-
-  ts_selection.enter()
-    .append("path")
-    .classed("ts_line", true)
-    .attrs({
-      "id": function(d) { return d; },
-      "fill": "none",
-      "stroke": "#303030",
-      "stroke-width": 0,
-      "d": function(d) {
-	return line_fun(
-	  get_line_data(values, d)
-	);
-      }
-    });
-
-  d3.select(elem)
-    .selectAll(".ts_line")
-    .transition()
-    .duration(100)
-    .attrs({
-      "stroke": function(d) {
-	if (cur_lines.indexOf(d) != -1) {
-	  return "#2D869F";
-	}
-	return "#696969";
-      },
-      "stroke-width": function(d) {
-	if (cur_lines.indexOf(d) != -1) {
-	  return 1;
-	}
-	return 0.5;
-      },
-      "opacity": function(d) {
-	if(cur_lines.indexOf(d) != -1) {
-	  return 0.9;
-	}
-	return 0.1;
-      }
-    });
+  var ts_select = draw_ts_internal(elem, values, scales, "all_ts", cur_lines);
 
   if (mouseover_text) {
-    ts_selection
+    ts_select
       .on("mouseover",
 	  function(d) {
 	    var cur_data = get_line_data(values, d);
@@ -140,7 +96,6 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
 	      });
 	  });
   }
-
 }
 
 /**
@@ -249,7 +204,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
 
   // width + height info are in the scales
   var cluster = d3.cluster()
-      .size([scales.x.range()[1], 0.37 * scales.y.range()[0]]);
+      .size([0.8 * scales.x.range()[1], 0.37 * scales.y.range()[0]]);
   var layout = cluster(hierarchy);
 
   // draw links
@@ -295,6 +250,70 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
 	      });
 	  });
   }
+}
+
+function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
+  var line_fun = d3.line()
+      .x(function(d) { return scales.x(d.time); })
+      .y(function(d) { return scales.y(d.value); });
+
+  var units = d3.set(values.unit).values();
+  var ts_selection = d3.select(elem)
+      .select("#" + cur_id)
+      .selectAll("." + cur_id)
+      .data(units, function(d) { return d; });
+
+  ts_selection.exit().remove();
+  ts_selection.enter()
+    .append("path")
+    .classed(cur_id, true)
+    .attrs({
+      "id": function(d) { return d; },
+      "fill": "none",
+      "stroke": "#696969",
+      "stroke-width": 0.5,
+      "opacity": 0.1,
+      "d": function(d) {
+	return line_fun(
+	  get_line_data(values, d)
+	);
+      }
+    });
+
+  ts_selection.transition()
+    .duration(100)
+    .attrs({
+      "stroke": function(d) {
+	if (cur_lines.indexOf(d) != -1) {
+	  return "#2D869F";
+	}
+	return "#696969";
+      },
+      "stroke-width": function(d) {
+	if (cur_lines.indexOf(d) != -1) {
+	  return 1;
+	}
+	return 0.5;
+      },
+      "d": function(d) {
+	return line_fun(
+	  get_line_data(values, d)
+	);
+      },
+      "opacity": function(d) {
+	if(cur_lines.indexOf(d) != -1) {
+	  return 0.9;
+	}
+	return 0.1;
+      }
+    });
+
+  return ts_selection;
+}
+
+function draw_zoom(elem, values, cur_lines, scales) {
+  var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
+  draw_ts_internal(elem, values, cur_scales, "zoom_ts", cur_lines);
 }
 
 /*******************************************************************************
@@ -445,7 +464,7 @@ function get_box_extent(brush, scales) {
  **/
 function brush_ts_intersection(elem, brushes, scales) {
   var units = d3.select(elem)
-      .selectAll(".ts_line")
+      .selectAll(".all_ts")
       .nodes()
       .map(function(d) { return d.id; });
 
