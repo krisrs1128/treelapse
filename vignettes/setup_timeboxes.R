@@ -48,7 +48,6 @@ mvalues <- do.call(rbind, values) %>%
 colnames(mvalues) <- c("time", "unit", "value")
 
 ##---- timebox-vis ----
-install()
 timebox_tree(mvalues, taxa, "Bacteria", 700, 500, size_min = 1, size_max = 20)
 
 ## ---- treebox-vis ----
