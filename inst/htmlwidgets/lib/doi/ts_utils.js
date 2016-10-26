@@ -316,7 +316,6 @@ function draw_zoom(elem, values, cur_lines, scales) {
   draw_ts_internal(elem, values, cur_scales, "zoom_ts", cur_lines);
 }
 
-
 /*******************************************************************************
 * Functions required for doing timebox / treebox querying using brush extents
 *******************************************************************************/
