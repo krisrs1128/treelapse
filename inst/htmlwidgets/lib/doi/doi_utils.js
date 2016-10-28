@@ -549,6 +549,16 @@ function average_block_dois(block_dois) {
   return average_dois;
 }
 
+/**
+ * Remove some children when many sibling subtrees
+ *
+ * @param {string} focus_node_id A string specifying the .name field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @return null
+ * @side-effects If a node is not an ancestor of a focus node (or the actual
+ *     focus node), all but the first two children subtrees will be pruned.
+ **/
 function trim_children(focus_node_id) {
   if (Object.keys(this).indexOf("children") == -1 || this.name == focus_node_id) {
     return;
