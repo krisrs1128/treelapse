@@ -96,6 +96,7 @@ function DoiTreeInternal(tree_json, depth, parent) {
   this.set_tree_fisheye = set_tree_fisheye;
   this.set_doi = set_doi;
   this.get_block_dois = get_block_dois;
+  this.trim_children = trim_children;
   this.trim_width = trim_width;
   this.filter_block = filter_block;
   this.tree_block = tree_block;
@@ -549,6 +550,32 @@ function average_block_dois(block_dois) {
 }
 
 /**
+ * Remove some children when many sibling subtrees
+ *
+ * @param {string} focus_node_id A string specifying the .name field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @return null
+ * @side-effects If a node is not an ancestor of a focus node (or the actual
+ *     focus node), all but the first two children subtrees will be pruned.
+ **/
+function trim_children(focus_node_id) {
+  if (Object.keys(this).indexOf("children") == -1 || this.name == focus_node_id) {
+    return;
+  }
+
+  var subtrees = this.children;
+  var filtered_subtrees = [];
+  for (var i = 0; i < subtrees.length; i++) {
+    subtrees[i].trim_children(focus_node_id);
+    if (i < 2 || subtrees[i].contains_node(focus_node_id)) {
+      filtered_subtrees.push(subtrees[i]);
+    }
+  }
+  this.children = filtered_subtrees;
+}
+
+/**
  * Trim the width of a tree until it fits within a certain width
  *
  * This defines a method for DoiTree objects. It expects the names "name" and
@@ -617,6 +644,7 @@ function trim_width(focus_node_id, display_dim, node_size) {
  **/
 function tree_block(focus_node_id, display_dim, node_size) {
   this.set_doi(focus_node_id);
+  this.trim_children(focus_node_id);
   this.trim_width(focus_node_id, display_dim, node_size);
   return this.get_layout(focus_node_id, display_dim, node_size);
 }
