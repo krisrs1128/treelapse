@@ -34,7 +34,6 @@ clust[is.na(clust)] <- 3
 sample_info <- sample_data(ps)
 sample_info$CST <- clust
 
-
 ## ---- get_values ----
 sample_otu <- cbind(sample_info[, c("CST")], otu_table(ps)) %>%
   group_by(CST) %>%
@@ -52,7 +51,6 @@ for (i in seq_len(nrow(sample_otu))) {
 
   values[[i]] <- tree_sum(data.frame(taxa), cur_values)
 }
-
 
 mvalues <- do.call(rbind, values) %>%
   melt()

@@ -2,6 +2,8 @@
 #'
 #' <Add Description>
 #' @import htmlwidgets
+#' @importFrom magrittr %%>
+#' @importFrom dplyr arrange select
 #' @importFrom jsonlite toJSON
 #' @export
 doi_sankey <- function(values,
@@ -19,6 +21,13 @@ doi_sankey <- function(values,
   if (is.null(root)) {
     root  <- edges[1, 1]
   }
+
+  # order branches according to abundance
+  match_ix <- match(edges$child, values$unit)
+  edges$value <- values[match_ix, "value"]
+  edges <- edges %>%
+    arrange(parent, desc(value)) %>%
+    select(parent, child)
 
   # forward options using x
   x <- list(
