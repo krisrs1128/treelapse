@@ -118,16 +118,12 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text, line_data) {
  *     be directly input to a d3 path selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_link_attrs(values, cur_lines, scales) {
+function timebox_link_attrs(cur_lines, scales, unit_values) {
   var attr_funs = link_attr_defaults();
   attr_funs.stroke = "#F0F0F0";
 
   attr_funs.stroke_width = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.target.data.name[0]
-    );
+    var cur_values = unit_values[d.target.data.name[0]];
     return scales.r(d3.mean(cur_values));
   };
 
@@ -152,15 +148,11 @@ function timebox_link_attrs(values, cur_lines, scales) {
  *     be directly input to a d3 circles selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_node_attrs(values, cur_lines, scales) {
+function timebox_node_attrs(cur_lines, scales, unit_values) {
   var attr_funs = node_attr_defaults();
 
   attr_funs.r = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name[0]
-    );
+    var cur_values = unit_values[d.data.name[0]];
     return 1.2 * scales.r(d3.mean(cur_values));
   };
 
@@ -200,7 +192,7 @@ function timebox_node_attrs(values, cur_lines, scales) {
  * @side-effects Draws the static tree structure (circles and paths between
  *     them) on elem.
  **/
-function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
+function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, unit_values) {
   var hierarchy = d3.hierarchy(tree);
 
   // width + height info are in the scales
@@ -214,7 +206,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
     d3.select(elem).select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(values, cur_lines, scales),
+    timebox_link_attrs(cur_lines, scales, unit_values),
     100
   );
 
@@ -224,7 +216,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    timebox_node_attrs(values, cur_lines, scales),
+    timebox_node_attrs(cur_lines, scales, unit_values),
     100
   );
 

@@ -153,8 +153,12 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 
   var units = d3.set(values.unit).values();
   var svg_data = {};
+  var unit_values = {};
   for (var i = 0; i < units.length; i++) {
     svg_data[units[i]] = get_line_data(values, units[i]);
+    unit_values[units[i]] = svg_data[units[i]].map(
+      function(d) { return d.value; }
+    );
   }
 
   var update_fun = update_factory(
@@ -164,7 +168,8 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     tree,
     [],
     scales,
-    svg_data
+    svg_data,
+    unit_values
   );
 
   var zoom_brush = d3.brush()
@@ -216,7 +221,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, values, tree, [], scales, svg_data);
+  timebox_update(elem, values, tree, [], scales, svg_data, unit_values);
 }
 
 /**
@@ -238,10 +243,10 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, values, tree, cur_lines, scales, line_data) {
+function timebox_update(elem, values, tree, cur_lines, scales, line_data, unit_values) {
   draw_zoom(elem, values, cur_lines, scales, line_data);
   draw_ts(elem, values, cur_lines, scales, false, line_data);
-  draw_tree(elem, values, cur_lines, tree, scales, true);
+  draw_tree(elem, values, cur_lines, tree, scales, true, unit_values);
 }
 
 /**
@@ -266,9 +271,9 @@ function timebox_update(elem, values, tree, cur_lines, scales, line_data) {
  * @return {function} A version of the base_function function with options
  *    filled in according to the arguments in the factory.
  **/
-function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales, line_data) {
+function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales, line_data, unit_values) {
   function f(cur_lines, cur_scales) {
-    base_fun(elem, values, tree, cur_lines, cur_scales, line_data);
+    base_fun(elem, values, tree, cur_lines, cur_scales, line_data, unit_values);
   }
 
   return f;
