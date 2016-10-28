@@ -291,7 +291,36 @@ function treebox_update(elem, values, tree, cur_lines, scales) {
   draw_tree(elem, values, cur_lines, tree, scales, false);
 }
 
-<<<<<<< HEAD
+
+/**
+ * Identify which time series are selected (by either Time or Treeboxes)
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {function} combine_fun The function used for combining units across
+ *     brush selections. This is usually the intersection or union of selections
+ *    coming from any individual brush.
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @return {array of string} units The IDs associated with each time series that
+ *     is currently being selected.
+ **/
+function selected_ts(elem, combine_fun, scales) {
+  var brushes = d3.select(elem)
+      .selectAll(".brush")
+      .nodes();
+  if (brushes.length !== 0) {
+    units = combine_fun(
+      elem,
+      brushes,
+      scales
+    );
+  } else {
+    units = [];
+  }
+  return units;
+}
+
 /**
  * Function to execute every time a brush is updated
  *
@@ -313,25 +342,6 @@ function treebox_update(elem, values, tree, cur_lines, scales) {
  * @side-effects Every time the associated brush is moved, the update_fun() will
  *     be called.
  **/
-function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
-=======
-function selected_ts(elem, combine_fun, scales) {
->>>>>>> master
-  var brushes = d3.select(elem)
-      .selectAll(".brush")
-      .nodes();
-  if (brushes.length !== 0) {
-    units = combine_fun(
-      elem,
-      brushes,
-      scales
-    );
-  } else {
-    units = [];
-  }
-  return units;
-}
-
 function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
   var units = selected_ts(elem, combine_fun, scales);
   update_fun(units, scales);
