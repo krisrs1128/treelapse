@@ -13,6 +13,7 @@
  * Return the scales required for positioning in time + treeboxes
  *
  * @param {object} values An object with three subarrays,
+ *       - time {array of float} The times associated with Tree nodes.
  *       - value {array of float} The y values associated with Tree nodes.
  *       - unit {array of string} The node names associated with values.
  *     The i^th element in each of the three arrays correspond to the same
@@ -106,11 +107,11 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
  *       - unit {array of string} The node names associated with values.
  *     The i^th element in each of the three arrays correspond to the same
  *     entity.
- * @param cur_lines {array of string} An array of IDs for the time series /
+ * @param {array of string} cur_lines An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
  *     rest).
- * @param scales {dictionary of d3-scales} An object with keys "r"  giving
+ * @param {dictionary of d3-scales} scales An object with keys "r"  giving
  *     the scale from which the radius of the tree nodes are calculated / width
  *     of tree edges.
  * @return {dictionary of functions} A dictionary containing functions that can
@@ -532,8 +533,7 @@ function line_in_box(line_data, box_extent) {
  *     example
  *             {"a": [{"time": 0, "value": 1}, ...],
  *              "b": [{"time": 0, "value": 3}, ...]}
- *     are two time series with ids "a" and "b" (the first coordinate is time,
- *     the second coordinate is its value).
+ *     are two time series with ids "a" and "b".
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
  *       - x_min {float} The minimum x-value for the node to in order for it to

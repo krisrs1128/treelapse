@@ -635,9 +635,9 @@ function tree_block(focus_node_id, display_dim, node_size) {
  *       - value {array of float} The values associated with tree nodes. This
  *         determines the size of each node.
  *       - unit {array of string} The node names associated with values.
- * @param scales {Object of d3.scales} An object with different scales for size
+ * @param {Object of d3.scales} scales An object with different scales for size
  *     and fill, used when drawing the nodes. Must have keys "size" and "fill".
- * @param tree_obj {DoiTree} The DoiTree that we are drawing. This is used for
+ * @param {DoiTree} tree_obj The DoiTree that we are drawing. This is used for
  *     searching partial matches among descendants (to determine whether to
  *     highlight a node or not).
  * @param {string} search_str The string to scan across all node ids looking for
