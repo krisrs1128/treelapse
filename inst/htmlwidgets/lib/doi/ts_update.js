@@ -149,13 +149,22 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   var line_data = setup_tree_ts(elem, width, height, values);
+
+
+  var units = d3.set(values.unit).values();
+  var svg_data = {};
+  for (var i = 0; i < units.length; i++) {
+    svg_data[units[i]] = get_line_data(values, units[i]);
+  }
+
   var update_fun = update_factory(
     timebox_update,
     elem,
     values,
     tree,
     [],
-    scales
+    scales,
+    svg_data
   );
 
   var zoom_brush = d3.brush()
@@ -207,7 +216,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, values, tree, [], scales);
+  timebox_update(elem, values, tree, [], scales, svg_data);
 }
 
 /**
@@ -229,9 +238,9 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, values, tree, cur_lines, scales) {
-  draw_zoom(elem, values, cur_lines, scales);
-  draw_ts(elem, values, cur_lines, scales, false);
+function timebox_update(elem, values, tree, cur_lines, scales, line_data) {
+  draw_zoom(elem, values, cur_lines, scales, line_data);
+  draw_ts(elem, values, cur_lines, scales, false, line_data);
   draw_tree(elem, values, cur_lines, tree, scales, true);
 }
 
@@ -257,9 +266,9 @@ function timebox_update(elem, values, tree, cur_lines, scales) {
  * @return {function} A version of the base_function function with options
  *    filled in according to the arguments in the factory.
  **/
-function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales) {
+function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales, line_data) {
   function f(cur_lines, cur_scales) {
-    base_fun(elem, values, tree, cur_lines, cur_scales);
+    base_fun(elem, values, tree, cur_lines, cur_scales, line_data);
   }
 
   return f;

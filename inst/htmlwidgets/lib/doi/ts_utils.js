@@ -70,14 +70,14 @@ function get_scales(values, width, height, size_min, size_max) {
  * @return null
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
-function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
-  var ts_select = draw_ts_internal(elem, values, scales, "all_ts", cur_lines);
+function draw_ts(elem, values, cur_lines, scales, mouseover_text, line_data) {
+  var ts_select = draw_ts_internal(elem, values, scales, "all_ts", cur_lines, line_data);
 
   if (mouseover_text) {
     ts_select
       .on("mouseover",
 	  function(d) {
-	    var cur_data = get_line_data(values, d);
+	    var cur_data = line_data[d];
 	    var cur_y = cur_data[cur_data.length - 1].value;
 	    var cur_x = cur_data[cur_data.length - 1].time;
 
@@ -253,7 +253,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
   }
 }
 
-function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
+function draw_ts_internal(elem, values, scales, cur_id, cur_lines, line_data) {
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
@@ -276,7 +276,7 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
       "opacity": 0.1,
       "d": function(d) {
 	return line_fun(
-	  get_line_data(values, d)
+	  line_data[d]
 	);
       }
     });
@@ -298,7 +298,7 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
       },
       "d": function(d) {
 	return line_fun(
-	  get_line_data(values, d)
+	  line_data[d]
 	);
       },
       "opacity": function(d) {
@@ -312,9 +312,9 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
   return ts_selection;
 }
 
-function draw_zoom(elem, values, cur_lines, scales) {
+function draw_zoom(elem, values, cur_lines, scales, line_data) {
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, values, cur_scales, "zoom_ts", cur_lines);
+  draw_ts_internal(elem, values, cur_scales, "zoom_ts", cur_lines, line_data);
 }
 
 /*******************************************************************************
