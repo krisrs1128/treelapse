@@ -71,7 +71,6 @@ function get_scales(values, width, height, size_min, size_max) {
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
 function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
-  console.log(dvalues);
   var ts_select = draw_ts_internal(elem, dvalues, scales, "all_ts", cur_lines);
 
   if (mouseover_text) {
@@ -193,7 +192,7 @@ function timebox_node_attrs(dvalues, cur_lines, scales) {
  * @side-effects Draws the static tree structure (circles and paths between
  *     them) on elem.
  **/
-function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, dvalues) {
+function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
   var hierarchy = d3.hierarchy(tree);
 
   // width + height info are in the scales

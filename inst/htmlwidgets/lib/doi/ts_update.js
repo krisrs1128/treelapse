@@ -272,7 +272,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 function timebox_update(elem, reshaped, tree, cur_lines, scales) {
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false);
-  draw_tree(elem, reshaped.values, cur_lines, tree, scales, true, reshaped.dvalues);
+  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true);
 }
 
 /**
