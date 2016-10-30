@@ -78,13 +78,13 @@ function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
       .on("mouseover",
 	  function(d) {
 	    var cur_data = dvalues[d];
-	    var cur_y = cur_data[cur_data.length - 1].value;
-	    var cur_x = cur_data[cur_data.length - 1].time;
+	    var cur_y = cur_data[0].value;
+	    var cur_x = cur_data[0].time;
 
 	    d3.select(elem)
 	      .select("#mouseover")
 	      .attrs({
-		"transform": "translate(" + (5 + scales.x(cur_x)) + "," +
+		"transform": "translate(" + 4+ "," +
 		  scales.y(cur_y) + ")"
 	      });
 

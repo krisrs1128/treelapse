@@ -80,7 +80,27 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
-  var brush_extent = [[0, 0], [0.8 * width, 0.39 * height]]; // only brush over tree
+
+  // add brush in top right for zooming
+  var zoom_brush = d3.brush()
+    .on("brush", function() {
+      zoom_brush_fun(
+	elem,
+	reshaped.pairs,
+	scales,
+	brush_nodes_union,
+	update_fun
+      );
+    })
+    .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+
+  d3.select("#zoom_ts")
+    .append("g")
+    .classed("zoom_brush", "true")
+    .call(zoom_brush);
+
+  // draw main brush for selecting tree nodes
+  var brush_extent = [[0, 0], [0.8 * width, 0.39 * height]];
   function add_fun() {
     new_brush(
       elem,
