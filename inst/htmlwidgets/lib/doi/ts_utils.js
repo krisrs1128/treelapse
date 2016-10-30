@@ -556,8 +556,8 @@ function lines_in_box(pairs, box_extent) {
  * @return units {array of strings} The ids for tree nodes contained in any of
  *     the specified brushes.
  **/
-function brush_nodes_union(elem, brushes) {
-  var scales = {
+function brush_nodes_union(elem, pairs, brushes, scales) {
+  scales = {
     "x": d3.scaleLinear(),
     "y": d3.scaleLinear()
   };

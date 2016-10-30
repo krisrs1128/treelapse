@@ -68,7 +68,7 @@ function setup_tree_ts(elem, width, height) {
  **/
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, 0.9 * width, height, size_min, size_max);
-  var line_data = setup_tree_ts(elem, width, height);
+  setup_tree_ts(elem, width, height);
   var reshaped = get_reshaped_values(values);
 
   var update_fun = update_factory(
@@ -85,7 +85,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   function add_fun() {
     new_brush(
       elem,
-      line_data,
+      reshaped.pairs,
       scales,
       update_fun,
       brush_extent,
@@ -96,7 +96,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   function remove_fun() {
     remove_brush(
       elem,
-      line_data,
+      reshaped.dvalues,
       scales,
       update_fun,
       brush_nodes_union
@@ -106,7 +106,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  treebox_update(elem, values, tree, [], scales);
+  treebox_update(elem, reshaped, tree, [], scales);
 }
 
 /**
@@ -326,9 +326,9 @@ function update_factory(base_fun, elem, reshaped, tree, cur_lines, cur_scales) {
  * @side_effects Redraws the tree and time series in the treebox display in
  *     order to highlight the currently selected IDs.
  **/
-function treebox_update(elem, values, tree, cur_lines, scales, line_data) {
-  draw_ts(elem, cur_lines, scales, true, line_data);
-  draw_tree(elem, values, cur_lines, tree, scales, false);
+function treebox_update(elem, reshaped, tree, cur_lines, scales) {
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, true);
+  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false);
 }
 
 
@@ -350,6 +350,7 @@ function selected_ts(elem, pairs, combine_fun, scales) {
       .selectAll(".brush")
       .nodes();
   var units = [];
+
   if (brushes.length !== 0) {
     units = combine_fun(
       elem,
@@ -414,12 +415,12 @@ function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
  * @return null
  * @side-effects Adds a new brush to elem and focuses the display on it.
  **/
-function new_brush(elem, dvalues, scales, update_fun, extent, combine_fun) {
+function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
   var brush = d3.brush()
       .on("brush", function() {
 	brush_fun(
 	  elem,
-	  dvalues,
+	  pairs,
 	  scales,
 	  update_fun,
 	  combine_fun
