@@ -67,7 +67,7 @@ function setup_tree_ts(elem, width, height) {
  *     display.
  **/
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
-  var scales = get_scales(values, 0.9 * width, height, size_min, size_max);
+  var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
   var reshaped = get_reshaped_values(values);
 
@@ -80,8 +80,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
-  var brush_extent = [[0, 0], [width, 0.39 * height]]; // only brush over tree
-
+  var brush_extent = [[0, 0], [0.8 * width, 0.39 * height]]; // only brush over tree
   function add_fun() {
     new_brush(
       elem,
@@ -158,6 +157,30 @@ function get_reshaped_values(values) {
   return reshaped;
 }
 
+function zoom_brush_fun(elem, pairs, scales, combine_fun, update_fun) {
+  var cur_extent = d3.brushSelection(
+    d3.select("#zoom_ts").select(".zoom_brush").node()
+  );
+
+  // reset domains for scales
+  scales.x.domain(
+    [scales.zoom_x.invert(cur_extent[0][0]),
+     scales.zoom_x.invert(cur_extent[1][0])]
+  );
+  scales.y.domain(
+    [scales.zoom_y.invert(cur_extent[1][1]),
+     scales.zoom_y.invert(cur_extent[0][1])]
+  );
+
+  var units = selected_ts(
+    elem,
+    pairs,
+    combine_fun,
+    scales
+  );
+  update_fun(units, scales);
+}
+
 /**
  * Setup and draw the initial timeboxes display
  *
@@ -193,36 +216,26 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
+  // add brush in top right for zooming
   var zoom_brush = d3.brush()
-      .on("brush", function() {
-	cur_extent = d3.brushSelection(
-	  d3.select("#zoom_ts").select(".zoom_brush").node()
-	);
-	scales.x.domain(
-	  [scales.zoom_x.invert(cur_extent[0][0]),
-	   scales.zoom_x.invert(cur_extent[1][0])]
-	);
-	scales.y.domain(
-	  [scales.zoom_y.invert(cur_extent[1][1]),
-	   scales.zoom_y.invert(cur_extent[0][1])]
-	);
-	var units = selected_ts(
-	  elem,
-	  reshaped.pairs,
-	  brush_ts_intersection,
-	  scales
-	);
-	update_fun(units, scales);
-      })
-      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+    .on("brush", function() {
+      zoom_brush_fun(
+	elem,
+	reshaped.pairs,
+	scales,
+	brush_ts_intersection,
+	update_fun
+      );
+    })
+    .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
   d3.select("#zoom_ts")
     .append("g")
     .classed("zoom_brush", "true")
     .call(zoom_brush);
 
+  // draw main brush for selecting series
   var brush_extent = [[0, 0.43 * height], [width, height]];
-
   function add_fun() {
     new_brush(
       elem,
@@ -327,6 +340,7 @@ function update_factory(base_fun, elem, reshaped, tree, cur_lines, cur_scales) {
  *     order to highlight the currently selected IDs.
  **/
 function treebox_update(elem, reshaped, tree, cur_lines, scales) {
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false);
 }
