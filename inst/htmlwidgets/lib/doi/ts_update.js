@@ -13,28 +13,12 @@
  *     will be drawn.
  * @param {float} width The width of the display's rectangle background.
  * @param {float} height The height the display's rectangle background.
- * @param {object} values An object with two subarrays,
- *       - time {array of float} The times associated with Tree nodes.
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
- * @return {object} line_data An object that contains data for each line
- *     element. This has the form
- *       {"a": [{"time": 0, "value": 1}, ...],
- *        "b": [{"time": 0, "value": 3}, ...]}
- *     for two time series with ids "a" and "b".
+ * @return null
  * @side-effects Draws the background elements associated with both time and
  *     treeboxes. This includes the background rectangle and the group elements
  *     for the underlying tree and time series displays.
  **/
-function setup_tree_ts(elem, width, height, values) {
-  var units = d3.set(values.unit).values();
-  line_data = {};
-  for (var i = 0; i < units.length; i++) {
-    line_data[units[i]] = get_line_data(values, units[i]);
-  }
-
+function setup_tree_ts(elem, width, height) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
@@ -59,7 +43,6 @@ function setup_tree_ts(elem, width, height, values) {
   d3.select(elem)
     .select("#mouseover")
     .append("text");
-  return line_data;
 }
 
 /**
@@ -85,12 +68,13 @@ function setup_tree_ts(elem, width, height, values) {
  **/
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, 0.9 * width, height, size_min, size_max);
-  var line_data = setup_tree_ts(elem, width, height, values);
+  var line_data = setup_tree_ts(elem, width, height);
+  var reshaped = get_reshaped_values(values);
 
   var update_fun = update_factory(
     treebox_update,
     elem,
-    values,
+    reshaped,
     tree,
     [],
     scales
@@ -126,6 +110,55 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 }
 
 /**
+ * Reshape line data in form required for d3.svg.line()
+ *
+ * @param {object} values An object with three subarrays,
+ *       - time {array of float} The times associated with Tree nodes.
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node names associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @param cur_unit {string} The ID of the entity to extract the time series for.
+ * @return {array of objects} An with time / value pairs for each time series
+ *     line. For example, [{"time": 0, "value": 1}, ...]
+ **/
+function get_line_data(values, cur_unit) {
+  var cur_times = get_matching_subarray(
+    values.time,
+    values.unit,
+    cur_unit
+  );
+
+  var cur_values = get_matching_subarray(
+    values.value,
+    values.unit,
+    cur_unit
+  );
+
+  return cur_times.map(function (e, i) {
+    return {"time": e, "value": cur_values[i]};
+  });
+}
+
+function get_reshaped_values(values) {
+  var reshaped = {
+    "values": values,
+    "pairs": {},
+    "dvalues": {}
+  };
+
+  var units = d3.set(values.unit).values();
+  for (var i = 0; i < units.length; i++) {
+    reshaped.pairs[units[i]] = get_line_data(values, units[i]);
+    reshaped.dvalues[units[i]] = reshaped.pairs[units[i]].map(
+      function(d) { return d.value; }
+    );
+  }
+
+  return reshaped;
+}
+
+/**
  * Setup and draw the initial timeboxes display
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
@@ -148,28 +181,16 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
  **/
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
-  var line_data = setup_tree_ts(elem, width, height, values);
-
-
-  var units = d3.set(values.unit).values();
-  var svg_data = {};
-  var unit_values = {};
-  for (var i = 0; i < units.length; i++) {
-    svg_data[units[i]] = get_line_data(values, units[i]);
-    unit_values[units[i]] = svg_data[units[i]].map(
-      function(d) { return d.value; }
-    );
-  }
+  setup_tree_ts(elem, width, height);
+  var reshaped = get_reshaped_values(values);
 
   var update_fun = update_factory(
     timebox_update,
     elem,
-    values,
+    reshaped,
     tree,
     [],
-    scales,
-    svg_data,
-    unit_values
+    scales
   );
 
   var zoom_brush = d3.brush()
@@ -185,7 +206,12 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 	  [scales.zoom_y.invert(cur_extent[1][1]),
 	   scales.zoom_y.invert(cur_extent[0][1])]
 	);
-	var units = selected_ts(elem, brush_ts_intersection, scales);
+	var units = selected_ts(
+	  elem,
+	  reshaped.pairs,
+	  brush_ts_intersection,
+	  scales
+	);
 	update_fun(units, scales);
       })
       .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
@@ -200,7 +226,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   function add_fun() {
     new_brush(
       elem,
-      line_data,
+      reshaped.pairs,
       scales,
       update_fun,
       brush_extent,
@@ -211,7 +237,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   function remove_fun() {
     remove_brush(
       elem,
-      line_data,
+      reshaped.pairs,
       scales,
       update_fun,
       brush_ts_intersection
@@ -221,7 +247,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, values, tree, [], scales, svg_data, unit_values);
+  timebox_update(elem, reshaped, tree, [], scales);
 }
 
 /**
@@ -243,10 +269,10 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, values, tree, cur_lines, scales, line_data, unit_values) {
-  draw_zoom(elem, cur_lines, scales, line_data);
-  draw_ts(elem, cur_lines, scales, false, line_data);
-  draw_tree(elem, values, cur_lines, tree, scales, true, unit_values);
+function timebox_update(elem, reshaped, tree, cur_lines, scales) {
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, false);
+  draw_tree(elem, reshaped.values, cur_lines, tree, scales, true, reshaped.dvalues);
 }
 
 /**
@@ -271,9 +297,9 @@ function timebox_update(elem, values, tree, cur_lines, scales, line_data, unit_v
  * @return {function} A version of the base_function function with options
  *    filled in according to the arguments in the factory.
  **/
-function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales, line_data, unit_values) {
+function update_factory(base_fun, elem, reshaped, tree, cur_lines, cur_scales) {
   function f(cur_lines, cur_scales) {
-    base_fun(elem, values, tree, cur_lines, cur_scales, line_data, unit_values);
+    base_fun(elem, reshaped, tree, cur_lines, cur_scales);
   }
 
   return f;
@@ -300,8 +326,8 @@ function update_factory(base_fun, elem, values, tree, cur_lines, cur_scales, lin
  * @side_effects Redraws the tree and time series in the treebox display in
  *     order to highlight the currently selected IDs.
  **/
-function treebox_update(elem, values, tree, cur_lines, scales) {
-  draw_ts(elem, cur_lines, scales, true);
+function treebox_update(elem, values, tree, cur_lines, scales, line_data) {
+  draw_ts(elem, cur_lines, scales, true, line_data);
   draw_tree(elem, values, cur_lines, tree, scales, false);
 }
 
@@ -319,18 +345,18 @@ function treebox_update(elem, values, tree, cur_lines, scales) {
  * @return {array of string} units The IDs associated with each time series that
  *     is currently being selected.
  **/
-function selected_ts(elem, combine_fun, scales) {
+function selected_ts(elem, pairs, combine_fun, scales) {
   var brushes = d3.select(elem)
       .selectAll(".brush")
       .nodes();
+  var units = [];
   if (brushes.length !== 0) {
     units = combine_fun(
       elem,
+      pairs,
       brushes,
       scales
     );
-  } else {
-    units = [];
   }
   return units;
 }
@@ -340,7 +366,7 @@ function selected_ts(elem, combine_fun, scales) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
- * @param {object} line_data An object that contains data for each line
+ * @param {object} unit_values An object that contains data for each line
  *     element. This has the form
  *       {"a": [{"time": 0, "value": 1}, ...],
  *        "b": [{"time": 0, "value": 3}, ...]}
@@ -356,8 +382,8 @@ function selected_ts(elem, combine_fun, scales) {
  * @side-effects Every time the associated brush is moved, the update_fun() will
  *     be called.
  **/
-function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
-  var units = selected_ts(elem, combine_fun, scales);
+function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
+  var units = selected_ts(elem, pairs, combine_fun, scales);
   update_fun(units, scales);
 }
 
@@ -366,7 +392,7 @@ function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
- * @param {object} line_data An object that contains data for each line
+ * @param {object} unit_values An object that contains data for each line
  *     element. This has the form
  *       {"a": [{"time": 0, "value": 1}, ...],
  *        "b": [{"time": 0, "value": 3}, ...]}
@@ -388,12 +414,12 @@ function brush_fun(elem, line_data, scales, update_fun, combine_fun) {
  * @return null
  * @side-effects Adds a new brush to elem and focuses the display on it.
  **/
-function new_brush(elem, line_data, scales, update_fun, extent, combine_fun) {
+function new_brush(elem, dvalues, scales, update_fun, extent, combine_fun) {
   var brush = d3.brush()
       .on("brush", function() {
 	brush_fun(
 	  elem,
-	  line_data,
+	  dvalues,
 	  scales,
 	  update_fun,
 	  combine_fun
@@ -419,7 +445,7 @@ function new_brush(elem, line_data, scales, update_fun, extent, combine_fun) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
- * @param {object} line_data An object that contains data for each line
+ * @param {object} unit_values An object that contains data for each line
  *     element. This has the form
  *       {"a": [{"time": 0, "value": 1}, ...],
  *        "b": [{"time": 0, "value": 3}, ...]}
@@ -442,7 +468,7 @@ function new_brush(elem, line_data, scales, update_fun, extent, combine_fun) {
  * @side-effects Removes the specified brush from elem and refocuses on the
  *     previously added one.
  **/
-function remove_brush(elem, line_data, scales, update_fun, combine_fun) {
+function remove_brush(elem, pairs, scales, update_fun, combine_fun) {
   var brush_ix = 0;
   d3.select(elem)
     .selectAll(".brush").filter(
@@ -467,7 +493,7 @@ function remove_brush(elem, line_data, scales, update_fun, combine_fun) {
   focus_brush(elem, brush_ix % n_brushes);
   brush_fun(
     elem,
-    line_data,
+    pairs,
     scales,
     update_fun,
     combine_fun

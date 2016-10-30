@@ -70,14 +70,15 @@ function get_scales(values, width, height, size_min, size_max) {
  * @return null
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
-function draw_ts(elem, cur_lines, scales, mouseover_text, line_data) {
-  var ts_select = draw_ts_internal(elem, scales, "all_ts", cur_lines, line_data);
+function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
+  console.log(dvalues);
+  var ts_select = draw_ts_internal(elem, dvalues, scales, "all_ts", cur_lines);
 
   if (mouseover_text) {
     ts_select
       .on("mouseover",
 	  function(d) {
-	    var cur_data = line_data[d];
+	    var cur_data = dvalues[d];
 	    var cur_y = cur_data[cur_data.length - 1].value;
 	    var cur_x = cur_data[cur_data.length - 1].time;
 
@@ -118,12 +119,12 @@ function draw_ts(elem, cur_lines, scales, mouseover_text, line_data) {
  *     be directly input to a d3 path selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_link_attrs(cur_lines, scales, unit_values) {
+function timebox_link_attrs(dvalues, cur_lines, scales) {
   var attr_funs = link_attr_defaults();
   attr_funs.stroke = "#F0F0F0";
 
   attr_funs["stroke-width"] = function(d) {
-    var cur_values = unit_values[d.target.data.name[0]];
+    var cur_values = dvalues[d.target.data.name[0]];
     return scales.r(d3.mean(cur_values));
   };
 
@@ -148,11 +149,11 @@ function timebox_link_attrs(cur_lines, scales, unit_values) {
  *     be directly input to a d3 circles selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_node_attrs(cur_lines, scales, unit_values) {
+function timebox_node_attrs(dvalues, cur_lines, scales) {
   var attr_funs = node_attr_defaults();
 
   attr_funs.r = function(d) {
-    var cur_values = unit_values[d.data.name[0]];
+    var cur_values = dvalues[d.data.name[0]];
     return 1.2 * scales.r(d3.mean(cur_values));
   };
 
@@ -192,7 +193,7 @@ function timebox_node_attrs(cur_lines, scales, unit_values) {
  * @side-effects Draws the static tree structure (circles and paths between
  *     them) on elem.
  **/
-function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, unit_values) {
+function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, dvalues) {
   var hierarchy = d3.hierarchy(tree);
 
   // width + height info are in the scales
@@ -206,7 +207,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, unit_v
     d3.select(elem).select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(cur_lines, scales, unit_values),
+    timebox_link_attrs(dvalues, cur_lines, scales),
     100
   );
 
@@ -216,7 +217,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, unit_v
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    timebox_node_attrs(cur_lines, scales, unit_values),
+    timebox_node_attrs(dvalues, cur_lines, scales),
     100
   );
 
@@ -245,12 +246,12 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, unit_v
   }
 }
 
-function draw_ts_internal(elem, scales, cur_id, cur_lines, line_data) {
+function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
 
-  var units = Object.keys(line_data);
+  var units = Object.keys(pairs);
   var ts_selection = d3.select(elem)
       .select("#" + cur_id)
       .selectAll("." + cur_id)
@@ -268,7 +269,7 @@ function draw_ts_internal(elem, scales, cur_id, cur_lines, line_data) {
       "opacity": 0.1,
       "d": function(d) {
 	return line_fun(
-	  line_data[d]
+	  pairs[d]
 	);
       }
     });
@@ -290,7 +291,7 @@ function draw_ts_internal(elem, scales, cur_id, cur_lines, line_data) {
       },
       "d": function(d) {
 	return line_fun(
-	  line_data[d]
+	  pairs[d]
 	);
       },
       "opacity": function(d) {
@@ -304,9 +305,9 @@ function draw_ts_internal(elem, scales, cur_id, cur_lines, line_data) {
   return ts_selection;
 }
 
-function draw_zoom(elem, cur_lines, scales, line_data) {
+function draw_zoom(elem, paris, cur_lines, scales) {
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, cur_scales, "zoom_ts", cur_lines, line_data);
+  draw_ts_internal(elem, paris, cur_scales, "zoom_ts", cur_lines);
 }
 
 /*******************************************************************************
@@ -326,7 +327,7 @@ function draw_zoom(elem, cur_lines, scales, line_data) {
  * @return {array of objects} An with time / value pairs for each time series
  *     line. For example, [{"time": 0, "value": 1}, ...]
  **/
-function get_line_data(values, cur_unit) {
+function get_unit_values(values, cur_unit) {
   var cur_times = get_matching_subarray(
     values.time,
     values.unit,
@@ -455,7 +456,7 @@ function get_box_extent(brush, scales) {
  * @return units {array of strings} The ids for tree nodes contained in any of
  *     the specified brushes.
  **/
-function brush_ts_intersection(elem, brushes, scales) {
+function brush_ts_intersection(elem, pairs, brushes, scales) {
   var units = d3.select(elem)
       .selectAll(".all_ts")
       .nodes()
@@ -465,7 +466,7 @@ function brush_ts_intersection(elem, brushes, scales) {
     var box_extent = get_box_extent(brushes[i], scales);
     units = intersect(
       units,
-      lines_in_box(line_data, box_extent)
+      lines_in_box(pairs, box_extent)
     );
 
   }
@@ -496,7 +497,7 @@ function point_in_box(point, box_extent) {
 /**
  * Check whether a line contains any points within the box_extent
  *
- * @param line_data {array of ["time": float, "value": float]} An array specifying the time
+ * @param unit_values {array of ["time": float, "value": float]} An array specifying the time
  *     series structure. Each array element is a length two [time, value] array.
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
@@ -508,9 +509,9 @@ function point_in_box(point, box_extent) {
  * @return {bool} An indicator of whether the specified line has any points
  *     going through the box_extent.
  **/
-function line_in_box(line_data, box_extent) {
-  for (var i = 0; i < line_data.length; i++) {
-    var cur_check = point_in_box(line_data[i], box_extent);
+function line_in_box(pairs, box_extent) {
+  for (var i = 0; i < pairs.length; i++) {
+    var cur_check = point_in_box(pairs[i], box_extent);
     if (cur_check) {
       return true;
     }
@@ -521,7 +522,7 @@ function line_in_box(line_data, box_extent) {
 /**
  * Return ids associated with any time series contained in a given brush
  *
- * @param line_data {object} An object whose keys are IDs for time series. For
+ * @param unit_values {object} An object whose keys are IDs for time series. For
  *     example
  *             {"a": [{"time": 0, "value": 1}, ...],
  *              "b": [{"time": 0, "value": 3}, ...]}
@@ -536,10 +537,10 @@ function line_in_box(line_data, box_extent) {
  * @return contained_ids {array of string} The IDs for each time series that has
  *      at least one timepoint / value pair going through the box_extent.
  **/
-function lines_in_box(line_data, box_extent) {
+function lines_in_box(pairs, box_extent) {
   var contained_ids = [];
-  for (var line_id in line_data) {
-    if (line_in_box(line_data[line_id], box_extent)) {
+  for (var line_id in pairs) {
+    if (line_in_box(pairs[line_id], box_extent)) {
       contained_ids.push(line_id);
     }
   }
