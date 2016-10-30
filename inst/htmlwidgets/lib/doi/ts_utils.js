@@ -50,14 +50,10 @@ function get_scales(values, width, height, size_min, size_max) {
 /**
  * Draw static TS associated with time / treeboxes
  *
- * @param elem {d3 selection} The html selection on which all the brushes to
+ * @param {d3 selection} elem The html selection on which all the brushes to
  *     check are located.
- * @param {object} values An object with three subarrays,
- *       - time {array of float} The times associated with Tree nodes.
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param cur_lines {array of string} An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -70,21 +66,21 @@ function get_scales(values, width, height, size_min, size_max) {
  * @return null
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
-function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
-  var ts_select = draw_ts_internal(elem, values, scales, "all_ts", cur_lines);
+function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
+  var ts_select = draw_ts_internal(elem, dvalues, scales, "all_ts", cur_lines);
 
   if (mouseover_text) {
     ts_select
       .on("mouseover",
 	  function(d) {
-	    var cur_data = get_line_data(values, d);
-	    var cur_y = cur_data[cur_data.length - 1].value;
-	    var cur_x = cur_data[cur_data.length - 1].time;
+	    var cur_data = dvalues[d];
+	    var cur_y = cur_data[0].value;
+	    var cur_x = cur_data[0].time;
 
 	    d3.select(elem)
 	      .select("#mouseover")
 	      .attrs({
-		"transform": "translate(" + (5 + scales.x(cur_x)) + "," +
+		"transform": "translate(" + 4+ "," +
 		  scales.y(cur_y) + ")"
 	      });
 
@@ -102,11 +98,8 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
 /**
  * Specify attribute functions for tree links in time + treeboxes
  *
- * @param {object} values An object with three subarrays,
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param {array of string} cur_lines An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -118,16 +111,12 @@ function draw_ts(elem, values, cur_lines, scales, mouseover_text) {
  *     be directly input to a d3 path selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_link_attrs(values, cur_lines, scales) {
+function timebox_link_attrs(dvalues, cur_lines, scales) {
   var attr_funs = link_attr_defaults();
   attr_funs.stroke = "#F0F0F0";
 
-  attr_funs.stroke_width = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.target.data.name[0]
-    );
+  attr_funs["stroke-width"] = function(d) {
+    var cur_values = dvalues[d.target.data.name[0]];
     return scales.r(d3.mean(cur_values));
   };
 
@@ -137,11 +126,8 @@ function timebox_link_attrs(values, cur_lines, scales) {
 /**
  * Specify attribute functions for tree nodes in time + treeboxes
  *
- * @param {object} values An object with three subarrays,
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param cur_lines {array of string} An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -152,15 +138,11 @@ function timebox_link_attrs(values, cur_lines, scales) {
  *     be directly input to a d3 circles selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_node_attrs(values, cur_lines, scales) {
+function timebox_node_attrs(dvalues, cur_lines, scales) {
   var attr_funs = node_attr_defaults();
 
   attr_funs.r = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name[0]
-    );
+    var cur_values = dvalues[d.data.name[0]];
     return 1.2 * scales.r(d3.mean(cur_values));
   };
 
@@ -179,12 +161,8 @@ function timebox_node_attrs(values, cur_lines, scales) {
  *
  * @param elem {d3 selection} The html selection on which all the brushes to
  *     check are located.
- * @param {object} values An object with three subarrays,
- *       - time {array of float} The times associated with Tree nodes.
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param cur_lines {array of string} An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -200,7 +178,7 @@ function timebox_node_attrs(values, cur_lines, scales) {
  * @side-effects Draws the static tree structure (circles and paths between
  *     them) on elem.
  **/
-function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
+function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
   var hierarchy = d3.hierarchy(tree);
 
   // width + height info are in the scales
@@ -214,7 +192,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
     d3.select(elem).select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(values, cur_lines, scales),
+    timebox_link_attrs(dvalues, cur_lines, scales),
     100
   );
 
@@ -224,7 +202,7 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    timebox_node_attrs(values, cur_lines, scales),
+    timebox_node_attrs(dvalues, cur_lines, scales),
     100
   );
 
@@ -253,12 +231,28 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
   }
 }
 
-function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
+/**
+ * Generic time series drawing function
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @param {string} cur_id The ID of the html element on which to draw the time
+ *     series.
+ * @param {array of strings} cur_lines An array containing ids of the nodes and
+ *     series to highlight.
+ * @return {d3 selection} ts_selection The d3 html selection with bound data.
+ * @side-effects Draws the ts encoded in pairs onto the element elem.
+ **/
+function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
 
-  var units = d3.set(values.unit).values();
+  var units = Object.keys(pairs);
   var ts_selection = d3.select(elem)
       .select("#" + cur_id)
       .selectAll("." + cur_id)
@@ -276,7 +270,7 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
       "opacity": 0.1,
       "d": function(d) {
 	return line_fun(
-	  get_line_data(values, d)
+	  pairs[d]
 	);
       }
     });
@@ -298,7 +292,7 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
       },
       "d": function(d) {
 	return line_fun(
-	  get_line_data(values, d)
+	  pairs[d]
 	);
       },
       "opacity": function(d) {
@@ -312,9 +306,23 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines) {
   return ts_selection;
 }
 
-function draw_zoom(elem, values, cur_lines, scales) {
+/**
+ * Draw time series used for zooming into series
+ *
+ * @param  {d3 selection} elem The html selection on which the tree / timebox
+ *     display will be drawn.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {array of strings} cur_lines An array containing ids of the nodes and
+ *     series to highlight.
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @return null
+ * @side-effects Draws zooming time series on the #zoom_ts group on elem
+ **/
+function draw_zoom(elem, pairs, cur_lines, scales) {
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, values, cur_scales, "zoom_ts", cur_lines);
+  draw_ts_internal(elem, pairs, cur_scales, "zoom_ts", cur_lines);
 }
 
 /*******************************************************************************
@@ -334,7 +342,7 @@ function draw_zoom(elem, values, cur_lines, scales) {
  * @return {array of objects} An with time / value pairs for each time series
  *     line. For example, [{"time": 0, "value": 1}, ...]
  **/
-function get_line_data(values, cur_unit) {
+function get_unit_values(values, cur_unit) {
   var cur_times = get_matching_subarray(
     values.time,
     values.unit,
@@ -458,12 +466,14 @@ function get_box_extent(brush, scales) {
  *
  * @param elem {d3 selection} The html selection on which all the time series to
  *     check are located.
- * @param brushes {array of d3-brush} An array containing all the d3-brushes on
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {array of d3-brush} brushes An array containing all the d3-brushes on
  *     the display.
  * @return units {array of strings} The ids for tree nodes contained in any of
  *     the specified brushes.
  **/
-function brush_ts_intersection(elem, brushes, scales) {
+function brush_ts_intersection(elem, pairs, brushes, scales) {
   var units = d3.select(elem)
       .selectAll(".all_ts")
       .nodes()
@@ -473,7 +483,7 @@ function brush_ts_intersection(elem, brushes, scales) {
     var box_extent = get_box_extent(brushes[i], scales);
     units = intersect(
       units,
-      lines_in_box(line_data, box_extent)
+      lines_in_box(pairs, box_extent)
     );
 
   }
@@ -504,8 +514,8 @@ function point_in_box(point, box_extent) {
 /**
  * Check whether a line contains any points within the box_extent
  *
- * @param line_data {array of ["time": float, "value": float]} An array specifying the time
- *     series structure. Each array element is a length two [time, value] array.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
  *       - x_min {float} The minimum x-value for the node to in order for it to
@@ -516,9 +526,9 @@ function point_in_box(point, box_extent) {
  * @return {bool} An indicator of whether the specified line has any points
  *     going through the box_extent.
  **/
-function line_in_box(line_data, box_extent) {
-  for (var i = 0; i < line_data.length; i++) {
-    var cur_check = point_in_box(line_data[i], box_extent);
+function line_in_box(pairs, box_extent) {
+  for (var i = 0; i < pairs.length; i++) {
+    var cur_check = point_in_box(pairs[i], box_extent);
     if (cur_check) {
       return true;
     }
@@ -529,11 +539,8 @@ function line_in_box(line_data, box_extent) {
 /**
  * Return ids associated with any time series contained in a given brush
  *
- * @param line_data {object} An object whose keys are IDs for time series. For
- *     example
- *             {"a": [{"time": 0, "value": 1}, ...],
- *              "b": [{"time": 0, "value": 3}, ...]}
- *     are two time series with ids "a" and "b".
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
  *       - x_min {float} The minimum x-value for the node to in order for it to
@@ -544,10 +551,10 @@ function line_in_box(line_data, box_extent) {
  * @return contained_ids {array of string} The IDs for each time series that has
  *      at least one timepoint / value pair going through the box_extent.
  **/
-function lines_in_box(line_data, box_extent) {
+function lines_in_box(pairs, box_extent) {
   var contained_ids = [];
-  for (var line_id in line_data) {
-    if (line_in_box(line_data[line_id], box_extent)) {
+  for (var line_id in pairs) {
+    if (line_in_box(pairs[line_id], box_extent)) {
       contained_ids.push(line_id);
     }
   }
@@ -559,13 +566,15 @@ function lines_in_box(line_data, box_extent) {
  *
  * @param elem {d3 selection} The html selection on which all the .tree_nodes to
  *     check are located.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param brushes {array of d3-brush} An array containing all the d3-brushes on
  *     the display.
  * @return units {array of strings} The ids for tree nodes contained in any of
  *     the specified brushes.
  **/
-function brush_nodes_union(elem, brushes) {
-  var scales = {
+function brush_nodes_union(elem, pairs, brushes, scales) {
+  scales = {
     "x": d3.scaleLinear(),
     "y": d3.scaleLinear()
   };

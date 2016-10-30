@@ -205,6 +205,6 @@ function sankey_update(elem,
   d3.select(elem)
     .selectAll("[class^='tree_link']")
     .on("click", function(d) {
-      return sankey_update_wrapper(d.target.data.name);
+      return sankey_update_wrapper(d.source.data.name);
     });
 }
