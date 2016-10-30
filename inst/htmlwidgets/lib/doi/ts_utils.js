@@ -50,14 +50,10 @@ function get_scales(values, width, height, size_min, size_max) {
 /**
  * Draw static TS associated with time / treeboxes
  *
- * @param elem {d3 selection} The html selection on which all the brushes to
+ * @param {d3 selection} elem The html selection on which all the brushes to
  *     check are located.
- * @param {object} values An object with three subarrays,
- *       - time {array of float} The times associated with Tree nodes.
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param cur_lines {array of string} An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -102,11 +98,8 @@ function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
 /**
  * Specify attribute functions for tree links in time + treeboxes
  *
- * @param {object} values An object with three subarrays,
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param {array of string} cur_lines An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -133,11 +126,8 @@ function timebox_link_attrs(dvalues, cur_lines, scales) {
 /**
  * Specify attribute functions for tree nodes in time + treeboxes
  *
- * @param {object} values An object with three subarrays,
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param cur_lines {array of string} An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -171,12 +161,8 @@ function timebox_node_attrs(dvalues, cur_lines, scales) {
  *
  * @param elem {d3 selection} The html selection on which all the brushes to
  *     check are located.
- * @param {object} values An object with three subarrays,
- *       - time {array of float} The times associated with Tree nodes.
- *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
- *     The i^th element in each of the three arrays correspond to the same
- *     entity.
+ * @param {object of arrays} dvalues An object whose keys are series IDs and
+ *     whose values are the series y values associated with each ID.
  * @param cur_lines {array of string} An array of IDs for the time series /
  *     nodes that are currently being selected by either timeboxes or treeboxes.
  *     This will be used to highlight those nodes in the tree (and mute the
@@ -245,6 +231,10 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
   }
 }
 
+/**
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ **/
 function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
@@ -450,6 +440,8 @@ function get_box_extent(brush, scales) {
  *
  * @param elem {d3 selection} The html selection on which all the time series to
  *     check are located.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param brushes {array of d3-brush} An array containing all the d3-brushes on
  *     the display.
  * @return units {array of strings} The ids for tree nodes contained in any of
@@ -496,8 +488,8 @@ function point_in_box(point, box_extent) {
 /**
  * Check whether a line contains any points within the box_extent
  *
- * @param unit_values {array of ["time": float, "value": float]} An array specifying the time
- *     series structure. Each array element is a length two [time, value] array.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
  *       - x_min {float} The minimum x-value for the node to in order for it to
@@ -521,11 +513,8 @@ function line_in_box(pairs, box_extent) {
 /**
  * Return ids associated with any time series contained in a given brush
  *
- * @param unit_values {object} An object whose keys are IDs for time series. For
- *     example
- *             {"a": [{"time": 0, "value": 1}, ...],
- *              "b": [{"time": 0, "value": 3}, ...]}
- *     are two time series with ids "a" and "b".
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param box_extent {Object} An object specifying the bounds for nodes which we
  *     should return as "in the box". It must have the keys,
  *       - x_min {float} The minimum x-value for the node to in order for it to
@@ -551,6 +540,8 @@ function lines_in_box(pairs, box_extent) {
  *
  * @param elem {d3 selection} The html selection on which all the .tree_nodes to
  *     check are located.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param brushes {array of d3-brush} An array containing all the d3-brushes on
  *     the display.
  * @return units {array of strings} The ids for tree nodes contained in any of

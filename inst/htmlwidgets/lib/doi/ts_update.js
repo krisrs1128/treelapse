@@ -177,6 +177,11 @@ function get_reshaped_values(values) {
   return reshaped;
 }
 
+/**
+ *
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ **/
 function zoom_brush_fun(elem, pairs, scales, combine_fun, update_fun) {
   var cur_extent = d3.brushSelection(
     d3.select("#zoom_ts").select(".zoom_brush").node()
@@ -371,6 +376,8 @@ function treebox_update(elem, reshaped, tree, cur_lines, scales) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param {function} combine_fun The function used for combining units across
  *     brush selections. This is usually the intersection or union of selections
  *    coming from any individual brush.
@@ -401,11 +408,8 @@ function selected_ts(elem, pairs, combine_fun, scales) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
- * @param {object} unit_values An object that contains data for each line
- *     element. This has the form
- *       {"a": [{"time": 0, "value": 1}, ...],
- *        "b": [{"time": 0, "value": 3}, ...]}
- *     for two time series with ids "a" and "b".
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param {Object of d3.scales} scales An object with different scales for
  *     positions and sizes for the time series and nodes.
  * @param {function} update_fun The function to execute every time the brush is
@@ -427,11 +431,8 @@ function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
- * @param {object} unit_values An object that contains data for each line
- *     element. This has the form
- *       {"a": [{"time": 0, "value": 1}, ...],
- *        "b": [{"time": 0, "value": 3}, ...]}
- *     for two time series with ids "a" and "b".
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param {Object of d3.scales} scales An object with different scales for
  *     positions and sizes for the time series and nodes.
  * @param {function} update_fun The function to execute every time the brush is
@@ -480,11 +481,8 @@ function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
  *     will be drawn.
- * @param {object} unit_values An object that contains data for each line
- *     element. This has the form
- *       {"a": [{"time": 0, "value": 1}, ...],
- *        "b": [{"time": 0, "value": 3}, ...]}
- *     for two time series with ids "a" and "b".
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
  * @param {Object of d3.scales} scales An object with different scales for
  *     positions and sizes for the time series and nodes.
  * @param {function} update_fun The function to execute every time the brush is
