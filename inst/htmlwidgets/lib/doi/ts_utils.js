@@ -232,8 +232,20 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
 }
 
 /**
+ * Generic time series drawing function
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
  * @param {array of objects} pairs An with time / value pairs for each time
  *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @param {string} cur_id The ID of the html element on which to draw the time
+ *     series.
+ * @param {array of strings} cur_lines An array containing ids of the nodes and
+ *     series to highlight.
+ * @return {d3 selection} ts_selection The d3 html selection with bound data.
+ * @side-effects Draws the ts encoded in pairs onto the element elem.
  **/
 function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
   var line_fun = d3.line()
@@ -294,9 +306,23 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
   return ts_selection;
 }
 
-function draw_zoom(elem, paris, cur_lines, scales) {
+/**
+ * Draw time series used for zooming into series
+ *
+ * @param  {d3 selection} elem The html selection on which the tree / timebox
+ *     display will be drawn.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {array of strings} cur_lines An array containing ids of the nodes and
+ *     series to highlight.
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @return null
+ * @side-effects Draws zooming time series on the #zoom_ts group on elem
+ **/
+function draw_zoom(elem, pairs, cur_lines, scales) {
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, paris, cur_scales, "zoom_ts", cur_lines);
+  draw_ts_internal(elem, pairs, cur_scales, "zoom_ts", cur_lines);
 }
 
 /*******************************************************************************
@@ -442,7 +468,7 @@ function get_box_extent(brush, scales) {
  *     check are located.
  * @param {array of objects} pairs An with time / value pairs for each time
  *      series line. For example, [{"time": 0, "value": 1}, ...]
- * @param brushes {array of d3-brush} An array containing all the d3-brushes on
+ * @param {array of d3-brush} brushes An array containing all the d3-brushes on
  *     the display.
  * @return units {array of strings} The ids for tree nodes contained in any of
  *     the specified brushes.

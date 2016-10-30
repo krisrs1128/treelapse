@@ -87,8 +87,8 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
       zoom_brush_fun(
 	elem,
 	reshaped.pairs,
-	scales,
 	brush_nodes_union,
+	scales,
 	update_fun
       );
     })
@@ -178,35 +178,6 @@ function get_reshaped_values(values) {
 }
 
 /**
- *
- * @param {array of objects} pairs An with time / value pairs for each time
- *      series line. For example, [{"time": 0, "value": 1}, ...]
- **/
-function zoom_brush_fun(elem, pairs, scales, combine_fun, update_fun) {
-  var cur_extent = d3.brushSelection(
-    d3.select("#zoom_ts").select(".zoom_brush").node()
-  );
-
-  // reset domains for scales
-  scales.x.domain(
-    [scales.zoom_x.invert(cur_extent[0][0]),
-     scales.zoom_x.invert(cur_extent[1][0])]
-  );
-  scales.y.domain(
-    [scales.zoom_y.invert(cur_extent[1][1]),
-     scales.zoom_y.invert(cur_extent[0][1])]
-  );
-
-  var units = selected_ts(
-    elem,
-    pairs,
-    combine_fun,
-    scales
-  );
-  update_fun(units, scales);
-}
-
-/**
  * Setup and draw the initial timeboxes display
  *
  * @param  {d3 selection} elem The html selection on which the DOI tree display
@@ -247,8 +218,8 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
       zoom_brush_fun(
 	elem,
 	reshaped.pairs,
-	scales,
 	brush_ts_intersection,
+	scales,
 	update_fun
       );
     })
@@ -326,7 +297,7 @@ function timebox_update(elem, reshaped, tree, cur_lines, scales) {
  *       - unit {array of string} The node names associated with values.
  *     The i^th element in each of the three arrays correspond to the same
  *     entity.
- * @param tree {Tree} A tree object (actually, a properly nested JSON would
+ * @param {Tree} tree A tree object (actually, a properly nested JSON would
  *     suffice) on which we can call d3.hierarchy to compute the layout.
  * @param {array of strings} cur_lines An array containing ids of the nodes and
  *     series to highlight.
@@ -369,7 +340,6 @@ function treebox_update(elem, reshaped, tree, cur_lines, scales) {
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false);
 }
-
 
 /**
  * Identify which time series are selected (by either Time or Treeboxes)
@@ -423,6 +393,48 @@ function selected_ts(elem, pairs, combine_fun, scales) {
  **/
 function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
   var units = selected_ts(elem, pairs, combine_fun, scales);
+  update_fun(units, scales);
+}
+
+/**
+ * Function to call every time brush in zoom box is moved
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {function} combine_fun The function used for combining units across
+ *     brush selections. This is usually the intersection or union of selections
+ *    coming from any individual brush.
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @param {function} update_fun The function to execute every time the brush is
+ *     updated.
+ * @return null
+ * @side-effects Redraws the main time series according to the scales set by the
+ *     zoom brush on the top right.
+ **/
+function zoom_brush_fun(elem, pairs, combine_fun, scales, update_fun) {
+  var cur_extent = d3.brushSelection(
+    d3.select("#zoom_ts").select(".zoom_brush").node()
+  );
+
+  // reset domains for scales
+  scales.x.domain(
+    [scales.zoom_x.invert(cur_extent[0][0]),
+     scales.zoom_x.invert(cur_extent[1][0])]
+  );
+  scales.y.domain(
+    [scales.zoom_y.invert(cur_extent[1][1]),
+     scales.zoom_y.invert(cur_extent[0][1])]
+  );
+
+  var units = selected_ts(
+    elem,
+    pairs,
+    combine_fun,
+    scales
+  );
   update_fun(units, scales);
 }
 
