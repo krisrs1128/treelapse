@@ -70,8 +70,8 @@ function get_scales(values, width, height, size_min, size_max) {
  * @return null
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
-function draw_ts(elem, values, cur_lines, scales, mouseover_text, line_data) {
-  var ts_select = draw_ts_internal(elem, values, scales, "all_ts", cur_lines, line_data);
+function draw_ts(elem, cur_lines, scales, mouseover_text, line_data) {
+  var ts_select = draw_ts_internal(elem, scales, "all_ts", cur_lines, line_data);
 
   if (mouseover_text) {
     ts_select
@@ -122,7 +122,7 @@ function timebox_link_attrs(cur_lines, scales, unit_values) {
   var attr_funs = link_attr_defaults();
   attr_funs.stroke = "#F0F0F0";
 
-  attr_funs.stroke_width = function(d) {
+  attr_funs["stroke-width"] = function(d) {
     var cur_values = unit_values[d.target.data.name[0]];
     return scales.r(d3.mean(cur_values));
   };
@@ -245,12 +245,12 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text, unit_v
   }
 }
 
-function draw_ts_internal(elem, values, scales, cur_id, cur_lines, line_data) {
+function draw_ts_internal(elem, scales, cur_id, cur_lines, line_data) {
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
 
-  var units = d3.set(values.unit).values();
+  var units = Object.keys(line_data);
   var ts_selection = d3.select(elem)
       .select("#" + cur_id)
       .selectAll("." + cur_id)
@@ -304,9 +304,9 @@ function draw_ts_internal(elem, values, scales, cur_id, cur_lines, line_data) {
   return ts_selection;
 }
 
-function draw_zoom(elem, values, cur_lines, scales, line_data) {
+function draw_zoom(elem, cur_lines, scales, line_data) {
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, values, cur_scales, "zoom_ts", cur_lines, line_data);
+  draw_ts_internal(elem, cur_scales, "zoom_ts", cur_lines, line_data);
 }
 
 /*******************************************************************************
