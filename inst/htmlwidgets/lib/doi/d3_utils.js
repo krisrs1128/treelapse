@@ -59,17 +59,27 @@ function setup_groups(elem, group_names) {
  * @side-effects Attaches (1) a group called "search-{id associated with elem}"
  * and (2) a text input to the selection called elem.
  **/
-function setup_search(elem) {
+function setup_search(elem, options) {
+  var elem_id = d3.select(elem).attr("id");
   var search = d3.select(elem)
       .append("g")
-      .attr("id", "search" + d3.select(elem).attr("id"));
+      .attr("id", "search-" + elem_id);
 
-  search.append("input")
+  search.append("select")
     .attrs({
-      "id": "search_box" + d3.select(elem).attr("id"),
-      "type": "text"
-    });
+      "id": "search_box-" + elem_id,
+      "type": "text",
+      "multiple": true
+    })
+    .classed("chosen-select", true);
 
+  d3.select("#search_box-" + elem_id)
+    .selectAll("option")
+    .data(options).enter()
+    .append("option")
+    .attr("value", function(d) { return d;})
+    .text(function(d) { return d;});
+  $("#search_box-" + elem_id).chosen();
 }
 
 /**

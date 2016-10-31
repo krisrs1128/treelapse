@@ -308,16 +308,13 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
     });
 
   // highlighted searched terms
-  var search_id = "#search_box" + d3.select(elem).attr("id");
-  var search_str = [$(search_id).val()];
-  if (units.indexOf(search_str[0]) == -1) {
-    search_str = [];
-  }
-
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  var search_str = [""].concat($(search_id).val());
   var search_selection = d3.select(elem)
       .select("#" + cur_id)
       .selectAll(".search-" + cur_id)
       .data(search_str, function(d) { return d; });
+  console.log(search_str);
 
   search_selection.exit().remove();
   search_selection.enter()
@@ -330,6 +327,31 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
       "stroke-width": 2,
       "opacity": 0.9,
       "d": function(d) {
+	console.log(d);
+	if (units.indexOf(d) == -1) {
+	  return;
+	}
+
+	return line_fun(
+	  pairs[d]
+	);
+      }
+    });
+
+  search_selection.transition()
+    .duration(100)
+    .attrs({
+      "id": function(d) { return "search-" + d; },
+      "fill": "none",
+      "stroke": "#C2571A",
+      "stroke-width": 2,
+      "opacity": 0.9,
+      "d": function(d) {
+	console.log(d);
+	if (units.indexOf(d) == -1) {
+	  return;
+	}
+
 	return line_fun(
 	  pairs[d]
 	);
@@ -693,4 +715,14 @@ function union(a, b) {
       res.push(obj[k]);
   }
   return res;
+}
+
+// https://jqueryui.com/autocomplete/#multiple
+function split(val) {
+  //return val.split( /,\s*/ );
+  return val.split(",");
+}
+
+function extract_last(term) {
+  return split(term).pop();
 }
