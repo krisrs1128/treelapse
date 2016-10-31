@@ -159,6 +159,24 @@ function get_line_data(values, cur_unit) {
   });
 }
 
+/**
+ * Precompute various forms of "values" to increase performance
+ *
+ * We don't want to recompute these forms of values every time a brush is moved.
+ *
+ * @param {object} values An object with three subarrays,
+ *       - time {array of float} The times associated with Tree nodes.
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node names associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @return {object} reshaped An object with the following elements,
+ *       - {object} values This is the same as the input values object.
+ *       - {pairs} An object of arrays with time / value pairs for each time
+ *                 series line. For example, [{"time": 0, "value": 1}, ...]
+ *       - {dvalues} A object of arrays keyed by series IDs and giving y-values
+ *                   for each series.
+ **/
 function get_reshaped_values(values) {
   var reshaped = {
     "values": values,
