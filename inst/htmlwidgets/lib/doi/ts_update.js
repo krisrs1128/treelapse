@@ -226,7 +226,9 @@ function get_reshaped_values(values) {
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+
   var reshaped = get_reshaped_values(values);
+  setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     timebox_update,
