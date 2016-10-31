@@ -73,6 +73,8 @@ function setup_search(elem, options) {
     })
     .classed("chosen-select", true);
 
+  console.log(options);
+
   d3.select("#search_box-" + elem_id)
     .selectAll("option")
     .data(options).enter()
