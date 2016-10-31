@@ -47,6 +47,11 @@ function get_scales(values, width, height, size_min, size_max) {
   };
 }
 
+function get_search_lines(elem) {
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  return [""].concat($(search_id).val());
+}
+
 /**
  * Draw static TS associated with time / treeboxes
  *
@@ -67,35 +72,44 @@ function get_scales(values, width, height, size_min, size_max) {
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
 function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
-  var ts_select = draw_ts_internal(elem, dvalues, scales, "all_ts", cur_lines);
+  var ts_select = draw_ts_internal(
+    elem,
+    dvalues,
+    scales,
+    "all_ts",
+    cur_lines,
+    get_search_lines(elem)
+  );
 
   d3.select(elem)
     .select("#mouseover > text")
     .attr("font-size", 0);
 
+  var search_lines = get_search_lines(elem);
+  function mouseover_fun(d) {
+    if (cur_lines.concat(search_lines).indexOf(d) == -1) {
+      return;
+    }
+
+    var cur_pos = d3.mouse(this);
+    d3.select(elem)
+      .select("#mouseover")
+      .attrs({
+	"transform": "translate(" + cur_pos[0] + "," + cur_pos[1] + ")"
+      });
+
+    d3.select(elem)
+      .select("#mouseover > text")
+      .text(d)
+      .attrs({
+	"font-size": 14,
+	"font-family": "roboto"
+      });
+  }
+
   if (mouseover_text) {
-    ts_select
-      .on("mouseover",
-	  function(d) {
-	    if (cur_lines.indexOf(d) == -1) {
-	      return;
-	    }
-
-	    var cur_pos = d3.mouse(this);
-	    d3.select(elem)
-	      .select("#mouseover")
-	      .attrs({
-		"transform": "translate(" + cur_pos[0] + "," + cur_pos[1] + ")"
-	      });
-
-	    d3.select(elem)
-	      .select("#mouseover > text")
-	      .text(d)
-	      .attrs({
-		"font-size": 14,
-		"font-family": "roboto"
-	      });
-	  });
+    ts_select.ts.on("mouseover", mouseover_fun);
+    ts_select.search.on("mouseover", mouseover_fun);
   }
 }
 
@@ -142,7 +156,7 @@ function timebox_link_attrs(dvalues, cur_lines, scales) {
  *     be directly input to a d3 circles selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_node_attrs(dvalues, cur_lines, scales) {
+function timebox_node_attrs(dvalues, cur_lines, search_lines, scales) {
   var attr_funs = node_attr_defaults();
 
   attr_funs.r = function(d) {
@@ -155,6 +169,16 @@ function timebox_node_attrs(dvalues, cur_lines, scales) {
       return "#2D869F";
     }
     return "#F0F0F0";
+  };
+
+  attr_funs.stroke = "#C2571A";
+  attr_funs["stroke-width"] = function(d) {
+    if (search_lines.indexOf(d.data.name[0]) != -1) {
+      var cur_values = dvalues[d.data.name[0]];
+      return scales.r(d3.mean(cur_values));
+    } else {
+      return 0;
+    }
   };
 
   return attr_funs;
@@ -201,12 +225,13 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
   );
 
   // draw nodes
+  var search_lines = get_search_lines(elem);
   selection_update(
     "circle",
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    timebox_node_attrs(dvalues, cur_lines, scales),
+    timebox_node_attrs(dvalues, cur_lines, search_lines, scales),
     100
   );
 
@@ -251,12 +276,58 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
  * @return {d3 selection} ts_selection The d3 html selection with bound data.
  * @side-effects Draws the ts encoded in pairs onto the element elem.
  **/
-function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
+function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) {
   var line_fun = d3.line()
       .x(function(d) { return scales.x(d.time); })
       .y(function(d) { return scales.y(d.value); });
-
   var units = Object.keys(pairs);
+
+  // highlighted searched terms
+  var search_selection = d3.select(elem)
+      .select("#" + cur_id)
+      .selectAll(".search-" + cur_id)
+      .data(search_lines, function(d) { return d; });
+
+  search_selection.exit().remove();
+  search_selection.enter()
+    .append("path")
+    .classed("search-" + cur_id, true)
+    .attrs({
+      "id": function(d) { return "search-" + d; },
+      "fill": "none",
+      "stroke": "#C2571A",
+      "stroke-width": 2,
+      "opacity": 0.9,
+      "d": function(d) {
+	if (units.indexOf(d) == -1) {
+	  return;
+	}
+	return line_fun(
+	  pairs[d]
+	);
+      }
+    });
+
+  search_selection.transition()
+    .duration(100)
+    .attrs({
+      "id": function(d) { return "search-" + d; },
+      "fill": "none",
+      "stroke": "#C2571A",
+      "stroke-width": 2,
+      "opacity": 0.9,
+      "d": function(d) {
+	if (units.indexOf(d) == -1) {
+	  return;
+	}
+
+	return line_fun(
+	  pairs[d]
+	);
+      }
+    });
+
+  // brushed over lines
   var ts_selection = d3.select(elem)
       .select("#" + cur_id)
       .selectAll("." + cur_id)
@@ -307,58 +378,10 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
       }
     });
 
-  // highlighted searched terms
-  var search_id = "#search_box-" + d3.select(elem).attr("id");
-  var search_str = [""].concat($(search_id).val());
-  var search_selection = d3.select(elem)
-      .select("#" + cur_id)
-      .selectAll(".search-" + cur_id)
-      .data(search_str, function(d) { return d; });
-  console.log(search_str);
-
-  search_selection.exit().remove();
-  search_selection.enter()
-    .append("path")
-    .classed("search-" + cur_id, true)
-    .attrs({
-      "id": function(d) { return "search-" + d; },
-      "fill": "none",
-      "stroke": "#C2571A",
-      "stroke-width": 2,
-      "opacity": 0.9,
-      "d": function(d) {
-	console.log(d);
-	if (units.indexOf(d) == -1) {
-	  return;
-	}
-
-	return line_fun(
-	  pairs[d]
-	);
-      }
-    });
-
-  search_selection.transition()
-    .duration(100)
-    .attrs({
-      "id": function(d) { return "search-" + d; },
-      "fill": "none",
-      "stroke": "#C2571A",
-      "stroke-width": 2,
-      "opacity": 0.9,
-      "d": function(d) {
-	console.log(d);
-	if (units.indexOf(d) == -1) {
-	  return;
-	}
-
-	return line_fun(
-	  pairs[d]
-	);
-      }
-    });
-
-  return ts_selection;
+  return {
+    "ts": ts_selection,
+    "search": search_selection
+  };
 }
 
 /**
@@ -376,8 +399,9 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines) {
  * @side-effects Draws zooming time series on the #zoom_ts group on elem
  **/
 function draw_zoom(elem, pairs, cur_lines, scales) {
+  var search_lines = get_search_lines(elem);
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, pairs, cur_scales, "zoom_ts", cur_lines);
+  draw_ts_internal(elem, pairs, cur_scales, "zoom_ts", cur_lines, search_lines);
 }
 
 /*******************************************************************************
