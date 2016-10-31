@@ -126,19 +126,19 @@ function doi_update(elem,
 
   // setup search box
   var node_names = tree_obj.get_attr_array("name");
-   $(function() {
-     $(search_id).autocomplete({
-       minLength: 0,
-       source: node_names,
-       search: function(event, ui) {
+  $(function() {
+    $(search_id).autocomplete({
+      minLength: 0,
+      source: node_names,
+      search: function(event, ui) {
    	doi_update_wrapper(focus_node_id);
-       },
-       select: function(event, ui) {
+      },
+      select: function(event, ui) {
    	$(search_id).val(ui.item.label);
    	doi_update_wrapper(focus_node_id);
-       }
-     });
-   });
+      }
+    });
+  });
 
   var scales = {
     "size": d3.scaleLinear()

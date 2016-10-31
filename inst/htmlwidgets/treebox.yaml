@@ -21,6 +21,11 @@
     - ts_utils.js
     - ts_update.js
     - d3_utils.js
+  - name: jquery-ui
+    version: 1.12.1
+    src: htmlwidgets/lib/jquery-ui-1.12.1
+    stylesheet: jquery-ui.css
+    script: jquery-ui.js
   - name: roboto
     version: 0.0.0
     src: htmlwidgets/lib/font

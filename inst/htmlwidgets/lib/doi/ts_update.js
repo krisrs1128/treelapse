@@ -20,6 +20,7 @@
  **/
 function setup_tree_ts(elem, width, height) {
   setup_background(elem, width, height, "#F7F7F7");
+  setup_search(elem);
   setup_groups(
     d3.select(elem).select("svg"),
     ["all_ts"]
@@ -80,7 +81,6 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
-
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
     .on("brush", function() {
@@ -121,6 +121,22 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
       brush_nodes_union
     );
   }
+
+  // draw search box
+  var search_id = "#search_box" + d3.select(elem).attr("id");
+  $(function() {
+    $(search_id).autocomplete({
+      minLength: 0,
+      source: Object.keys(reshaped.dvalues),
+      search: function(event, ui) {
+   	brush_fun(elem, reshaped.pairs, scales, update_fun, brush_nodes_union);
+      },
+      select: function(event, ui) {
+   	$(search_id).val(ui.item.label);
+	brush_fun(elem, reshaped.pairs, scales, update_fun, brush_nodes_union);
+      }
+    });
+  });
 
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
