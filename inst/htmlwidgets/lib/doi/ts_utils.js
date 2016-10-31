@@ -69,26 +69,30 @@ function get_scales(values, width, height, size_min, size_max) {
 function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
   var ts_select = draw_ts_internal(elem, dvalues, scales, "all_ts", cur_lines);
 
+  d3.select(elem)
+    .select("#mouseover > text")
+    .attr("font-size", 0);
+
   if (mouseover_text) {
     ts_select
       .on("mouseover",
 	  function(d) {
-	    var cur_data = dvalues[d];
-	    var cur_y = cur_data[0].value;
-	    var cur_x = cur_data[0].time;
+	    if (cur_lines.indexOf(d) == -1) {
+	      return;
+	    }
 
+	    var cur_pos = d3.mouse(this);
 	    d3.select(elem)
 	      .select("#mouseover")
 	      .attrs({
-		"transform": "translate(" + 4+ "," +
-		  scales.y(cur_y) + ")"
+		"transform": "translate(" + cur_pos[0] + "," + cur_pos[1] + ")"
 	      });
 
 	    d3.select(elem)
 	      .select("#mouseover > text")
 	      .text(d)
 	      .attrs({
-		"font-size": 11,
+		"font-size": 14,
 		"font-family": "roboto"
 	      });
 	  });
