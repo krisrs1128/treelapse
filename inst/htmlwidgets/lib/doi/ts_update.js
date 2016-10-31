@@ -280,6 +280,12 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     );
   }
 
+  // draw search box
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).change(function() {
+    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_ts_intersection);
+  });
+
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
