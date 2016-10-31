@@ -47,16 +47,15 @@ function draw_doi(elem,
   var tree_obj = new Tree(tree);
   var doi_tree = new DoiTree(tree);
 
-  setup_search(elem, tree_obj.get_attr_array("name"));
   setup_background(elem, width, height, "#F7F7F7");
+  setup_search(elem, d3.set(values.unit).values());
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
   doi_update(
     elem,
     width,
     height,
     values,
-    tree_obj,
-    doi_tree,
+    tree,
     focus_node_id,
     size_min,
     size_max,
@@ -100,7 +99,6 @@ function doi_update(elem,
 		    height,
 		    values,
 		    tree,
-		    doi_tree,
 		    focus_node_id,
 		    size_min,
 		    size_max,
@@ -113,7 +111,6 @@ function doi_update(elem,
       height,
       values,
       tree,
-      doi_tree,
       x,
       size_min,
       size_max,
@@ -124,14 +121,15 @@ function doi_update(elem,
 
   console.log("Focusing on " + focus_node_id);
   var search_id = "#search_box-" + d3.select(elem).attr("id");
-  console.log(search_id);
-  var search_strs = [""].concat($(search_id).val());
-  $(search_id).change(function() {
+  $(search_id).unbind('change');
+  $(search_id).on("change", function(e) {
     doi_update_wrapper(focus_node_id);
   });
+  var search_strs = [""].concat($(search_id).val());
 
   // essential DOI algorithm
-
+  var tree_obj = new Tree(tree);
+  var doi_tree = new DoiTree(tree);
   doi_tree.set_doi();
 
   var scales = {
@@ -154,7 +152,7 @@ function doi_update(elem,
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    doi_node_attrs(values, scales, tree, search_strs),
+    doi_node_attrs(values, scales, tree_obj, search_strs),
     1000
   );
 
@@ -172,7 +170,7 @@ function doi_update(elem,
     d3.select(elem).select("#highlighted_links"),
     layout.links(),
     "highlighted_tree_links",
-    doi_highlight_link_attrs(values, scales, tree, search_strs),
+    doi_highlight_link_attrs(values, scales, tree_obj, search_strs),
     1000
   );
 

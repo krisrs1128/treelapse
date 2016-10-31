@@ -19,7 +19,6 @@ values <- data.frame(
 )
 
 ## ---- visualize ----
-devtools::install()
 doi_tree(values, taxa, "Bacteria", "Bacteria", 1100, 500,
          leaf_width = 35, leaf_height = 75, size_max = 20,
          size_min = 1.5)

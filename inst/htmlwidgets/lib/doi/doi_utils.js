@@ -777,7 +777,6 @@ function doi_highlight_link_attrs(values, scales, tree_obj, search_strs) {
   attrs["stroke-width"] = function(d) {
     var cur_tree = tree_obj.get_subtree(d.target.data.name);
     for (var i = 0; i < search_strs.length; i++) {
-      console.log(search_strs);
       if (search_strs[i] !== null &&
 	  search_strs[i] !== "" &&
 	  cur_tree.contains_partial_match(search_strs[i])) {
