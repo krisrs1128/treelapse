@@ -23,14 +23,73 @@ function setup_background(elem, width, height, fill) {
 	height: height
       });
 
-  var rect = svg_elem
-      .append("rect")
-      .attrs({
-	"id": "background_rect",
-	"width": width,
-	"height": height,
-	"fill": fill
-      });
+  draw_rect(elem, width, height, "background_rect", fill);
+}
+
+/**
+ * Draw x / y axes given a dictionary of scales
+ *
+ * @param {d3 selection} elem The html selection on which all the brushes to
+ *     check are located.
+ * @param scales {dictionary of d3-scales} An object with keys "x" and "y"
+ *     giving scales from which x and y positions of the tree nodes are
+ *     calculated.
+ * @return null
+ * @side-effects Draws x and y axes on group elements #x_axis and #y_axis
+ **/
+function draw_axes(elem, scales) {
+  d3.select("#x_axis")
+    .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
+    .call(d3.axisBottom(scales.x));
+  d3.select("#y_axis")
+    .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
+    .call(d3.axisLeft(scales.y));
+}
+
+/**
+ * Update x / y axes to reflect new scales
+ *
+ * @param {d3 selection} elem The html selection on which all the brushes to
+ *     check are located.
+ * @param scales {dictionary of d3-scales} An object with keys "x" and "y"
+ *     giving scales from which x and y positions of the tree nodes are
+ *     calculated.
+ * @return null
+ * @side-effects Updates x and y axes on group elements #x_axis and #y_axis
+ *     to reflect the new scales.
+ **/
+function update_axes(elem, scales) {
+  d3.select("#x_axis")
+    .transition()
+    .duration(100)
+    .call(d3.axisBottom(scales.x));
+  d3.select("#y_axis")
+    .transition()
+    .duration(100)
+    .call(d3.axisLeft(scales.y));
+}
+
+
+/**
+ * Draw a filled rectangle
+ * @param {d3 selection} elem The html selection on which all the brushes to
+ *     check are located.
+ * @param {float} width The width of the display's rectangle background.
+ * @param {float} height The height the display's rectangle background.
+ * @param {string} id The ID to give the attached rectangle
+ * @param fill {string} The hex code for the fill color of the background
+ *     rectangle.
+ **/
+function draw_rect(elem, width, height, id, fill) {
+  d3.select(elem)
+    .select("svg")
+    .append("rect")
+    .attrs({
+      "id": id,
+      "height": height,
+      "width": width,
+      "fill": fill
+    });
 }
 
 /**

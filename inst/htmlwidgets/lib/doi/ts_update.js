@@ -25,16 +25,17 @@ function setup_tree_ts(elem, width, height) {
     ["all_ts"]
   );
 
-  d3.select(elem)
-    .select("svg")
-    .append("rect")
-    .attrs({
-      "id": "tree_backdrop",
-      "height": 0.43 * height,
-      "width": width,
-      "fill": "#F7F7F7"
-    });
+  draw_rect(elem, 0.05 * width, height, "y_axis_backdrop", "#F7F7F7");
+  draw_rect(elem, width, 0.05 * height, "x_axis_backdrop", "#F7F7F7");
+  d3.select("#x_axis_backdrop")
+    .attr("transform", "translate(0, " + 0.95 * height + ")");
 
+  setup_groups(
+    d3.select(elem).select("svg"),
+    ["x_axis", "y_axis"]
+  );
+
+  draw_rect(elem, width, 0.43 * height, "tree_backdrop", "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
     ["zoom_ts", "links", "nodes", "all_brushes", "mouseover"]
@@ -69,6 +70,7 @@ function setup_tree_ts(elem, width, height) {
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+  draw_axes(elem, scales);
 
   var reshaped = get_reshaped_values(values);
   setup_search(elem, Object.keys(reshaped.dvalues));
@@ -226,6 +228,7 @@ function get_reshaped_values(values) {
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+  draw_axes(elem, scales);
 
   var reshaped = get_reshaped_values(values);
   setup_search(elem, Object.keys(reshaped.dvalues));
@@ -258,7 +261,11 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     .call(zoom_brush);
 
   // draw main brush for selecting series
-  var brush_extent = [[0, 0.43 * height], [width, height]];
+  var brush_extent = [
+    [scales.x.range()[0], scales.y.range()[1]],
+    [scales.x.range()[1], scales.y.range()[0]]
+  ];
+
   function add_fun() {
     new_brush(
       elem,
@@ -312,6 +319,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
  *     series.
  **/
 function timebox_update(elem, reshaped, tree, cur_lines, scales) {
+  update_axes(elem, scales);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true);
@@ -369,6 +377,7 @@ function update_factory(base_fun, elem, reshaped, tree, cur_lines, cur_scales) {
  *     order to highlight the currently selected IDs.
  **/
 function treebox_update(elem, reshaped, tree, cur_lines, scales) {
+  update_axes(elem, scales);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false);
