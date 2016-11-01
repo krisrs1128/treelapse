@@ -674,7 +674,7 @@ function tree_block(focus_node_id, display_dim, node_size) {
  *     be directly input to a d3 circle selection's .attr() to give styling /
  *     positioning for DoiTrees.
  **/
-function doi_node_attrs(values, scales, tree_obj, search_str) {
+function doi_node_attrs(values, scales, tree_obj, search_strs) {
   var attrs = node_attr_defaults();
 
   // fill and radius
@@ -689,23 +689,27 @@ function doi_node_attrs(values, scales, tree_obj, search_str) {
   };
 
   // stroke and stroke-width
-  attrs.stroke = function(d) {
-    var cur_tree = tree_obj.get_subtree(d.data.name);
-    if (search_str !== "" & cur_tree.contains_partial_match(search_str)) {
-      return "#D66F62";
-    }
-  };
+  attrs.stroke = "#D66F62";
   attrs["stroke-width"] = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name
-    );
-    var width = 0.05 * scales.size(d3.mean(cur_values));
-    if (width < 1.5) {
-      return 1.5;
+    var cur_tree = tree_obj.get_subtree(d.data.name);
+    for (var i = 0; i < search_strs.length; i++) {
+      if (search_strs[i] !== null &&
+	  search_strs[i] !== "" &&
+	  cur_tree.contains_partial_match(search_strs[i])) {
+
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.name
+	);
+	var width = 0.05 * scales.size(d3.mean(cur_values));
+	if (width < 1.5) {
+	  return 1.5;
+	}
+	return width;
+      }
     }
-    return width;
+    return 0;
   };
 
   return attrs;
@@ -767,21 +771,26 @@ function doi_link_attrs(values, scales) {
  *     be directly input to a d3 path selection's .attr() to give styling /
  *     positioning for DoiTrees.
  **/
-function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
+function doi_highlight_link_attrs(values, scales, tree_obj, search_strs) {
   var attrs = link_attr_defaults();
 
   attrs["stroke-width"] = function(d) {
     var cur_tree = tree_obj.get_subtree(d.target.data.name);
-    if (!(search_str !== "" & cur_tree.contains_partial_match(search_str))) {
-      return 0;
+    for (var i = 0; i < search_strs.length; i++) {
+      if (search_strs[i] !== null &&
+	  search_strs[i] !== "" &&
+	  cur_tree.contains_partial_match(search_strs[i])) {
+
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.target.data.name
+	);
+	return 1.3 * scales.size(d3.mean(cur_values));
+      }
     }
 
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.target.data.name
-    );
-    return 1.3 * scales.size(d3.mean(cur_values));
+    return 0;
   };
 
   attrs.stroke = function(d) { return "#D66F62";};

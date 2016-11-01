@@ -69,7 +69,9 @@ function setup_tree_ts(elem, width, height) {
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+
   var reshaped = get_reshaped_values(values);
+  setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     treebox_update,
@@ -80,16 +82,15 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     scales
   );
 
-
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
     .on("brush", function() {
       zoom_brush_fun(
 	elem,
 	reshaped.pairs,
-	brush_nodes_union,
 	scales,
-	update_fun
+	update_fun,
+	brush_nodes_union
       );
     })
     .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
@@ -121,6 +122,12 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
       brush_nodes_union
     );
   }
+
+  // draw search box
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).change(function() {
+    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_nodes_union);
+  });
 
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
@@ -219,7 +226,9 @@ function get_reshaped_values(values) {
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+
   var reshaped = get_reshaped_values(values);
+  setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     timebox_update,
@@ -236,9 +245,9 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
       zoom_brush_fun(
 	elem,
 	reshaped.pairs,
-	brush_ts_intersection,
 	scales,
-	update_fun
+	update_fun,
+	brush_ts_intersection
       );
     })
     .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
@@ -270,6 +279,12 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
       brush_ts_intersection
     );
   }
+
+  // draw search box
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).change(function() {
+    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_ts_intersection);
+  });
 
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
@@ -432,7 +447,7 @@ function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
  * @side-effects Redraws the main time series according to the scales set by the
  *     zoom brush on the top right.
  **/
-function zoom_brush_fun(elem, pairs, combine_fun, scales, update_fun) {
+function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
   var cur_extent = d3.brushSelection(
     d3.select("#zoom_ts").select(".zoom_brush").node()
   );

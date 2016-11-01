@@ -43,8 +43,12 @@ function draw_doi(elem,
 		  size_max,
 		  leaf_width,
 		  leaf_height) {
-  setup_search(elem);
+
+  var tree_obj = new Tree(tree);
+  var doi_tree = new DoiTree(tree);
+
   setup_background(elem, width, height, "#F7F7F7");
+  setup_search(elem, d3.set(values.unit).values());
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
   doi_update(
     elem,
@@ -116,29 +120,17 @@ function doi_update(elem,
   }
 
   console.log("Focusing on " + focus_node_id);
-  var search_id = "#search_box" + d3.select(elem).attr("id");
-  var search_str = $(search_id).val();
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).unbind("change");
+  $(search_id).on("change", function(e) {
+    doi_update_wrapper(focus_node_id);
+  });
+  var search_strs = get_search_values(elem);
 
   // essential DOI algorithm
   var tree_obj = new Tree(tree);
   var doi_tree = new DoiTree(tree);
   doi_tree.set_doi();
-
-  // setup search box
-  var node_names = tree_obj.get_attr_array("name");
-   $(function() {
-     $(search_id).autocomplete({
-       minLength: 0,
-       source: node_names,
-       search: function(event, ui) {
-   	doi_update_wrapper(focus_node_id);
-       },
-       select: function(event, ui) {
-   	$(search_id).val(ui.item.label);
-   	doi_update_wrapper(focus_node_id);
-       }
-     });
-   });
 
   var scales = {
     "size": d3.scaleLinear()
@@ -160,7 +152,7 @@ function doi_update(elem,
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    doi_node_attrs(values, scales, tree_obj, search_str),
+    doi_node_attrs(values, scales, tree_obj, search_strs),
     1000
   );
 
@@ -178,7 +170,7 @@ function doi_update(elem,
     d3.select(elem).select("#highlighted_links"),
     layout.links(),
     "highlighted_tree_links",
-    doi_highlight_link_attrs(values, scales, tree_obj, search_str),
+    doi_highlight_link_attrs(values, scales, tree_obj, search_strs),
     1000
   );
 
