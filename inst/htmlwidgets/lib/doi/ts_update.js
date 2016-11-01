@@ -22,7 +22,7 @@ function setup_tree_ts(elem, width, height) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
-    ["all_ts"]
+    ["all_ts", "x_axis", "y_axis"]
   );
 
   d3.select(elem)

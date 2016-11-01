@@ -31,10 +31,10 @@ function get_scales(values, width, height, size_min, size_max) {
   return {
     "x": d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0, width]),
+      .range([0.02 * width, width]),
     "y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([height, 0.43 * height]),
+      .range([0.97 * height, 0.43 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([size_min, size_max]),
