@@ -280,7 +280,11 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     .call(zoom_brush);
 
   // draw main brush for selecting series
-  var brush_extent = [[0, 0.43 * height], [width, height]];
+  var brush_extent = [
+    [scales.x.range()[0], scales.y.range()[1]],
+    [scales.x.range()[1], scales.y.range()[0]]
+  ];
+
   function add_fun() {
     new_brush(
       elem,
