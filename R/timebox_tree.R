@@ -4,6 +4,7 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @importFrom dplyr arrange select left_join group_by summarise
+#' @importFrom magrittr %>%
 #' @export
 timebox_tree <- function(values,
                          edges,
