@@ -735,16 +735,3 @@ function union(a, b) {
   }
   return res;
 }
-
-/**
- * Get the IDs in the search box
- *
- * @param {d3 selection} elem The html selection on which all the brushes to
- *     check are located.
- * @return {array of string} An array of strings that are currently selected in
- *     the search box.
- **/
-function get_search_values(elem) {
-  var search_id = "#search_box-" + d3.select(elem).attr("id");
-  return [""].concat($(search_id).val());
-}
