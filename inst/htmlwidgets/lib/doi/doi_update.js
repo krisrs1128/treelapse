@@ -121,7 +121,7 @@ function doi_update(elem,
 
   console.log("Focusing on " + focus_node_id);
   var search_id = "#search_box-" + d3.select(elem).attr("id");
-  $(search_id).unbind('change');
+  $(search_id).unbind("change");
   $(search_id).on("change", function(e) {
     doi_update_wrapper(focus_node_id);
   });

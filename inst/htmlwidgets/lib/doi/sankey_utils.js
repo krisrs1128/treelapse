@@ -153,13 +153,13 @@ function edge_centers(x_pos, links, values, scale, center_type) {
  * @param tree_obj {Tree} The Tree that we are drawing. This is used for
  *     searching partial matches among descendants (to determine whether to
  *     highlight a node or not).
- * @param {string} search_str The string to scan across all node ids looking for
+ * @param {string} search_strs The string to scan across all node ids looking for
  *     a partial match.
  * @return {dictionary of functions} A dictionary containing functions that can
  *     be directly input to a d3 path selection's .attr() to give styling /
  *     position for Sankey trees.
  **/
-function sankey_link_attrs(values, scales, group, centers, tree, search_str) {
+function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
   var attrs = link_attr_defaults();
   attrs.opacity = 0.1;
   attrs.stroke = scales.fill(group);
@@ -198,9 +198,17 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_str) {
   };
 
   attrs["stroke-opacity"] = function(d) {
-    var cur_tree = tree.get_subtree(d.target.data.name);
-    if (cur_tree.contains_partial_match(search_str)) {
+    if (search_strs[1] === null) { // case nothing selected
       return 0.8;
+    }
+
+    var cur_tree = tree.get_subtree(d.target.data.name);
+    for (var i = 0; i < search_strs.length; i++) {
+      if (search_strs[i] !== null &&
+	  search_strs[i] !== "" &&
+	  cur_tree.contains_partial_match(search_strs[i])) {
+	return 0.8;
+      }
     }
     return 0.2;
   };
