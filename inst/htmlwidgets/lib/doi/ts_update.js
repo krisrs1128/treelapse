@@ -203,26 +203,6 @@ function get_reshaped_values(values) {
   return reshaped;
 }
 
-function draw_axes(elem, scales) {
-  d3.select("#x_axis")
-    .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
-    .call(d3.axisBottom(scales.x));
-  d3.select("#y_axis")
-    .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
-    .call(d3.axisLeft(scales.y));
-}
-
-function update_axes(elem, scales) {
-  d3.select("#x_axis")
-    .transition()
-    .duration(100)
-    .call(d3.axisBottom(scales.x));
-  d3.select("#y_axis")
-    .transition()
-    .duration(100)
-    .call(d3.axisLeft(scales.y));
-}
-
 /**
  * Setup and draw the initial timeboxes display
  *
