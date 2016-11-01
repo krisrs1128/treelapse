@@ -2,7 +2,7 @@
 #'
 #' <Add Description>
 #' @import htmlwidgets
-#' @importFrom magrittr %%>
+#' @importFrom magrittr %>%
 #' @importFrom dplyr arrange select left_join group_by summarise
 #' @importFrom jsonlite toJSON
 #' @export
