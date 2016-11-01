@@ -130,7 +130,7 @@ function sankey_update(elem,
   $(search_id).on("change", function(e) {
     sankey_update_wrapper(focus_node_id);
   });
-  var search_strs = [""].concat($(search_id).val());
+  var search_strs = get_search_values(elem);
 
   var groups = d3.set(values.group).values();
   var scales = {

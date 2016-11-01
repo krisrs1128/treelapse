@@ -47,11 +47,6 @@ function get_scales(values, width, height, size_min, size_max) {
   };
 }
 
-function get_search_lines(elem) {
-  var search_id = "#search_box-" + d3.select(elem).attr("id");
-  return [""].concat($(search_id).val());
-}
-
 /**
  * Draw static TS associated with time / treeboxes
  *
@@ -78,14 +73,14 @@ function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
     scales,
     "all_ts",
     cur_lines,
-    get_search_lines(elem)
+    get_search_values(elem)
   );
 
   d3.select(elem)
     .select("#mouseover > text")
     .attr("font-size", 0);
 
-  var search_lines = get_search_lines(elem);
+  var search_lines = get_search_values(elem);
   function mouseover_fun(d) {
     if (cur_lines.concat(search_lines).indexOf(d) == -1) {
       return;
@@ -225,7 +220,7 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
   );
 
   // draw nodes
-  var search_lines = get_search_lines(elem);
+  var search_lines = get_search_values(elem);
   selection_update(
     "circle",
     d3.select(elem).select("#nodes"),
@@ -399,7 +394,7 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
  * @side-effects Draws zooming time series on the #zoom_ts group on elem
  **/
 function draw_zoom(elem, pairs, cur_lines, scales) {
-  var search_lines = get_search_lines(elem);
+  var search_lines = get_search_values(elem);
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
   draw_ts_internal(elem, pairs, cur_scales, "zoom_ts", cur_lines, search_lines);
 }
@@ -741,12 +736,15 @@ function union(a, b) {
   return res;
 }
 
-// https://jqueryui.com/autocomplete/#multiple
-function split(val) {
-  //return val.split( /,\s*/ );
-  return val.split(",");
-}
-
-function extract_last(term) {
-  return split(term).pop();
+/**
+ * Get the IDs in the search box
+ *
+ * @param {d3 selection} elem The html selection on which all the brushes to
+ *     check are located.
+ * @return {array of string} An array of strings that are currently selected in
+ *     the search box.
+ **/
+function get_search_values(elem) {
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  return [""].concat($(search_id).val());
 }

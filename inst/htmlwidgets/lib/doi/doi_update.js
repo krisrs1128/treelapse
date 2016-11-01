@@ -125,7 +125,7 @@ function doi_update(elem,
   $(search_id).on("change", function(e) {
     doi_update_wrapper(focus_node_id);
   });
-  var search_strs = [""].concat($(search_id).val());
+  var search_strs = get_search_values(elem);
 
   // essential DOI algorithm
   var tree_obj = new Tree(tree);
