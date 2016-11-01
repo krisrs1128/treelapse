@@ -202,6 +202,15 @@ function get_reshaped_values(values) {
   return reshaped;
 }
 
+function draw_axes(elem, scales) {
+  d3.select("#x_axis")
+    .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
+    .call(d3.axisBottom(scales.x));
+  d3.select("#y_axis")
+    .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
+    .call(d3.axisLeft(scales.y));
+}
+
 /**
  * Setup and draw the initial timeboxes display
  *
@@ -226,6 +235,7 @@ function get_reshaped_values(values) {
 function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+  draw_axes(elem, scales);
 
   var reshaped = get_reshaped_values(values);
   setup_search(elem, Object.keys(reshaped.dvalues));
