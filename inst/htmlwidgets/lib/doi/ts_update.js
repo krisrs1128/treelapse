@@ -211,6 +211,13 @@ function draw_axes(elem, scales) {
     .call(d3.axisLeft(scales.y));
 }
 
+function update_axes(elem, scales) {
+  d3.select("#x_axis")
+    .call(d3.axisBottom(scales.x));
+  d3.select("#y_axis")
+    .call(d3.axisLeft(scales.y));
+}
+
 /**
  * Setup and draw the initial timeboxes display
  *
@@ -322,6 +329,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
  *     series.
  **/
 function timebox_update(elem, reshaped, tree, cur_lines, scales) {
+  update_axes(elem, scales);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true);
