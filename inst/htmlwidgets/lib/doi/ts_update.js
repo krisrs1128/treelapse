@@ -70,6 +70,7 @@ function setup_tree_ts(elem, width, height) {
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
+  draw_axes(elem, scales);
 
   var reshaped = get_reshaped_values(values);
   setup_search(elem, Object.keys(reshaped.dvalues));
@@ -376,6 +377,7 @@ function update_factory(base_fun, elem, reshaped, tree, cur_lines, cur_scales) {
  *     order to highlight the currently selected IDs.
  **/
 function treebox_update(elem, reshaped, tree, cur_lines, scales) {
+  update_axes(elem, scales);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false);
