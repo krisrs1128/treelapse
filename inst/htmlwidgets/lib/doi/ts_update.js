@@ -22,19 +22,20 @@ function setup_tree_ts(elem, width, height) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
-    ["all_ts", "x_axis", "y_axis"]
+    ["all_ts"]
   );
 
-  d3.select(elem)
-    .select("svg")
-    .append("rect")
-    .attrs({
-      "id": "tree_backdrop",
-      "height": 0.43 * height,
-      "width": width,
-      "fill": "#F7F7F7"
-    });
+  draw_rect(elem, 0.05 * width, height, "y_axis_backdrop", "#F7F7F7");
+  draw_rect(elem, width, 0.05 * height, "x_axis_backdrop", "#F7F7F7");
+  d3.select("#x_axis_backdrop")
+    .attr("transform", "translate(0, " + 0.95 * height + ")");
 
+  setup_groups(
+    d3.select(elem).select("svg"),
+    ["x_axis", "y_axis"]
+  );
+
+  draw_rect(elem, width, 0.43 * height, "tree_backdrop", "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
     ["zoom_ts", "links", "nodes", "all_brushes", "mouseover"]

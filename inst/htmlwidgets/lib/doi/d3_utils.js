@@ -23,14 +23,19 @@ function setup_background(elem, width, height, fill) {
 	height: height
       });
 
-  var rect = svg_elem
-      .append("rect")
-      .attrs({
-	"id": "background_rect",
-	"width": width,
-	"height": height,
-	"fill": fill
-      });
+  draw_rect(elem, width, height, "background_rect", fill);
+}
+
+function draw_rect(elem, width, height, id, fill) {
+  d3.select(elem)
+    .select("svg")
+    .append("rect")
+    .attrs({
+      "id": "id",
+      "height": height,
+      "width": width,
+      "fill": fill
+    });
 }
 
 /**
