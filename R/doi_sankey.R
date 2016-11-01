@@ -3,7 +3,7 @@
 #' <Add Description>
 #' @import htmlwidgets
 #' @importFrom magrittr %%>
-#' @importFrom dplyr arrange select
+#' @importFrom dplyr arrange select left_join group_by summarise
 #' @importFrom jsonlite toJSON
 #' @export
 doi_sankey <- function(values,
@@ -23,11 +23,13 @@ doi_sankey <- function(values,
   }
 
   # order branches according to abundance
-  match_ix <- match(edges$child, values$unit)
-  edges$value <- values[match_ix, "value"]
   edges <- edges %>%
-    arrange(parent, desc(value)) %>%
-    select(parent, child)
+    left_join(values, by = c("child" = "unit")) %>%
+    group_by(parent, child) %>%
+    summarise(mval = mean(value)) %>%
+    arrange(parent, desc(mval)) %>%
+    select(parent, child) %>%
+    as.data.frame()
 
   # forward options using x
   x <- list(
