@@ -214,8 +214,12 @@ function draw_axes(elem, scales) {
 
 function update_axes(elem, scales) {
   d3.select("#x_axis")
+    .transition()
+    .duration(100)
     .call(d3.axisBottom(scales.x));
   d3.select("#y_axis")
+    .transition()
+    .duration(100)
     .call(d3.axisLeft(scales.y));
 }
 
