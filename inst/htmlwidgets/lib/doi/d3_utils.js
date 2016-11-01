@@ -31,7 +31,7 @@ function draw_rect(elem, width, height, id, fill) {
     .select("svg")
     .append("rect")
     .attrs({
-      "id": "id",
+      "id": id,
       "height": height,
       "width": width,
       "fill": fill
