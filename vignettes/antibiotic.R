@@ -19,6 +19,9 @@ mapping <- sample_data(abt)
 
 ## ---- get-taxa ----
 taxa <- tax_table(abt)
+taxa <- gsub("_1", "", taxa)
+taxa <- gsub("_2", "", taxa)
+taxa <- gsub("uncultured", "", taxa)
 taxa[taxa == ""] <- NA
 edges <- taxa_edgelist(taxa)
 
@@ -34,7 +37,7 @@ values <- data.frame(
 )
 
 for (i in seq_along(times)) {
-  for (j in seq_along(subjects)) {
+  for (j in seq_along(subjects)[1]) {
     cat(sprintf(
       "Computing tree stats for subject %s at time %f \n",
       subjects[j],
@@ -71,11 +74,30 @@ for (i in seq_along(times)) {
   }
 }
 
-## ---- display-timebox
-cur_subject <- "E"
+## ---- prep-timebox-data ----
+cur_subject <- "D"
+time_data <- values %>%
+  filter(subject == cur_subject, type == "sum") %>%
+  select(time, unit, value) %>%
+  arrange(unit)
+
+## ---- timebox-mappings ----
+unique(mapping[mapping$ind == cur_subject, c("time", "condition")])
+
+## ---- treebox ----
+treebox(time_data, edges, size_min = 1, size_max = 10)
+
+## ---- timebox ----
+timebox_tree(time_data, edges, size_min = 1, size_max = 10)
+
+## ---- timebox-means-data ----
 time_data <- values %>%
   filter(subject == cur_subject, type == "mean") %>%
   select(time, unit, value) %>%
   arrange(unit)
 
-timebox_tree(time_data, edges, size_min = 1)
+## ---- treebox-means ----
+treebox(time_data, edges, size_min = .5, size_max = 2)
+
+## ---- timebox-means ----
+timebox_tree(time_data, edges, size_min = .5, size_max = 2)
