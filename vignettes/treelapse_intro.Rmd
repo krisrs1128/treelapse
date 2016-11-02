@@ -7,7 +7,7 @@ vignette: >
   %\VignetteIndexEntry{DOI Trees for Microbial Abundance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: ["treelapse_intro.bib"]
+bibliography: treelapse_intro.bib
 link-citations: yes
 ---
 
@@ -162,8 +162,10 @@ over them. Other than this, the interaction is exactly the same.
 
 Few of the ideas in this package are new. The key conceptual advances behind DOI
 trees, DOI sankeys, and time / treeboxes were introduced in
-\cite{heer2004doitrees, hochheiser2002visual, guerra2013visualizing},
+[@heer2004doitrees], [@hochheiser2002visual], and [@guerra2013visualizing],
 respectively. Further, the implementation here would be impossible without the
-htmlwidgets package \cite{vaidyanathan2014htmlwidgets} -- it's only through this
+htmlwidgets package [@vaidyanathan2014htmlwidgets] -- it's only through this
 this package that we can link interactive data analysis in R with interactive
 visualization using D3.
+
+## References ##
