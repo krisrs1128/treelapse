@@ -37,7 +37,7 @@ values <- data.frame(
 )
 
 for (i in seq_along(times)) {
-  for (j in seq_along(subjects)[1]) {
+  for (j in seq_along(subjects)) {
     cat(sprintf(
       "Computing tree stats for subject %s at time %f \n",
       subjects[j],
@@ -82,7 +82,11 @@ time_data <- values %>%
   arrange(unit)
 
 ## ---- timebox-mappings ----
-unique(mapping[mapping$ind == cur_subject, c("time", "condition")])
+conditions <- mapping %>%
+  filter(ind == cur_subject) %>%
+  select(time, condition) %>%
+  unique()
+conditions
 
 ## ---- treebox ----
 treebox(time_data, edges, size_min = 1, size_max = 10)
@@ -101,3 +105,19 @@ treebox(time_data, edges, size_min = .5, size_max = 2)
 
 ## ---- timebox-means ----
 timebox_tree(time_data, edges, size_min = .5, size_max = 2)
+
+## ---- doi-sankey ----
+condition_values <- values %>%
+  left_join(conditions) %>%
+  group_by(subject, unit, type, condition) %>%
+  dplyr::summarise(value = mean(value))
+
+sankey_data <- condition_values %>%
+  filter(subject == cur_subject, type == "sum") %>%
+  as.data.frame() %>%
+  select(condition, unit, value)
+colnames(sankey_data)[1] <- "group"
+sankey_data$group <- gsub(" ", "", sankey_data$group)
+
+doi_sankey(sankey_data, edges, width = 4000, leaf_width = 30)
+values <- sankey_data
