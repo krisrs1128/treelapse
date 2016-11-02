@@ -38,7 +38,7 @@ function setup_tree_ts(elem, width, height) {
   draw_rect(elem, width, 0.43 * height, "tree_backdrop", "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
-    ["zoom_ts", "links", "nodes", "all_brushes", "mouseover"]
+    ["zoom_ts", "links", "nodes", "ts_brushes", "zoom_brush", "mouseover"]
   );
 
   d3.select(elem)
@@ -98,7 +98,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
   d3.select(elem)
-    .select("#zoom_ts")
+    .select("#zoom_brush")
     .append("g")
     .classed("zoom_brush", "true")
     .call(zoom_brush);
@@ -257,7 +257,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
   d3.select(elem)
-    .select("#zoom_ts")
+    .select("#zoom_brush")
     .append("g")
     .classed("zoom_brush", "true")
     .call(zoom_brush);
@@ -460,7 +460,7 @@ function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
  **/
 function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
   var cur_extent = d3.brushSelection(
-    d3.select("#zoom_ts").select(".zoom_brush").node()
+    d3.select("#zoom_brush").select(".zoom_brush").node()
   );
 
   // reset domains for scales
@@ -523,7 +523,7 @@ function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
       .selectAll(".brush")
       .nodes().length;
   d3.select(elem)
-    .select("#all_brushes")
+    .select("#ts_brushes")
     .append("g")
     .classed("brush", true)
     .attrs({"id": "brush-" + n_brushes})
