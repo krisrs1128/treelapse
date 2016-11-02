@@ -6,6 +6,7 @@
 library("ape")
 library("treelapse")
 library("plyr")
+library("dplyr")
 
 ## ---- make-edgelist ----
 n_tips <- 100
