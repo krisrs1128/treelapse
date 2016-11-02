@@ -38,10 +38,12 @@ function setup_background(elem, width, height, fill) {
  * @side-effects Draws x and y axes on group elements #x_axis and #y_axis
  **/
 function draw_axes(elem, scales) {
-  d3.select("#x_axis")
+  d3.select(elem)
+    .select("#x_axis")
     .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
     .call(d3.axisBottom(scales.x));
-  d3.select("#y_axis")
+  d3.select(elem)
+    .select("#y_axis")
     .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
     .call(d3.axisLeft(scales.y));
 }
@@ -59,16 +61,17 @@ function draw_axes(elem, scales) {
  *     to reflect the new scales.
  **/
 function update_axes(elem, scales) {
-  d3.select("#x_axis")
+  d3.select(elem)
+    .select("#x_axis")
     .transition()
     .duration(100)
     .call(d3.axisBottom(scales.x));
-  d3.select("#y_axis")
+  d3.select(elem)
+    .select("#y_axis")
     .transition()
     .duration(100)
     .call(d3.axisLeft(scales.y));
 }
-
 
 /**
  * Draw a filled rectangle
