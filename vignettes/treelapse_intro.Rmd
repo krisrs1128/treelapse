@@ -1,0 +1,156 @@
+---
+title: "An Introduction to the Treelapse Package"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DOI Trees for Microbial Abundance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+link-citations: yes
+---
+
+```{r}
+library("knitr")
+read_chunk("treelapse_intro.R")
+opts_chunk$set(fig.width = 8, fig.height = 5)
+```
+
+## Introduction ##
+
+`treelapse` is an R package for interactive visualization of data that can be
+arranged along trees. This interactivity is helpful simplifies navigation across
+the tree (and the associated comparisons across data points).
+
+Our motivating application is to the microbiome, where time series or
+multinomial counts of microbial abundances can be arranged along
+an evolutionary tree. This abstraction is useful in other domains, however.
+For example, a tree can be built from geographic distances, or using
+hierarchical clustering. Different applications are described in the other
+vignettes to this package -- this vignette is designed just to get you started.
+
+This package is pretty simple, since we have tried to maintain focus on a few of
+the recurring questions in this problem domain. We consider three types of data,
+which usually come with corresponding, relatively generic questions.
+
+* **Scalars on trees**: Here we have a single number associated with each node in
+the tree. The basic questions of interest are how the values across nodes
+compare with each other, or whether there are any subtrees with consistently
+large / small values. This questions are addressed by DOI trees.
+* **Vectors on trees**: Sometimes each node is associated with a vector of
+measurements. For example, we might have counts for treatment vs. control
+groups. If we want to compare how the groups differ across subtrees, we can use
+the DOI Sankeys.
+* **Functions on trees**: Here, each node is associated with a function or time
+series. The questions of interest are whether any interesting shapes are present
+in the functions, and whether these shapes tend to be grouped along subtrees.
+This question is addressed by time and treeboxes.
+
+## Examples ##
+
+To describe the required input format for these functions, we give a toy example
+on simulated data. For more interesting motivating applications, see the other
+vignettes.
+
+In each method, we require a tree specified as an edgelist. Specifically, this
+is a two column `data.frame`, with two columns, `parent` and `child`, specifying
+the edge structure in the tree. We simulate such an edgelist using the `ape`
+package. The tip nodes are numbered 1 to 100, and all others are internal nodes.
+The root is node 101.
+
+```{r, make-edgelist}
+```
+
+Now, we need to associate data with each node. In general, this will be a
+`data.frame`, with the two columns,
+
+* `unit`: The name of the node to which the value is associated. The name must
+be the same as the name in `edges`.
+* `value`: The scalar value associated with the node.
+
+The DOI Sankeys require an extra column, `group`, for each node, while the
+time and treebox require an extra column `time`. Hence, each value is associated
+with either a `(unit)`, `(unit, group)` or `(unit, time)` tuple (i.e., we expect
+"tall" and not "wide" representations). This is illustrated below.
+
+### DOI Trees ###
+
+DOI trees expect just a scalar associated with each node. Here, we generate a
+random uniform variable for each node.
+
+```{r, doi-values}
+```
+
+The result is displayed below. Clicking on a node increases its
+"degree-of-interest" (DOI), and refocuses the display on that node. Further,
+previously hidden nodes are revealed depending on their proximity to this new
+focus node.
+
+The parameters `leaf_width` and `size_min` control the spacing and size of
+points -- `leaf_width` controls the $x$ spacing between nodes, while `size_min`
+specifies the radius of the smallest node.
+
+```{r, doi-display-1}
+```
+
+Suppose we didn't have data for each internal node. It might be interesting to
+aggregate up the tree. This is what the `tree_sum` function does. There are
+analogous functions for computing averages and aggregate diversities.
+
+```{r, doi-tip-values}
+```
+
+The resulting tree is somewhat more pleasing to look at, because width of an
+edge leading into a node is equal to the sum of the widths flowing out (since
+we aggregated values from the tips up).
+
+```{r, doi-display-2}
+```
+
+### DOI Sankeys ###
+
+For the DOI Sankey, we include a grouping variable. We will suppose there are
+tip values for each of three groups, and then aggregate up the tree one group at
+a time. The function below generates random tip values and does this
+aggregation. Notice that we have to convert the unit and group columns to
+characters: by default these will be integers, and `doi_sankey` will fail.
+
+```{r, make-sankey-data}
+```
+
+Given this data, we can create the sankey visualization. Clicking on edges
+will turn focus to the "node" directly above the click-on edge. Of course, here
+the groups all have about the same width, because the leaves have randomly
+generated values.
+
+```{r, vis-sankey-doi}
+```
+
+### Time / Treeboxes ###
+
+The input format for time and treeboxes is similar to that for the DOI sankey,
+where we have multiple measurements of the same unit across multiple timepoints
+(rather than across groups). In fact, we can use the same function to generate
+toy data.
+
+```{r, make-timebox-data}
+```
+
+Below we display the timebox. Here, pressing "new box" will let you draw a brush
+across the time series, highlighting any that pass through the box. The
+corresponding tree nodes will also be highlighted, and their names are displayed
+on mouseover. Further, pressing "new box" will let you draw another brush over
+the time series -- only time series passing through both boxes will be
+highlighted. The display in the top right is a miniature view of the main time
+series display that can be used for zooming in on certain time / value windows.
+Click and drag a brush over this sub-display to refocus the main time series
+display the associated time and value ranges. Finally, searching for a node name
+in the search box will highlight the associated series and node in red.
+
+
+
+## Previous Work ##
+
+* we  use the [HTMLWidgets](http://www.htmlwidgets.org/)
+package to connect data manipulation in R and with data visualization in d3.
+* we are using timeboxes, doi trees, and (sort of) treeversity
