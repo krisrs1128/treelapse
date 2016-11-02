@@ -97,7 +97,8 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     })
     .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
-  d3.select("#zoom_ts")
+  d3.select(elem)
+    .select("#zoom_ts")
     .append("g")
     .classed("zoom_brush", "true")
     .call(zoom_brush);
@@ -255,7 +256,8 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     })
     .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
-  d3.select("#zoom_ts")
+  d3.select(elem)
+    .select("#zoom_ts")
     .append("g")
     .classed("zoom_brush", "true")
     .call(zoom_brush);
