@@ -8,15 +8,12 @@
 #' @export
 treebox <- function(values,
                     edges,
-                    root = NULL,
                     width = NULL,
                     height = NULL,
                     size_min = 0,
                     size_max = 10
                     ) {
-  if (is.null(root)) {
-    root  <- edges[1, 1]
-  }
+  root <- get_root(edges)
 
   # order branches according to abundance
   edges <- edges %>%

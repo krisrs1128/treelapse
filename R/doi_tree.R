@@ -9,7 +9,6 @@
 doi_tree <- function(values,
                      edges,
                      focus_node_id = NULL,
-                     root = NULL,
                      width = NULL,
                      height = NULL,
                      size_min = 0,
@@ -19,9 +18,7 @@ doi_tree <- function(values,
   if (is.null(focus_node_id)) {
     focus_node_id  <- edges[1, 1]
   }
-  if (is.null(root)) {
-    root  <- edges[1, 1]
-  }
+  root <- get_root(edges)
 
   # order branches according to abundance
   edges <- edges %>%
