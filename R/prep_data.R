@@ -224,3 +224,12 @@ tip_descendants <- function(el, cur_node) {
   )
   tips[tips %in% names(descendants)]
 }
+
+#' @title Get root node
+#' @param el [character matrix] A matrix specifying the tree structure. The
+#' first column are character names for the parents, the second are children.
+#' @return [character vector] A vector of nodes that have children but no
+#' parents
+get_root <- function(edges) {
+  setdiff(edges[, 1], edges[, 2])
+}
