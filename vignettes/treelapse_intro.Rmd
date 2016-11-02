@@ -7,13 +7,14 @@ vignette: >
   %\VignetteIndexEntry{DOI Trees for Microbial Abundance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: ["treelapse_intro.bib"]
 link-citations: yes
 ---
 
 ```{r}
 library("knitr")
 read_chunk("treelapse_intro.R")
-opts_chunk$set(fig.width = 8, fig.height = 5)
+opts_chunk$set(fig.width = 8, fig.height = 5, cache = TRUE)
 ```
 
 ## Introduction ##
@@ -147,10 +148,22 @@ Click and drag a brush over this sub-display to refocus the main time series
 display the associated time and value ranges. Finally, searching for a node name
 in the search box will highlight the associated series and node in red.
 
+```{r, vis-timebox}
+```
 
+Timeoboxes only let you query based on time series shapes. Treeboxes are the
+natural converse -- they let you select nodes in the tree by drawing brushes
+over them. Other than this, the interaction is exactly the same.
+
+```{r, vis-treebox}
+````
 
 ## Previous Work ##
 
-* we  use the [HTMLWidgets](http://www.htmlwidgets.org/)
-package to connect data manipulation in R and with data visualization in d3.
-* we are using timeboxes, doi trees, and (sort of) treeversity
+Few of the ideas in this package are new. The key conceptual advances behind DOI
+trees, DOI sankeys, and time / treeboxes were introduced in
+\cite{heer2004doitrees, hochheiser2002visual, guerra2013visualizing},
+respectively. Further, the implementation here would be impossible without the
+htmlwidgets package \cite{vaidyanathan2014htmlwidgets} -- it's only through this
+this package that we can link interactive data analysis in R with interactive
+visualization using D3.
