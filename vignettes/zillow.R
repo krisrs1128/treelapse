@@ -11,7 +11,7 @@ library("treelapse")
 zillow <- fread("~/Desktop/Neighborhood_Zhvi_AllHomes.csv") %>%
   filter(State == "CA") %>%
   as.data.table()
-zillow$RegionID <- paste0(zillow$RegionID, zillow$RegionName)
+zillow$RegionID <- paste0(zillow$RegionID, "_", zillow$RegionName)
 
 zillow_impute <- zillow[, 8:ncol(zillow), with = F] %>%
   as.matrix() %>%
@@ -61,7 +61,7 @@ grouped_list <- list()
 for (i in seq_len(ncol(tip_values) - 1)) {
   cat(sprintf("Processing month %d\n", i))
   cur_values <- setNames(tip_values[, i + 1], tip_values[, 1])
-  grouped_list[[i]] <- tree_mean(edges, log(1 + cur_values))
+  grouped_list[[i]] <- tree_mean(edges, log(cur_values))
 }
 
 values <- do.call(rbind, grouped_list) %>%
@@ -69,3 +69,4 @@ values <- do.call(rbind, grouped_list) %>%
 
 ## ---- timebox-trees ----
 timebox_tree(values, edges, size_max = 4)
+treebox(values, edges, size_max = 4)
