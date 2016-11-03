@@ -5,10 +5,9 @@
 ## ---- setup ----
 library("plyr")
 library("dplyr")
-library("treelapse")
 library("caret")
-
-bike <- read.csv("~/Desktop/hour.csv")
+library("treelapse")
+data(bike)
 
 logit <- function(p) {
   log(p / (1 - p))
