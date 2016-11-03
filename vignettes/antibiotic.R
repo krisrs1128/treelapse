@@ -4,9 +4,9 @@
 
 ## ---- setup ----
 library("phyloseq")
-library("treelapse")
 library("plyr")
 library("dplyr")
+library("treelapse")
 data(abt)
 
 ## ---- timebox ----
@@ -110,7 +110,7 @@ timebox_tree(time_data, edges, size_min = .5, size_max = 2)
 condition_values <- values %>%
   left_join(conditions) %>%
   group_by(subject, unit, type, condition) %>%
-  dplyr::summarise(value = mean(value))
+  summarise(value = mean(value))
 
 sankey_data <- condition_values %>%
   filter(subject == cur_subject, type == "sum") %>%

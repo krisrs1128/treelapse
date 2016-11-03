@@ -27,7 +27,8 @@ timebox_tree <- function(values,
   # forward options using x
   x <- list(
     values,
-    toJSON(tree_json(edges, root)),
+    root,
+    edges,
     size_min,
     size_max
   )
