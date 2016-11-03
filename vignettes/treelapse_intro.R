@@ -25,6 +25,7 @@ values <- data.frame(
 )
 
 ## ---- doi-display-1 ----
+install(quick = T)
 doi_tree(values, edges, leaf_width = 50, size_min = 2)
 
 ## ---- doi-tip-values ----
@@ -74,7 +75,6 @@ timebox_values <- make_grouped_data(100, n_tips, edges)
 colnames(timebox_values) <- c("time", "unit", "value")
 
 ## ---- vis-timebox ----
-install(quick = TRUE)
 timebox_tree(timebox_values, edges, size_min = 1)
 
 ## ---- vis-treebox ----
