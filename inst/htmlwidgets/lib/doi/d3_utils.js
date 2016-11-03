@@ -301,3 +301,29 @@ function get_search_values(elem) {
   var search_id = "#search_box-" + d3.select(elem).attr("id");
   return [""].concat($(search_id).val());
 }
+
+
+/**
+ * Build a hierarchical object from an htmlwidgets parsed edgelist
+ *
+ * @param {dictionary of arrays} edge_arrays An object with two keys, "parents"
+ *     and "children", each linked to an array of strings. The i^th element of
+ *     "parents" is the parent to the i^th element of "children".
+ * @return {array of objects} A reshaped version of edge_arrays, which is just
+ *      one array but whose elements are tuples of the form
+ *      {"parent": "x", "child": "y"}
+ **/
+function stratified_tree(edge_arrays, root) {
+  var edges = [{"parent": "", "name": root}];
+  for (var i = 0; i < edge_arraysx.parent.length; i++) {
+    edges.push({
+      "parent": edge_arrays.parent[i],
+      "name": edge_arrays.child[i]
+    });
+  }
+
+  return d3.stratify()
+    .id(function(d) { return d.name; })
+    .parentId(function(d) { return d.parent; })
+  (edges);
+}
