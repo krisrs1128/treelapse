@@ -25,7 +25,6 @@ values <- data.frame(
 )
 
 ## ---- doi-display-1 ----
-install(quick = T)
 doi_tree(values, edges, leaf_width = 50, size_min = 2)
 
 ## ---- doi-tip-values ----
