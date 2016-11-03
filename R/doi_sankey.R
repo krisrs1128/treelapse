@@ -31,7 +31,8 @@ doi_sankey <- function(values,
   # forward options using x
   x <- list(
     values,
-    toJSON(tree_json(edges, root)),
+    edges,
+    root,
     focus_node_id,
     size_max,
     leaf_width,

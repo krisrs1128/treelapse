@@ -170,16 +170,16 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
     // widths of each descendant edge
     var target_center = centers.source
 	.filter(function(center) {
-	  return (center.target == d.target.data.name) &&
+	  return (center.target == d.target.data.id) &&
 	    (center.group == group);
 	})[0].x;
 
     // sources need to be based abundances of edges flowing out
     var source_center = centers.target
 	.filter(function(center) {
-	  return (center.source == d.source.data.name) &&
+	  return (center.source == d.source.data.id) &&
 	    (center.group == group) &&
-	    (center.target == d.target.data.name);
+	    (center.target == d.target.data.id);
 	})[0].x;
 
     return "M" + target_center + "," + d.target.y +
@@ -193,7 +193,7 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
     return centers.source
       .filter(function(center) {
 	return (center.group == group) &&
-	  (center.target == d.target.data.name);
+	  (center.target == d.target.data.id);
       })[0].width;
   };
 
@@ -202,7 +202,7 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
       return 0.8;
     }
 
-    var cur_tree = tree.get_subtree(d.target.data.name);
+    var cur_tree = tree.get_subtree(d.target.data.id);
     for (var i = 0; i < search_strs.length; i++) {
       if (search_strs[i] !== null &&
 	  search_strs[i] !== "" &&
@@ -239,7 +239,7 @@ function sankey_text_attrs(values, scales) {
     var cur_values = get_matching_subarray(
       values.value,
       values.unit,
-      d.data.name
+      d.data.id
     );
 
     return d.x + 0.5 * scales.size(d3.sum(cur_values)) + 5;
@@ -249,7 +249,7 @@ function sankey_text_attrs(values, scales) {
   attrs.fill = "#474747";
   attrs.text = function(d) {
     if (d.data.doi >= -1) {
-      return d.data.name;
+      return d.data.id;
     }
   };
 
