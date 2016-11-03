@@ -20,7 +20,7 @@
  * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
  *     searching partial matches among descendants (to determine whether to
  *     highlight a node or not).
- * @param {string} focus_node_id A string specifying the .name field in the
+ * @param {string} focus_node_id A string specifying the .id field in the
  *     object that will be considered the "focus" node, around which to set the
  *     doi distibution.
  * @param {float} size_min The minimum size (in pixels) of any node.
@@ -76,13 +76,13 @@ function draw_doi(elem,
  * @param {float} height The height the display's rectangle background.
  * @param {object} values An object with two subarrays,
  *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
+ *       - unit {array of string} The node.ids associated with values.
  *     The i^th element in each of the three arrays correspond to the same
  *     entity.
  * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
  *     searching partial matches among descendants (to determine whether to
  *     highlight a node or not).
- * @param {string} focus_node_id A string specifying the .name field in the
+ * @param {string} focus_node_id A string specifying the .id field in the
  *     object that will be considered the "focus" node, around which to set the
  *     doi distibution.
  * @param {float} size_min The minimum size (in pixels) of any node.
@@ -185,5 +185,5 @@ function doi_update(elem,
 
   d3.select(elem).
     selectAll(".tree_node")
-    .on("click", function(d) { return doi_update_wrapper(d.data.name); });
+    .on("click", function(d) { return doi_update_wrapper(d.data.id); });
 }
