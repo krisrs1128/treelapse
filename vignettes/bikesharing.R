@@ -58,8 +58,6 @@ y <- bike_day$cnt_morning
 
 tune_grid <- data.frame("cp" = c(.001))
 cart_model <- train(x = x, y = y, method = "rpart", tuneGrid = tune_grid)
-plot(cart_model$finalModel)
-text(cart_model$finalModel)
 
 leaf_ix <- cart_model$finalModel$where
 frame <- cart_model$finalModel$frame
@@ -115,3 +113,4 @@ values <- do.call(rbind, grouped_list) %>%
   melt(varnames = c("time", "unit"))
 
 timebox_tree(values, edges)
+treebox(values, edges)
