@@ -1,4 +1,38 @@
+/*******************************************************************************
+* @fileoverview Wrappers that update DOI trees according to user interaction.
+* @see_also doi_utils.js
+*
+* @author kriss1@stanford.edu
+*******************************************************************************/
 
+/**
+ * Setup and draw the DOI tree
+ *
+ * @param {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {float} width The width of the display's rectangle background.
+ * @param {float} height The height the display's rectangle background.
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node names associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
+ *     searching partial matches among descendants (to determine whether to
+ *     highlight a node or not).
+ * @param {string} focus_node_id A string specifying the .name field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param {float} size_min The minimum size (in pixels) of any node.
+ * @param {float} size_max The maximum size (in pixels) of any node.
+ * @param {float} leaf_height The height of the rectangle allocated to each
+ *     leaf node
+ * @param {float} leaf_width The width of the rectangle allocated to each
+ *     leaf node
+ * @return null
+ * @side-effects Sets up and draws the DOI tree on elem. This includes 4 overall
+ *     groups, for links, nodes, mouseover text, and highlighted links.
+ **/
 function draw_doi(elem,
 		  width,
 		  height,
@@ -9,8 +43,12 @@ function draw_doi(elem,
 		  size_max,
 		  leaf_width,
 		  leaf_height) {
-  setup_search(elem);
+
+  var tree_obj = new Tree(tree);
+  var doi_tree = new DoiTree(tree);
+
   setup_background(elem, width, height, "#F7F7F7");
+  setup_search(elem, d3.set(values.unit).values());
   setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
   doi_update(
     elem,
@@ -24,9 +62,38 @@ function draw_doi(elem,
     leaf_width,
     leaf_height
   );
-
 }
 
+/**
+ * DOI Tree updating function
+ *
+ * This redraws a DOI tree centered around (and with DOI distribution defined
+ * by)the current focus node.
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {float} width The width of the display's rectangle background.
+ * @param {float} height The height the display's rectangle background.
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node names associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
+ *     searching partial matches among descendants (to determine whether to
+ *     highlight a node or not).
+ * @param {string} focus_node_id A string specifying the .name field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param {float} size_min The minimum size (in pixels) of any node.
+ * @param {float} size_max The maximum size (in pixels) of any node.
+ * @param {float} leaf_height The height of the rectangle allocated to each
+ *     leaf node
+ * @param {float} leaf_width The width of the rectangle allocated to each
+ *     leaf node
+ * @return null
+ * @side-effects Updates the DOI tree to a new focus node.
+ **/
 function doi_update(elem,
 		    width,
 		    height,
@@ -53,29 +120,17 @@ function doi_update(elem,
   }
 
   console.log("Focusing on " + focus_node_id);
-  var search_id = "#search_box" + d3.select(elem).attr("id");
-  var search_str = $(search_id).val();
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).unbind("change");
+  $(search_id).on("change", function(e) {
+    doi_update_wrapper(focus_node_id);
+  });
+  var search_strs = get_search_values(elem);
 
   // essential DOI algorithm
   var tree_obj = new Tree(tree);
   var doi_tree = new DoiTree(tree);
   doi_tree.set_doi();
-
-  // setup search box
-  var node_names = tree_obj.get_attr_array("name");
-   $(function() {
-     $(search_id).autocomplete({
-       minLength: 0,
-       source: node_names,
-       search: function(event, ui) {
-   	doi_update_wrapper(focus_node_id);
-       },
-       select: function(event, ui) {
-   	$(search_id).val(ui.item.label);
-   	doi_update_wrapper(focus_node_id);
-       }
-     });
-   });
 
   var scales = {
     "size": d3.scaleLinear()
@@ -97,7 +152,7 @@ function doi_update(elem,
     d3.select(elem).select("#nodes"),
     layout.descendants(),
     "tree_node",
-    doi_node_attrs(values, scales, tree_obj, search_str),
+    doi_node_attrs(values, scales, tree_obj, search_strs),
     1000
   );
 
@@ -115,7 +170,7 @@ function doi_update(elem,
     d3.select(elem).select("#highlighted_links"),
     layout.links(),
     "highlighted_tree_links",
-    doi_highlight_link_attrs(values, scales, tree_obj, search_str),
+    doi_highlight_link_attrs(values, scales, tree_obj, search_strs),
     1000
   );
 

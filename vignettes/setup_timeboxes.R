@@ -5,7 +5,6 @@ library("plyr")
 library("dplyr")
 library("reshape2")
 
-
 ## ----  get-data----
 pregnancy_path <- "http://statweb.stanford.edu/~susan/papers/Pregnancy/PregnancyClosed15.Rdata"
 tmp <- tempfile()
@@ -38,7 +37,7 @@ for (i in seq_len(nrow(sample_info))) {
   )
 
   cur_date <- as.character(sample_info[i, ]$DateColl)
-  values[[cur_date]] <- tree_sum(
+  values[[cur_date]] <- tree_mean(
     data.frame(taxa),
     cur_values
   )

@@ -1,6 +1,9 @@
 /*******************************************************************************
-* Functions to calculate degree-of-interest related quantities. We
-* are following http://vis.stanford.edu/papers/doitrees-revisited
+* @fileoverview Functions for calculating degree-of-interest related quantities.
+*     We are following http://vis.stanford.edu/papers/doitrees-revisited
+* @see_also doi_update.js
+*
+* @author kriss1@stanford.edu
 *******************************************************************************/
 
 /*******************************************************************************
@@ -8,19 +11,50 @@
 *******************************************************************************/
 
 /**
- * Define a "tree" object
+ * Construct a Tree object
  *
- * This adds some useful methods to the hierachy defined by the tree JSON
- * structure.
+ * Interface to a class for constructing tree objects. This creates methods that
+ * are useful for handling tree-structured JSON objects.
+ *
+ * @param tree_json {object} A nested object that has, at each level, attributes
+ *     called "id" giving the name of the specified node and "children" giving
+ *     an array containing further tree objects.
+ * @return {TreeInternal} A TreeInternal object initialized to depth zero. The
+ *     main difference is that this object now includes various methodos for
+ *     manipulating tree structures.
+ * @constructor
  */
 function Tree(tree_json) {
   return new TreeInternal(tree_json, 0);
 }
 
+/**
+ * Define a DoiTree object
+ * @param tree_json {object} A nested object that has, at each level, attributes
+ *     called "id" giving the name of the specified node and "children" giving
+ *     an array containing further tree objects.
+ * @return {DoiTreeInternal} A DoiTreeInternal object initialized to depth zero
+ *     (and with no parents). The main difference is that this object now
+ *     includes various methods for manipulating tree structures.
+ * @constructor
+ **/
 function DoiTree(tree_json) {
   return new DoiTreeInternal(tree_json, 0, "none");
 }
 
+/**
+ * Construct a TreeInternal object
+ *
+ * @param tree_json {object} A nested object that has, at each level, attributes
+ *     called "id" giving the name of the specified node and "children" giving
+ *     an array containing further tree objects.
+ * @param depth {int} The current depth of the node from which tree_json is
+ *     descended from. This is needed for recursively increasing the depth of
+ *     given nodes.
+ * @return null
+ * @defines A class that adds new methods for navigating / filtering the
+ *     original tree_json object.
+ **/
 function TreeInternal(tree_json, depth) {
   this.get_subtree = get_subtree;
   this.filter_tree = filter_tree;
@@ -30,7 +64,7 @@ function TreeInternal(tree_json, depth) {
   this.get_layout = get_layout;
   this.get_layout_bounds = get_layout_bounds;
 
-  this.name = tree_json.name[0];
+  this.id = tree_json.id;
   this.depth = depth;
   if (Object.keys(tree_json).indexOf("children") != -1) {
     this.children = [];
@@ -41,12 +75,28 @@ function TreeInternal(tree_json, depth) {
   }
 }
 
+/**
+ * Construct a DoiTreeInternal object
+ *
+ * @param tree_json {object} A nested object that has, at each level, attributes
+ *     called "id" giving the name of the specified node and "children" giving
+ *     an array containing further tree objects.
+ * @param depth {int} The current depth of the node from which tree_json is
+ *     descended from. This is needed for recursively increasing the depth of
+ *     given nodes.
+ * @param parent {string} The name of the parent node in the DOI tree. Used for
+ *     pointing to parents when doing TreeBlock filtering.
+ * @return null
+ * @defines A class that adds new methods for performing DOI calculations on the
+ *     original tree_json object.
+ **/
 function DoiTreeInternal(tree_json, depth, parent) {
   this.doi = null;
   this.segment = parent;
   this.set_tree_fisheye = set_tree_fisheye;
   this.set_doi = set_doi;
   this.get_block_dois = get_block_dois;
+  this.trim_children = trim_children;
   this.trim_width = trim_width;
   this.filter_block = filter_block;
   this.tree_block = tree_block;
@@ -59,34 +109,34 @@ function DoiTreeInternal(tree_json, depth, parent) {
   this.get_layout = get_layout;
   this.get_layout_bounds = get_layout_bounds;
 
-  this.name = tree_json.name[0];
+  this.id = tree_json.id;
   this.depth = depth;
 
   if (Object.keys(tree_json).indexOf("children") != -1) {
     this.children = [];
     for (var i = 0; i < tree_json.children.length; i++) {
       var subtree = tree_json.children[i];
-      this.children.push(new DoiTreeInternal(subtree, depth + 1, this.name));
+      this.children.push(new DoiTreeInternal(subtree, depth + 1, this.id));
     }
   }
 }
 
 /*******************************************************************************
-* General tree methods
+* Methods for Tree and DOITree objects
 *******************************************************************************/
 
 /**
- * Check whether a tree contains a  node of a specified id
+ * Check whether a Tree / DoiTree contains a node with a specified id
  *
- * @param {Object} tree_var The tree sturctured variable that we will
- * containing objects whose .name attribute will be checked to contain
- * the id node_id.
+ * This defines a method for Tree and DoiTree objects. It expects the.ids
+ * .id" and "children" for each node in the hierarchy.
+ *
  * @param {string} node_id The id to search the tree for.
  * @return {bool} true or false, depending on whether the node_id was
- * found in the tree.
+ *     found in the tree.
  **/
 function contains_node(node_id) {
-  if (this.name == node_id) {
+  if (this.id == node_id) {
     return true;
   }
 
@@ -102,8 +152,20 @@ function contains_node(node_id) {
   return children_indic.some(function(x) { return x; });
 }
 
+
+/**
+ * Create a TreeInternal corresponding to a subtree
+ *
+ * This defines a method for Tree and DoiTree objects. It expects the .ids"
+ * and "children" for each node in the hierarchy.
+ *
+ * @param {string} new_root The.id of the root in the subtree for the Tree /
+ * DoiTree object to return.
+ * @return {Tree / DoiTree} The subtree in the original object corresponding
+ *     with the specified "new_root" as the root node.
+ **/
 function get_subtree(new_root) {
-  if (this.name == new_root) {
+  if (this.id == new_root) {
     return this;
   }
 
@@ -115,8 +177,19 @@ function get_subtree(new_root) {
   }
 }
 
+/**
+ * Check whether a Tree / DoiTree contains a node partially matching an id
+ *
+ * This defines a method for Tree and DoiTree objects. It expects the.ids
+ * .id" and "children" for each node in the hierarchy.
+ *
+ * @param {string} search_str The string to scan across all node ids looking for
+ *     a partial match.
+ * @return {bool} true or false, depending on whether the node_id was
+ *     found in the tree.
+ **/
 function contains_partial_match(search_str) {
-  var match_ix = this.name.toLowerCase().search(
+  var match_ix = this.id.toLowerCase().search(
     search_str.toLowerCase()
   );
 
@@ -136,6 +209,17 @@ function contains_partial_match(search_str) {
   return children_indic.some(function(x) { return x; });
 }
 
+/**
+ * Unnest the attributes in a nested Tree / DoiTree object
+ *
+ * This defines a method for Tree and DoiTree objects. It expects the.ids
+ * .id" and "children" for each node in the hierarchy.
+ *
+ * @param {string} attr The.id of the attribute at each node in the hierarchy
+ *     whose value we want to extract and put into a flat list.
+ * @return {array} all_attrs An array containing the flattened collection of
+ *     tree values for the specified attribute.
+ **/
 function get_attr_array(attr) {
   if (Object.keys(this).indexOf("children") == -1) {
     return [this[attr]];
@@ -151,6 +235,25 @@ function get_attr_array(attr) {
   return all_attrs;
 }
 
+/**
+ * Filter a tree based on values in an external object
+ *
+ * This defines a method for Tree and DoiTree objects. It expects the.ids
+ * .id" and "children" for each node in the hierarchy.
+ *
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The values with which to filter Tree nodes.
+ *       - unit {array of string} The node.ids associated with values.
+ *     The tree will be pruned below any nodes whose values are below the
+ *     threhsold. Note that the same unit.id can appear in multiple rows. In
+ *     this case the unit will only be trimmed if the mean of the associated
+ *     values is above the threshold.
+ * @param {float} threshold The threhsold used for determining whether a subtree
+ *     is included in the result.
+ * @return null
+ * @side-effects Prunes the tree below any nodes whose associated values are
+ *     below the specified threshold.
+ **/
 function filter_tree(values, threshold) {
   // if we're at a leaf, return
   if (Object.keys(this).indexOf("children") == -1) {
@@ -164,7 +267,7 @@ function filter_tree(values, threshold) {
     var cur_values = get_matching_subarray(
       values.value,
       values.unit,
-      subtrees[i].name
+      subtrees[i].id
     );
 
     if (d3.mean(cur_values) >= threshold) {
@@ -187,20 +290,22 @@ function filter_tree(values, threshold) {
 /**
  * Compute the DOI of a tree, given a specific single focus node
  *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
+ *
  * Calculates the DOI according to
  * http://vis.stanford.edu/papers/doitrees-revisited
  *
- * @param {Object} tree_var A tree structured object, of the kind created by d3's
- * tree and hierarchy functions.
- * @param {string} focus_node_id A string specifying the .name field in
- * the object that will be considered the "focus" node, around which to
- * set the doi distibution.
+ * @param {Object} tree_var A tree structured object, of the kind created by
+ *     d3's tree and hierarchy functions.
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
  * @param {float} min_doi The minimum doi at which point we stop traversing the
- * tree. This can save computation when navigating very large trees.
- *
- * @return tree_var A copy of the input tree_var, but with the doi
- * distribution input as the .doi field in each node.
- *
+ *     tree. This can save computation when navigating very large trees.
+ * @return null
+ * @side-effect Updates the input tree_var, so that the doi distribution input
+ *     in the .doi fields for each node reflect the new focus node.
  * @example
  * // using tax_tree defined by src/processing/prepare_phylo.R
  * set_doi(tax_tree, "G:Ruminococcus", -2)
@@ -222,17 +327,21 @@ function set_doi(focus_node_id) {
 /**
  * Compute fisheye distribution over a tree
  *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
+ *
  * Assigns doi argument to current node, and doi - 1 to immediate
  * children, and doi - 2 to second order children, ..., until
  * it reaches min_doi
  *
- * @param {Object} tree_var A tree structured object, of the kind created by d3's
- * tree and hierarchy functions.
+ * @param {Object} tree_var A tree structured object, of the kind created by
+ *     d3's tree and hierarchy functions.
  * @param {float} doi The doi for the top node in the tree.
  * @param {float} min_doi The minimum doi at which point we stop traversing the
- * tree. This can save computation when navigating very large trees.
- * @return A copy of the tree, but with the fisheye distribution set
- * as the .doi field in each node.
+ *     tree. This can save computation when navigating very large trees.
+ * @return null
+ * @side-effects Updates the input tree_var, but with the fisheye distribution
+ *     set as the .doi field in each node.
  * @example
  * test_doi = set_doi(tax_tree, "K:Bacteria", -10)
  **/
@@ -247,6 +356,20 @@ function set_tree_fisheye(doi) {
 
 /**
  * Get tree node positions
+ *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
+ *
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param display_dim {length 2 array of float} An array giving the width and
+ *     height of the desired tree layout, in pixels.
+ * @param node_size {float} The minimum space to be allocated to each node, in
+ *     pixels, if we were drawing a square with this width / height around each
+ *     node.
+ * @return layout {array} An array containing and x and y coordinates for each
+ *     node in the tree.
  **/
 function get_layout(focus_node_id, display_dim, node_size) {
   var hierarchy = d3.hierarchy(this);
@@ -258,7 +381,7 @@ function get_layout(focus_node_id, display_dim, node_size) {
   var nodes = layout.descendants();
 
   var focus = nodes.filter(function(d) {
-    return d.data.name == focus_node_id;
+    return d.data.id == focus_node_id;
   })[0];
 
   var x_move = 0.5 * display_dim[0] - focus.x;
@@ -273,6 +396,9 @@ function get_layout(focus_node_id, display_dim, node_size) {
 /**
  * Get the breadth and width associated with a tree + node_size
  *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
+ *
  * During the tree-blocking algorithm, we repeatedly query for the
  * width and breadth of successive trimmings of the tree. This
  * function calculates the space that a particular trimmed version of
@@ -281,12 +407,16 @@ function get_layout(focus_node_id, display_dim, node_size) {
  * reingold-tilford layout width does not change until you remove full
  * layers.
  *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions.
- * @param {array} node_size A length 2 array giving the width and
- * height of the rectangle reserved for a single node.
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param display_dim {length 2 array of float} An array giving the width and
+ *     height of the desired tree layout, in pixels.
+ * @param node_size {float} The minimum space to be allocated to each node, in
+ *     pixels, if we were drawing a square with this width / height around each
+ *     node.
  * @return {array} A length 2 array giving the width and height of
- * result tree.
+ *     result tree.
  **/
 function get_layout_bounds(focus_node_id, display_dim, node_size) {
   var nodes = this.get_layout(
@@ -310,13 +440,14 @@ function get_layout_bounds(focus_node_id, display_dim, node_size) {
 /**
  * Filter nodes within a single tree block
  *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
+ *
  * The tree-blocking algorithm requires filtering away blocks of
  * nodes, according to their degree-of-interest. This function filters
  * away a single block from the input tree structure, as specified by
  * the depth and segment position of the block (see tree_segment())
  *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions.
  * @param {int} depth The depth in the tree to filter away.
  * @param {int} segment The segment at the specified depth to filter
  * away.
@@ -348,12 +479,12 @@ function filter_block(depth, segment) {
 /**
  * Rearrange dois along trees into blocks
  *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
+ *
  * For the tree-blocking algorithm, it is convenient to store the DOIs
  * into a depth x segment object.
  *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions. This is assumed to have
- * a "depth" and a "segment" field already included.
  * @return {Object} block_dois An object keyed by depths. At each
  * depth, the value is another object, keyed by segments. For each
  * block-segment combination, an array of DOIs for that block in the
@@ -385,16 +516,18 @@ function get_block_dois() {
 /**
  * Compute the average DOI in each block
  *
- * To summarize the importance of displaying any particular block, it
- * is useful to be able to retrieve the average doi within blocks.
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
  *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions. This is assumed to have
- * a "depth" and a "segment" field already included.
- * @return {Object} An object with the average dois for each block
- * contained in a .values element. The .depths and .segments blocks
- * specify the block and segment indices associated with each average
- * doi.
+ * To summarize the importance of displaying any particular block, it is useful
+ * to be able to retrieve the average doi within blocks.
+ *
+ * @param {Object} block_dois An object keyed by depths. At each depth, the
+ *     value is another object, keyed by segments. For each block-segment
+ *     combination, an array of DOIs for that block in the tree is returned.
+ * @return {Object} An object with the average dois for each block contained in
+ *     a .values element. The .depths and .segments blocks specify the block and
+ *     segment indices associated with each average doi.
  **/
 function average_block_dois(block_dois) {
   var average_dois = {};
@@ -417,7 +550,36 @@ function average_block_dois(block_dois) {
 }
 
 /**
+ * Remove some children when many sibling subtrees
+ *
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @return null
+ * @side-effects If a node is not an ancestor of a focus node (or the actual
+ *     focus node), all but the first two children subtrees will be pruned.
+ **/
+function trim_children(focus_node_id) {
+  if (Object.keys(this).indexOf("children") == -1 || this.id == focus_node_id) {
+    return;
+  }
+
+  var subtrees = this.children;
+  var filtered_subtrees = [];
+  for (var i = 0; i < subtrees.length; i++) {
+    subtrees[i].trim_children(focus_node_id);
+    if (i < 2 || subtrees[i].contains_node(focus_node_id)) {
+      filtered_subtrees.push(subtrees[i]);
+    }
+  }
+  this.children = filtered_subtrees;
+}
+
+/**
  * Trim the width of a tree until it fits within a certain width
+ *
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
  *
  * This implements the breadth-trimming strategy described in the
  * DOI revisited paper (there are some differences in details). The
@@ -426,11 +588,14 @@ function average_block_dois(block_dois) {
  * lowest to highest DOI, until the width of the resulting layout is
  * below the specified max_width.
  *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions.
- * @param max_width The maximum allowed width of the tree layout.
- * @param {array} node_size A length 2 array giving the width and
- * height of the rectangle reserved for a single node.
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param display_dim {length 2 array of float} An array giving the width and
+ *     height of the desired tree layout, in pixels.
+ * @param node_size {float} The minimum space to be allocated to each node, in
+ *     pixels, if we were drawing a square with this width / height around each
+ *     node.
  * @reference http://vis.stanford.edu/files/2004-DOITree-AVI.pdf
  **/
 function trim_width(focus_node_id, display_dim, node_size) {
@@ -457,36 +622,254 @@ function trim_width(focus_node_id, display_dim, node_size) {
 	);
       }
     }
-
   }
 }
 
 /**
  * Wrapper to perform overall tree blocking algorithm
  *
- * @param {Object} tree_var A tree structured object, of the kind
- * used by d3's tree and hierarchy functions.
- * @param
- * @param {string} focus_node_id A string specifying the .name field in
- * the object that will be considered the "focus" node, around which to
- * set the doi distibution.
- * @param {float} min_doi The minimum doi at which point we stop traversing the
- * tree. This can save computation when navigating very large trees.
- * @param {array} node_size A length 2 array giving the width and
- * height of the rectangle reserved for a single node.
+ * This defines a method for DoiTree objects. It expects the.ids .id" and
+ * "children" for each node in the hierarchy.
  *
- * @return The filtered tree and nodes.
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param display_dim {length 2 array of float} An array giving the width and
+ *     height of the desired tree layout, in pixels.
+ * @param node_size {float} The minimum space to be allocated to each node, in
+ *     pixels, if we were drawing a square with this width / height around each
+ *     node.
+ * @return The layout (node x and y positions) associated with the TreeBlock
+ *     filtered tree.
  **/
 function tree_block(focus_node_id, display_dim, node_size) {
   this.set_doi(focus_node_id);
+  this.trim_children(focus_node_id);
   this.trim_width(focus_node_id, display_dim, node_size);
   return this.get_layout(focus_node_id, display_dim, node_size);
+}
+
+/*******************************************************************************
+ * Styling / Positioning for DOI trees
+ ******************************************************************************/
+
+/**
+ * Specify attribute functions for nodes in DOI tree
+ *
+ * This specializes the template in node_attr_defaults [d3_utils.js] for drawing
+ * DOI trees.
+ *
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The values associated with tree nodes. This
+ *         determines the size of each node.
+ *       - unit {array of string} The node.ids associated with values.
+ * @param {Object of d3.scales} scales An object with different scales for size
+ *     and fill, used when drawing the nodes. Must have keys "size" and "fill".
+ * @param {DoiTree} tree_obj The DoiTree that we are drawing. This is used for
+ *     searching partial matches among descendants (to determine whether to
+ *     highlight a node or not).
+ * @param {string} search_str The string to scan across all node ids looking for
+ *     a partial match.
+ * @return {dictionary of functions} A dictionary containing functions that can
+ *     be directly input to a d3 circle selection's .attr() to give styling /
+ *     positioning for DoiTrees.
+ **/
+function doi_node_attrs(values, scales, tree_obj, search_strs) {
+  var attrs = node_attr_defaults();
+
+  // fill and radius
+  attrs.fill = function(d) { return scales.fill(d.data.doi); };
+  attrs.r = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.id
+    );
+    return scales.size(d3.mean(cur_values));
+  };
+
+  // stroke and stroke-width
+  attrs.stroke = "#D66F62";
+  attrs["stroke-width"] = function(d) {
+    var cur_tree = tree_obj.get_subtree(d.data.id);
+    for (var i = 0; i < search_strs.length; i++) {
+      if (search_strs[i] !== null &&
+	  search_strs[i] !== "" &&
+	  cur_tree.contains_partial_match(search_strs[i])) {
+
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.data.id
+	);
+	var width = 0.05 * scales.size(d3.mean(cur_values));
+	if (width < 1.5) {
+	  return 1.5;
+	}
+	return width;
+      }
+    }
+    return 0;
+  };
+
+  return attrs;
+}
+
+/**
+ * Specify attribute functions for links in DOI tree
+ *
+ * This specializes the template in link_attr_defaults [d3_utils.js] for drawing
+ * DOI trees.
+ *
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The values associated with tree nodes. This
+ *         determines the size of each node.
+ *       - unit {array of string} The node.ids associated with values.
+ * @param scales {Object of d3.scales} An object with different scales for size
+ *     and fill, used when drawing the nodes. Must have keys "size" and "fill".
+ * @return {dictionary of functions} A dictionary containing functions that can
+ *     be directly input to a d3 path selection's .attr() to give styling /
+ *     positioning for DoiTrees.
+ **/
+function doi_link_attrs(values, scales) {
+  var attrs = link_attr_defaults();
+
+  attrs.stroke = function(d) {
+    return scales.fill(d.target.data.doi);
+  };
+
+  attrs["stroke-width"] = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.target.data.id
+    );
+    return scales.size(d3.mean(cur_values));
+  };
+
+  return attrs;
+}
+
+/**
+ * Specify attribute functions for highlighted links in DOI tree
+ *
+ * This specializes the template in link_attr_defaults [d3_utils.js] for drawing
+ * highlighted links in DOI trees.
+ *
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The values associated with tree nodes. This
+ *         determines the size of each node.
+ *       - unit {array of string} The node.ids associated with values.
+ * @param scales {Object of d3.scales} An object with different scales for size
+ *     and fill, used when drawing the nodes. Must have keys "size" and "fill".
+ * @param tree_obj {DoiTree} The DoiTree that we are drawing. This is used for
+ *     searching partial matches among descendants (to determine whether to
+ *     highlight a link or not).
+ * @param {string} search_str The string to scan across all node ids looking for
+ *     a partial match.
+ * @return {dictionary of functions} A dictionary containing functions that can
+ *     be directly input to a d3 path selection's .attr() to give styling /
+ *     positioning for DoiTrees.
+ **/
+function doi_highlight_link_attrs(values, scales, tree_obj, search_strs) {
+  var attrs = link_attr_defaults();
+
+  attrs["stroke-width"] = function(d) {
+    var cur_tree = tree_obj.get_subtree(d.target.data.id);
+    for (var i = 0; i < search_strs.length; i++) {
+      if (search_strs[i] !== null &&
+	  search_strs[i] !== "" &&
+	  cur_tree.contains_partial_match(search_strs[i])) {
+
+	var cur_values = get_matching_subarray(
+	  values.value,
+	  values.unit,
+	  d.target.data.id
+	);
+	return 1.3 * scales.size(d3.mean(cur_values));
+      }
+    }
+
+    return 0;
+  };
+
+  attrs.stroke = function(d) { return "#D66F62";};
+  return attrs;
+}
+
+/**
+ * Specify attribute functions for text in DOI tree
+ *
+ * This specializes the template in text_attr_defaults [d3_utils.js] for drawing
+ * text on DOI trees.
+ *
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The values associated with tree nodes. This
+ *         determines the size of each node.
+ *       - unit {array of string} The node.ids associated with values.
+ * @param scales {Object of d3.scales} An object with different scales for size
+ *     and fill, used when drawing the nodes. Must have keys "size" and "fill".
+ * @return {dictionary of functions} A dictionary containing functions that can
+ *     be directly input to a d3 text selection's .attr() to give styling /
+ *     positioning for text on DoiTrees.
+ **/
+function doi_text_attrs(values, scales) {
+  var attrs = text_attr_defaults();
+
+  attrs.x = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.id
+    );
+
+    return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+  };
+
+  attrs.y = function(d) {
+    var cur_values = get_matching_subarray(
+      values.value,
+      values.unit,
+      d.data.id
+    );
+
+    return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+  };
+
+  attrs.fill = function(d) {
+	return scales.fill(d.data.doi);
+  };
+
+  attrs.text = function(d) {
+    if (d.data.doi >= -1) {
+      return d.data.id;
+    }
+  };
+
+  attrs["font-size"] = function(d) {
+    if (d.data.doi === 0) {
+      return 20;
+    }
+    return 10;
+  };
+
+  return attrs;
 }
 
 /*******************************************************************************
  * Miscellaneous helper functions
  ******************************************************************************/
 
+/**
+ * Get values at indices specified by categories array
+ *
+ * @param {array} values The array to filter.
+ * @param {array} categories The array to use for filtering.
+ * @param {string or float} to_match The value categories[i] must be in order
+ *     for values[i] to be included in the matched subarray.
+ * @return {array} matched_values The subarray of values at indices where
+ *     categories is equal to to_match.
+ **/
 function get_matching_subarray(values, categories, to_match) {
   var matched_values = [];
   for(var i = 0; i < values.length; i++) {
@@ -500,7 +883,14 @@ function get_matching_subarray(values, categories, to_match) {
 /**
  * Helper to retrieve values in object
  *
- * This only applies to objects with depth two.
+ * This only applies to objects with depth two. It is used only for filtering
+ * segment-depth objects in the TreeBlock algorithm.
+ *
+ * @param {Object} obj A depth two object whose values we want to flatten into a
+ *     single array.
+ * @return {array of objects} values The values in obj as a single array. Each
+ *     index has an object with three attributes (outer_key, inner_key, and
+ *     value), matching information from the original nesting structure.
  */
 function flatten_nested_object(obj) {
   var values = [];
@@ -525,7 +915,10 @@ function flatten_nested_object(obj) {
 }
 
 /**
- * Shamelessly hide ugly code
+ * Shamelessly hide ugly code (get flattened DOIs and sort them)
+ *
+ * @param {array of objects} flattened_dois The output of flatten_nested_obj().
+ * @return The sorted .values fields in the flattened_dois object.
  */
 function unique_average_dois(flattened_dois) {
   return d3.set(
@@ -533,121 +926,4 @@ function unique_average_dois(flattened_dois) {
       function(d) { return d.value; }
     )).values()
     .sort(function(a, b) { return a - b;});
-}
-
-function doi_node_attrs(values, scales, tree_obj, search_str) {
-  var attrs = node_attr_defaults();
-
-  attrs.fill = function(d) { return scales.fill(d.data.doi); };
-  attrs.r = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name
-    );
-    return scales.size(d3.mean(cur_values));
-  };
-  attrs.stroke = function(d) {
-    var cur_tree = tree_obj.get_subtree(d.data.name);
-    if (search_str !== "" & cur_tree.contains_partial_match(search_str)) {
-      return "#D66F62";
-    }
-  };
-  attrs["stroke-width"] = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name
-    );
-    var width = 0.05 * scales.size(d3.mean(cur_values));
-    if (width < 1.5) {
-      return 1.5;
-    }
-    return width;
-  };
-
-  return attrs;
-}
-
-function doi_link_attrs(values, scales) {
-  var attrs = link_attr_defaults();
-
-  attrs.stroke = function(d) {
-    return scales.fill(d.target.data.doi);
-  };
-
-  attrs["stroke-width"] = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.target.data.name
-    );
-    return scales.size(d3.mean(cur_values));
-  };
-
-  return attrs;
-}
-
-function doi_highlight_link_attrs(values, scales, tree_obj, search_str) {
-  var attrs = link_attr_defaults();
-
-  attrs["stroke-width"] = function(d) {
-    var cur_tree = tree_obj.get_subtree(d.target.data.name);
-    if (!(search_str !== "" & cur_tree.contains_partial_match(search_str))) {
-      return 0;
-    }
-
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.target.data.name
-    );
-    return 1.3 * scales.size(d3.mean(cur_values));
-  };
-
-  attrs.stroke = function(d) { return "#D66F62";};
-  return attrs;
-}
-
-function doi_text_attrs(values, scales) {
-  var attrs = text_attr_defaults();
-
-  attrs.x = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name
-    );
-
-    return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
-  };
-
-  attrs.y = function(d) {
-    var cur_values = get_matching_subarray(
-      values.value,
-      values.unit,
-      d.data.name
-    );
-
-    return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
-  };
-
-  attrs.fill = function(d) {
-	return scales.fill(d.data.doi);
-  };
-
-  attrs.text = function(d) {
-    if (d.data.doi >= -1) {
-      return d.data.name;
-    }
-  };
-
-  attrs["font-size"] = function(d) {
-    if (d.data.doi === 0) {
-      return 20;
-    }
-    return 10;
-  };
-
-  return attrs;
 }

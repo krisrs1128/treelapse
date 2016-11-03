@@ -2,12 +2,13 @@
 #'
 #' <Add Description>
 #' @import htmlwidgets
+#' @importFrom magrittr %>%
+#' @importFrom dplyr arrange select left_join group_by summarise
 #' @importFrom jsonlite toJSON
 #' @export
 doi_sankey <- function(values,
                        edges,
                        focus_node_id = NULL,
-                       root = NULL,
                        width = NULL,
                        height = NULL,
                        size_max = 20,
@@ -16,14 +17,22 @@ doi_sankey <- function(values,
   if (is.null(focus_node_id)) {
     focus_node_id  <- edges[1, 1]
   }
-  if (is.null(root)) {
-    root  <- edges[1, 1]
-  }
+  root <- get_root(edges)
+
+  # order branches according to abundance
+  edges <- edges %>%
+    left_join(values, by = c("child" = "unit")) %>%
+    group_by(parent, child) %>%
+    summarise(mval = mean(value)) %>%
+    arrange(parent, desc(mval)) %>%
+    select(parent, child) %>%
+    as.data.frame()
 
   # forward options using x
   x <- list(
     values,
-    toJSON(tree_json(edges, root)),
+    edges,
+    root,
     focus_node_id,
     size_max,
     leaf_width,

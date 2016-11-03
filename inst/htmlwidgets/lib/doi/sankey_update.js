@@ -1,3 +1,39 @@
+/*******************************************************************************
+* @fileoverview Wrappers that update Sankey DOIs according to user interaction.
+* @see_also sankey_utils.js
+*
+* @author kriss1@stanford.edu
+*******************************************************************************/
+
+/**
+ * Setup and draw the Sankey DOI
+ *
+ * @param {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {float} width The width of the display's rectangle background.
+ * @param {float} height The height the display's rectangle background.
+ * @param {object} values An object with two subarrays,
+ *       - group {array of string} The group associated with each node.
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node.ids associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
+ *     searching partial matches among descendants (to determine whether to
+ *     highlight a node or not).
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param {float} size_min The minimum size (in pixels) of any node.
+ * @param {float} size_max The maximum size (in pixels) of any node.
+ * @param {float} leaf_height The height of the rectangle allocated to each
+ *     leaf node
+ * @param {float} leaf_width The width of the rectangle allocated to each
+ *     leaf node
+ * @return null
+ * @side-effects Sets up and draws the Sankey DOI on elem. This includes 2
+ *     overall groups, for links and text.
+ **/
 function draw_sankey(elem,
 		     width,
 		     height,
@@ -7,8 +43,8 @@ function draw_sankey(elem,
 		     size_max,
 		     leaf_width,
 		     leaf_height) {
-  setup_search(elem);
   setup_background(elem, width, height, "#F7F7F7");
+  setup_search(elem, d3.set(values.unit).values());
   setup_groups(
     d3.select(elem).select("svg"),
     ["links", "text"]
@@ -27,6 +63,36 @@ function draw_sankey(elem,
   );
 }
 
+/**
+ * Sankey Tree updating function
+ *
+ * This redraws a DOI Sankey centered around (and with DOI distribution defined
+ * by)the current focus.
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {float} width The width of the display's rectangle background.
+ * @param {float} height The height the display's rectangle background.
+ * @param {object} values An object with two subarrays,
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node.ids associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
+ *     searching partial matches among descendants (to determine whether to
+ *     highlight a node or not).
+ * @param {string} focus_node_id A string specifying the .id field in the
+ *     object that will be considered the "focus" node, around which to set the
+ *     doi distibution.
+ * @param {float} size_min The minimum size (in pixels) of any node.
+ * @param {float} size_max The maximum size (in pixels) of any node.
+ * @param {float} leaf_height The height of the rectangle allocated to each
+ *     leaf node
+ * @param {float} leaf_width The width of the rectangle allocated to each
+ *     leaf node
+ * @return null
+ * @side-effects Updates the Sankey DOI to a new focus node.
+ **/
 function sankey_update(elem,
 		       width,
 		       height,
@@ -59,22 +125,12 @@ function sankey_update(elem,
   doi_tree.set_doi();
 
   // setup search box
-  var node_names = tree_obj.get_attr_array("name");
-  var search_id = "#search_box" + d3.select(elem).attr("id");
-  $(function() {
-    $(search_id).autocomplete({
-      minLength: 0,
-      delay: 500,
-      source: node_names,
-      search: function(event, ui) {
-	sankey_update_wrapper(focus_node_id);
-      },
-      select: function(event, ui) {
-	$(search_id).val(ui.item.label);
-	sankey_update_wrapper(focus_node_id);
-      }
-    });
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).unbind('change');
+  $(search_id).on("change", function(e) {
+    sankey_update_wrapper(focus_node_id);
   });
+  var search_strs = get_search_values(elem);
 
   var groups = d3.set(values.group).values();
   var scales = {
@@ -93,14 +149,14 @@ function sankey_update(elem,
 
   var x_pos = layout.descendants()
       .map(function(d) {
-	return {"unit": d.data.name, "x": d.x};
+	return {"unit": d.data.id, "x": d.x};
       });
 
   var edgelist = layout.links()
       .map(function(d) {
 	return {
-	  "source": d.source.data.name,
-	  "target": d.target.data.name
+	  "source": d.source.data.id,
+	  "target": d.target.data.id
 	};
       });
 
@@ -121,7 +177,7 @@ function sankey_update(elem,
 	groups[i],
 	centers,
 	tree_obj,
-	$(search_id).val()
+	search_strs
       ),
       1000
     );
@@ -139,6 +195,6 @@ function sankey_update(elem,
   d3.select(elem)
     .selectAll("[class^='tree_link']")
     .on("click", function(d) {
-      return sankey_update_wrapper(d.target.data.name);
+      return sankey_update_wrapper(d.source.data.id);
     });
 }

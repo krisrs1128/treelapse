@@ -21,6 +21,13 @@
     - ts_utils.js
     - ts_update.js
     - d3_utils.js
+  - name: chosen
+    version: 1.6.2
+    src: htmlwidgets/lib/chosen
+    stylesheet: chosen.css
+    script:
+    - chosen.jquery.js
+    - chosen.proto.js
   - name: roboto
     version: 0.0.0
     src: htmlwidgets/lib/font
