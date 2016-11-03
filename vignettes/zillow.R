@@ -9,22 +9,24 @@ library("plyr")
 library("dplyr")
 library("treelapse")
 zillow <- fread("~/Desktop/Neighborhood_Zhvi_AllHomes.csv") %>%
-  head(100) %>%
-  filter(!(RegionID %in% c("51128", "194430"))) %>%
+  filter(State == "CA") %>%
   as.data.table()
-zillow$RegionID <- paste0("region_", zillow$RegionID)
-zillow$CountyName <- make.unique(zillow$CountyName)
-zillow$Metro <- make.unique(zillow$Metro)
-zillow$City <- make.unique(zillow$City)
-zillow$RegionName <- make.unique(zillow$RegionName)
+zillow$RegionID <- paste0(zillow$RegionID, zillow$RegionName)
+
+zillow_impute <- zillow[, 8:ncol(zillow), with = F] %>%
+  as.matrix() %>%
+  apply(1, function(x) { na.locf(x, fromLast = T)}) %>%
+  t()
+
+zillow[, 8:ncol(zillow)] <- data.table(zillow_impute)
 
 ## ---- get-edges ----
 region_scales <- c(
   "State",
-  "CountyName",
   "Metro",
+  "CountyName",
   "City",
-  "RegionName",
+#  "RegionName",
   "RegionID"
 )
 paths <- zillow[, region_scales, with = F] %>%
@@ -33,7 +35,6 @@ head(paths)
 paths[, "CountyName"] <- paste0("Cn:", paths[, "CountyName"])
 paths[, "Metro"] <- paste0("M:", paths[, "Metro"])
 paths[, "City"] <- paste0("Ci:", paths[, "City"])
-paths[, "RegionName"] <- paste0("R:", paths[, "RegionName"])
 
 for (i in seq_len(nrow(paths))) {
   if (any(paths[i, ] == "")) {
@@ -54,9 +55,7 @@ edges <- rbind(
 ## ---- get-values ----
 tip_values <- zillow %>%
   select(RegionID, starts_with("19"), starts_with("20")) %>%
-#  select(RegionID, starts_with("1996")) %>%
   as.data.frame()
-tip_values[is.na(tip_values)] <- median(tip_values[, -1] %>% unlist(), na.rm = T)
 
 grouped_list <- list()
 for (i in seq_len(ncol(tip_values) - 1)) {
@@ -65,11 +64,8 @@ for (i in seq_len(ncol(tip_values) - 1)) {
   grouped_list[[i]] <- tree_mean(edges, log(1 + cur_values))
 }
 
-#names(grouped_list) <- colnames(tip_values)[-1]
 values <- do.call(rbind, grouped_list) %>%
   melt(varnames = c("time", "unit"))
 
 ## ---- timebox-trees ----
 timebox_tree(values, edges, size_max = 4)
-
-head(values)
