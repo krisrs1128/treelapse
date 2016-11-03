@@ -133,8 +133,13 @@ function draw_tree(elem, values, cur_lines, tree, scales, mouseover_text) {
   var hierarchy = d3.hierarchy(tree);
 
   // width + height info are in the scales
+<<<<<<< Updated upstream
   var cluster = d3.cluster()
       .size([scales.x.range()[1], 0.37 * scales.y.range()[0]]);
+=======
+  var cluster = d3.tree()
+      .size([0.8 * scales.x.range()[1], 0.37 * scales.y.range()[0]]);
+>>>>>>> Stashed changes
   var layout = cluster(hierarchy);
 
   // draw links

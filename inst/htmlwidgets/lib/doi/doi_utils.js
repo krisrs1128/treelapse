@@ -250,7 +250,7 @@ function set_tree_fisheye(doi) {
  **/
 function get_layout(focus_node_id, display_dim, node_size) {
   var hierarchy = d3.hierarchy(this);
-  var cluster = d3.cluster()
+  var cluster = d3.tree()
       .size(display_dim)
       .nodeSize(node_size);
 
