@@ -15,13 +15,13 @@
  * @param {object} values An object with two subarrays,
  *       - group {array of string} The group associated with each node.
  *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
+ *       - unit {array of string} The node.ids associated with values.
  *     The i^th element in each of the three arrays correspond to the same
  *     entity.
  * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
  *     searching partial matches among descendants (to determine whether to
  *     highlight a node or not).
- * @param {string} focus_node_id A string specifying the .name field in the
+ * @param {string} focus_node_id A string specifying the .id field in the
  *     object that will be considered the "focus" node, around which to set the
  *     doi distibution.
  * @param {float} size_min The minimum size (in pixels) of any node.
@@ -75,13 +75,13 @@ function draw_sankey(elem,
  * @param {float} height The height the display's rectangle background.
  * @param {object} values An object with two subarrays,
  *       - value {array of float} The y values associated with Tree nodes.
- *       - unit {array of string} The node names associated with values.
+ *       - unit {array of string} The node.ids associated with values.
  *     The i^th element in each of the three arrays correspond to the same
  *     entity.
  * @param {DoiTree} tree The DoiTree that we are drawing. This is used for
  *     searching partial matches among descendants (to determine whether to
  *     highlight a node or not).
- * @param {string} focus_node_id A string specifying the .name field in the
+ * @param {string} focus_node_id A string specifying the .id field in the
  *     object that will be considered the "focus" node, around which to set the
  *     doi distibution.
  * @param {float} size_min The minimum size (in pixels) of any node.
@@ -149,14 +149,14 @@ function sankey_update(elem,
 
   var x_pos = layout.descendants()
       .map(function(d) {
-	return {"unit": d.data.name, "x": d.x};
+	return {"unit": d.data.id, "x": d.x};
       });
 
   var edgelist = layout.links()
       .map(function(d) {
 	return {
-	  "source": d.source.data.name,
-	  "target": d.target.data.name
+	  "source": d.source.data.id,
+	  "target": d.target.data.id
 	};
       });
 
@@ -195,6 +195,6 @@ function sankey_update(elem,
   d3.select(elem)
     .selectAll("[class^='tree_link']")
     .on("click", function(d) {
-      return sankey_update_wrapper(d.source.data.name);
+      return sankey_update_wrapper(d.source.data.id);
     });
 }
