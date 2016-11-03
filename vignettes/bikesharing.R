@@ -5,10 +5,14 @@
 ## ---- setup ----
 library("plyr")
 library("dplyr")
+library("reshape2")
 library("caret")
 library("treelapse")
 data(bike)
+bike <- bike %>%
+  filter(!(dteday %in% c("2012-10-29", "2012-10-30", "2011-01-18", "2011-01-27")))
 
+## ---- featurize ----
 logit <- function(p) {
   log(p / (1 - p))
 }
@@ -50,6 +54,7 @@ bike_day <- bike %>%
     cnt_morning = cnt[8]
   )
 
+## ---- train-model ----
 x <- bike_day %>%
   select(-c(dteday, cnt_morning)) %>%
   as.matrix()
@@ -58,6 +63,7 @@ y <- bike_day$cnt_morning
 tune_grid <- data.frame("cp" = c(.001))
 cart_model <- train(x = x, y = y, method = "rpart", tuneGrid = tune_grid)
 
+## ---- get-tree-paths ----
 leaf_ix <- cart_model$finalModel$where
 frame <- cart_model$finalModel$frame
 leaf_assignment <- rownames(frame)[leaf_ix]
@@ -78,10 +84,11 @@ for (i in seq_along(paths)) {
       rep(NA, depth - cur_length)
     )
   }
-  paths[[i]] <- gsub(" ", "", paths[[i]])
 }
 
-# edges up to actual samples (the series)
+head(paths)
+
+## ---- build-edgelist ----
 paths <- do.call(rbind, paths)
 rownames(paths) <- NULL
 edges <- taxa_edgelist(paths)
@@ -90,13 +97,14 @@ edges <- rbind(
   edges,
   data.frame(
     "parent" = leaf_assignment,
-    "child" = paste0("sample_", seq_along(leaf_assignment)),
+    "child" = paste0("sample_", unique(bike$dteday)),
     stringsAsFactors = FALSE
   )
 )
 
+## ---- time-values ----
 tip_values <- data.frame(
-  "unit" = paste0("sample_", as.numeric(bike$dteday)),
+  "unit" = paste0("sample_", bike$dteday),
   "time" = bike$hr,
   "value" = bike$cnt
 ) %>%
@@ -111,5 +119,33 @@ for (i in seq_len(ncol(tip_values) - 1)) {
 values <- do.call(rbind, grouped_list) %>%
   melt(varnames = c("time", "unit"))
 
+## ---- timeboxes ----
 timebox_tree(values, edges)
+
+## ---- treeboxes ----
 treebox(values, edges)
+
+## ---- get-group-values ----
+tip_values <- data.frame(
+  "unit" = paste0("sample_", bike$dteday),
+  "time" = bike$hr,
+  "value" = 1,
+  "cnt" = bike$cnt
+) %>%
+  filter(time == 8)
+
+tip_values$group <- cut(tip_values$cnt, 5)
+
+tip_values <- tip_values %>%
+  dcast(unit ~ group, fill = 0, value.var = "value", fun.aggregate = sum)
+
+grouped_list <- list()
+for (i in seq_len(ncol(tip_values) - 1)) {
+  cur_values <- setNames(tip_values[, i + 1], tip_values[, 1])
+  grouped_list[[i]] <- tree_sum(edges, cur_values)
+}
+values <- do.call(rbind, grouped_list) %>%
+  melt(varnames = c("group", "unit"))
+
+## ---- doi-sankey ----
+doi_sankey(values, edges, "root", leaf_width = 4)
