@@ -129,7 +129,7 @@ function timebox_link_attrs(dvalues, cur_lines, scales) {
   attr_funs.stroke = "#F0F0F0";
 
   attr_funs["stroke-width"] = function(d) {
-    var cur_values = dvalues[d.target.data.name[0]];
+    var cur_values = dvalues[d.target.data.id];
     return scales.r(d3.mean(cur_values));
   };
 
@@ -155,12 +155,12 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales) {
   var attr_funs = node_attr_defaults();
 
   attr_funs.r = function(d) {
-    var cur_values = dvalues[d.data.name[0]];
+    var cur_values = dvalues[d.data.id];
     return 1.2 * scales.r(d3.mean(cur_values));
   };
 
   attr_funs.fill = function(d) {
-    if (cur_lines.indexOf(d.data.name[0]) != -1) {
+    if (cur_lines.indexOf(d.data.id) != -1) {
       return "#2D869F";
     }
     return "#F0F0F0";
@@ -168,8 +168,8 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales) {
 
   attr_funs.stroke = "#C2571A";
   attr_funs["stroke-width"] = function(d) {
-    if (search_lines.indexOf(d.data.name[0]) != -1) {
-      var cur_values = dvalues[d.data.name[0]];
+    if (search_lines.indexOf(d.data.id) != -1) {
+      var cur_values = dvalues[d.data.id];
       return scales.r(d3.mean(cur_values));
     } else {
       return 0;
@@ -246,7 +246,7 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
 
 	    d3.select(elem)
 	      .select("#mouseover > text")
-	      .text(d.data.name[0])
+	      .text(d.data.id)
 	      .attrs({
 		"font-size": 11,
 		"font-family": "roboto"

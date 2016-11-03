@@ -153,7 +153,7 @@ function setup_search(elem, options) {
  * @return {string} The source name and target name, pasted together by a '-'.
  **/
 function link_id_fun(d) {
-  return d.source.data.name + "-" + d.target.data.name;
+  return d.source.data.id + "-" + d.target.data.id;
 }
 
 /**
@@ -187,7 +187,7 @@ function node_attr_defaults() {
     "cx": function(d) { return d.x; },
     "cy": function(d) { return d.y; },
     "fill": function(d) { return "black"; },
-    "id": function(d) { return d.data.name; },
+    "id": function(d) { return d.data.id; },
     "r": function(d) { return 2; },
     "stroke": function(d) { return "black"; },
     "stroke-width": function(d) { return 0; },
@@ -231,8 +231,8 @@ function link_attr_defaults() {
  **/
 function text_attr_defaults() {
   return {
-    "id": function(d) { return d.data.name; },
-    "text": function(d) { return d.data.name; },
+    "id": function(d) { return d.data.id; },
+    "text": function(d) { return d.data.id; },
     "x": function(d) {return d.x; },
     "y": function(d) {return d.y; },
     "fill": function(d) {return d.fill; },
