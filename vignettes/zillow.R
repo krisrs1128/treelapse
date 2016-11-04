@@ -8,9 +8,15 @@ library("data.table")
 library("plyr")
 library("dplyr")
 library("treelapse")
-zillow <- fread("~/Desktop/Neighborhood_Zhvi_AllHomes.csv") %>%
+
+tmp <- tempfile()
+zillow_url <- "http://files.zillowstatic.com/research/public/Neighborhood/Neighborhood_Zhvi_AllHomes.csv"
+download.file(zillow_url, tmp)
+
+zillow <- fread(tmp) %>%
   filter(State == "CA") %>%
   as.data.table()
+
 zillow$RegionID <- paste0(zillow$RegionID, "_", zillow$RegionName)
 
 zillow_impute <- zillow[, 8:ncol(zillow), with = F] %>%
@@ -32,9 +38,9 @@ region_scales <- c(
 paths <- zillow[, region_scales, with = F] %>%
   as.matrix()
 head(paths)
-paths[, "CountyName"] <- paste0("Cn:", paths[, "CountyName"])
-paths[, "Metro"] <- paste0("M:", paths[, "Metro"])
-paths[, "City"] <- paste0("Ci:", paths[, "City"])
+paths[, "CountyName"] <- paste0("Cn_", paths[, "CountyName"])
+paths[, "Metro"] <- paste0("M_", paths[, "Metro"])
+paths[, "City"] <- paste0("Ci_", paths[, "City"])
 
 for (i in seq_len(nrow(paths))) {
   if (any(paths[i, ] == "")) {
@@ -59,7 +65,9 @@ tip_values <- zillow %>%
 
 grouped_list <- list()
 for (i in seq_len(ncol(tip_values) - 1)) {
-  cat(sprintf("Processing month %d\n", i))
+  if (i %% 20 == 0) {
+    cat(sprintf("Processing month %d\n", i))
+  }
   cur_values <- setNames(tip_values[, i + 1], tip_values[, 1])
   grouped_list[[i]] <- tree_mean(edges, log(cur_values))
 }
