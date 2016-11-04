@@ -1,0 +1,168 @@
+---
+title: "A Bikesharing Case Study"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A Bikesharing Case Study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: treelapse_intro.bib
+link-citations: yes
+graphics: yes
+---
+
+## Introduction ##
+
+```{r, setup}
+knitr::read_chunk("~/Documents/programming/treelapse/vignettes/bikesharing.R")
+knitr::opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
+library("plyr")
+library("dplyr")
+library("reshape2")
+library("caret")
+library("treelapse")
+```
+
+This vignette applies the `treelapse` package to explore data on bikesharing.
+Bikesharing lets people use bikes temporarily between different stations, Figure
+\@ref(fig:bike_picture) shows an example station.
+
+```{r, bike_picture, fig.caption="Bikesharing in London, from https://commons.wikimedia.org/wiki/File:Bikesharing_londonIMG_1022.jpg.", out.width = "400px"}
+knitr::include_graphics("bikesharing.jpg")
+```
+
+The main questions of interest from an operational point of view are forecasting
+demand across bike rack locations and planning the locations for new ones. We
+will build some visualizations to help with this first forecasting problem. Our
+data don't include a spatial component, but if it were available, the figures
+we produce here could be extended to cover this case. We downloaded it from
+[UCI](archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset); it had been
+featured in a kaggle
+[competition](https://www.kaggle.com/c/bike-sharing-demand) before.
+
+The data look like this -- `casual`, `registered`, and `cnt` are measures of
+bike demand, the other columns are potentially explanatory features. We've
+removed a few days that have a lot of missing data for some reason.
+
+```{r, data}
+```
+
+The originaly competition was about forecasting demand on an hour-by-hour
+basis[^ Interestingly, you are allowed to use the explanatory variables from the
+future to make these predictions, so it's not strictly forecasting, per se.].
+We will consider a related but slightly different problem, to make it more
+interesting from a visualization point of view: what are the different shapes of
+bicycle demand during a 24 hour period, and how to the different explanatory
+variables associate with different shapes? E.g., how hot does it have to be
+for people to give up on bikeshares in the day (and, does nighttime demand
+increase)?
+
+Framing the problem this way lets us use `treelapse`: we want to study a
+collection of potentially related time series. Each time series is the demand
+curve for a single day, and certain time series may be more related to each
+other based on the similarity of their explanatory variables. We go into detail
+about our approach below.
+
+## Approach ##
+
+That we have many related time series is now clear, but how to arrange them in a
+tree is not obvious. The approach we use here is to build a classification tree
+using the explanatory variables, calling series close to each other if they lie
+in the same leaf node[^This is similar to using "proximity" plots from random
+forests, but is more directly interpretable.]. There are probably other natural
+ways to create this sort of
+structure[^write to [me](mailto:kriss1@stanford.edu) if you have ideas], but
+we'll go with what we have.
+
+In more detail, we will calculate a single number summary of each daily demand
+series and then train a CART model to that based on the explanatory variables
+for that day. Each time series is associated with some leaf node in this
+regression tree, based on its explanatory variables, and all the series at the
+same leaf node will hopefully have similar values of the response statistic.
+We can then use timebox trees and treeboxes. The statistic we will use is bike
+demand at 8AM. We found this more interesting than the (perhaps more natural)
+"total daily demand" statistic, because it clearly distinguishes between weekday
+and weekend use.
+
+For a slight variation, we can assign each series to a bin according to its
+value of this statistic. We can then see which parts of the tree are home to
+which of the bin types using the sankey representation.
+
+## Predictions ##
+
+This section carries out the plan sketched above. First, we featurize the
+original data at the daily level -- these will be input to the classification
+model.
+
+```{r, featurize}
+```
+
+Now we can train our model. We intentionally use a tuning parameter that will
+give a larger tree, since this the display later on more interesting.
+
+```{r, train-model}
+```
+
+It's a little bit of work to extract the edgelist from the trained tree. First,
+there are only functions for extracting paths from trees, not edges. This is
+analogous to only having taxonomic tables, rather than edges in the taxonomic
+tree. Second, these paths only lead down to leaf nodes, not actual observed data
+series. So, we will have to manually add edges between leaf nodes and the series
+that are contained in them.
+
+All this said, it's only a few lines to get the required code.
+
+```{r, get-tree-paths}
+```
+
+From these paths, we can build an edgelist using `taxa_edgelist`. Then, we
+add the edges from decision tree leaves to the samples assigned to them. Note
+that the edgelist names can't just be integers -- this is a bug that should be
+resolved in a future version of the package.
+
+```{r, build-edgelist}
+```
+
+We are only missing one more piece in order to apply treelapse: We don't have
+series associated with internal nodes in the decision tree. We can use our
+`tree_means` function to accomplish this, applying it for each hour
+individually. This will associate each internal node with the average of all
+sample series (the leaves in our full, extended CART tree) that are its
+descendants.
+
+```{r, time-values}
+```
+
+## Visualization ##
+
+Finally, we can produce the time and treebox visualizations.
+
+```{r, timeboxes}
+```
+
+
+```{r, treeboxes}
+```
+
+Also, we can generate the sankey representation getting quantiles of demand at
+8AM and counting, for each decision tree node, the number of descendant series
+falling into each bin. This gives us a general sense of which parts of the tree
+help to classify series into "low", "middle", to "high" demand series.
+
+The code we use to generate these bin counts at internal nodes is similar to
+that we used to get per-timepoint averages before (it probably could be
+modularized).
+
+```{r, get-group-values}
+```
+
+This can be directly input to the DOI sankey.
+
+```{r, doi-sankey}
+```
+
+## Interpretation ##
+
+The visualizations above should be more or less self-explanatory, but we include
+some example views just to get you thinking about interpretation.
