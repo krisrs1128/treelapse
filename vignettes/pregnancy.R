@@ -89,7 +89,7 @@ for (i in seq_len(5)) {
     values %>%
       filter(group == i) %>%
       group_by(unit, time) %>%
-      summarise(value = mean(value))
+      summarise(value = mean(value)),
     taxa,
     size_min = 1
   )
