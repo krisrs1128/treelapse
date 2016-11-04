@@ -11,9 +11,9 @@ bibliography: treelapse_intro.bib
 link-citations: yes
 ---
 
-```{r}
+```{r, setup}
 library("knitr")
-read_chunk("treelapse_intro.R")
+read_chunk("~/Documents/programming/treelapse/vignettes/treelapse_intro.R")
 opts_chunk$set(fig.width = 8, fig.height = 5, cache = TRUE)
 ```
 
@@ -140,7 +140,7 @@ toy data.
 Below we display the timebox. Here, pressing "new box" will let you draw a brush
 across the time series, highlighting any that pass through the box. The
 corresponding tree nodes will also be highlighted, and their names are displayed
-on mouseover. Further, pressing "new box" will let you draw another brush over
+on mouseover. Further pressing "new box" will let you draw another brush over
 the time series -- only time series passing through both boxes will be
 highlighted. The display in the top right is a miniature view of the main time
 series display that can be used for zooming in on certain time / value windows.
@@ -148,15 +148,15 @@ Click and drag a brush over this sub-display to refocus the main time series
 display the associated time and value ranges. Finally, searching for a node name
 in the search box will highlight the associated series and node in red.
 
-```{r, vis-timebox}
+```{r vis-timebox}
 ```
 
 Timeoboxes only let you query based on time series shapes. Treeboxes are the
 natural converse -- they let you select nodes in the tree by drawing brushes
 over them. Other than this, the interaction is exactly the same.
 
-```{r, vis-treebox}
-````
+```{r vis-treebox}
+```
 
 ## Previous Work ##
 
