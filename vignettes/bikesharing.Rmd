@@ -166,3 +166,33 @@ This can be directly input to the DOI sankey.
 
 The visualizations above should be more or less self-explanatory, but we include
 some example views just to get you thinking about interpretation.
+
+
+```{r, out.width = "400px"}
+include_graphics("working.png")
+```
+
+```{r, out.width = "400px"}
+include_graphics("weekend.png")
+```
+
+
+```{r, out.width = "400px"}
+include_graphics("weekend_warm.png")
+```
+
+```{r, out.width = "400px"}
+include_graphics("weekend_cold.png")
+```
+
+```{r, out.width = "400px"}
+include_graphics("working_high_overlaid.png")
+```
+
+```{r, out.width = "400px"}
+include_graphics("working_low_overlaid.png")
+```
+
+```{r, out.width = "400px"}
+include_graphics("nighttime.png")
+```
