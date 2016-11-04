@@ -165,17 +165,38 @@ This can be directly input to the DOI sankey.
 ## Interpretation ##
 
 The visualizations above should be more or less self-explanatory, but we include
-some example views just to get you thinking about interpretation.
+some example views just to get you thinking about some example workflows.
+The first thing that is clear is that there are two usage regimes -- weekend and
+weekday, with weekday showing two peaks around rush hour and weekend having one
+big peak centered around the middle of the day. We can draw a few boxes to
+highlight just these series on their own.
 
+These three boxes highlight mostly weekday series.
 
 ```{r, out.width = "400px"}
 include_graphics("working.png")
 ```
 
+And these highlight the weekend series.
+
 ```{r, out.width = "400px"}
 include_graphics("weekend.png")
 ```
 
+Note that at each split in the tree, we place the series with higher mean on the
+left. Consider our choice of $y$ (demand at 8AM), it's not so surprising that the
+top split is whether the day is a working day or not. The fact that the working
+day split is on the left means that, on average (across samples and hours) the
+working days have higher demand than the weekends. This is not obvious from the
+series on their own; it's unclear just by looking at the series whether the
+weekend midday peak is enough to offset the weekday rush hour peaks. But the
+tree settles this question.
+
+The next thing we might notice is that the difference between weekends with high
+demand and those with low demand is mainly the apparent temperature. This is the
+story from the next two figures. We just dragged the box over the midday peak up
+and down (keeping the low rush-hour boxes to ensure we were in weekend series)
+and then hovered over the highlighted nodes in the tree.
 
 ```{r, out.width = "400px"}
 include_graphics("weekend_warm.png")
@@ -185,6 +206,28 @@ include_graphics("weekend_warm.png")
 include_graphics("weekend_cold.png")
 ```
 
+Another major source of variation in these series seems to be whether the
+measurement was taken during 2011 or 2012. The demand generally seems higher
+in 2012, especially for weekday commutes. In addition to hovering over the
+tree, we can search for specific nodes and highlight their series using the
+search box. Here we have searched for the average series for
+
+* weekends: This is the unimodal red curve.
+* working days: This is the central bimodal red curve.
+* working days in 2011: This is the lower bimodal red curve.
+* working days in 2012: This is the upper bimodal red curve.
+
+This is the point of the next two figures. The only difference between them
+is the set of series that are being brushed over. In the first, we brush over
+the very high valued series, these appear on the top left of the tree,
+according to the splitting procedure described before. Apparently, these are
+almost always in 2012 (they are descendants of the 2012 red node) and are
+usually on warm days. In the second, we brush over the slightly lower demand
+series. This includes almost all of the 2011 series (middle red node), but also
+a reasonable number of the winter (season < 1.5) 2012 series. So, we get a sense
+of both a trend of overall increasing demand as well as strong seasonal
+influence.
+
 ```{r, out.width = "400px"}
 include_graphics("working_high_overlaid.png")
 ```
@@ -192,6 +235,14 @@ include_graphics("working_high_overlaid.png")
 ```{r, out.width = "400px"}
 include_graphics("working_low_overlaid.png")
 ```
+
+In our final view, we use zooming to ask a very specific question: On what
+days do people ride bikes very late at night? We use the "visual scent" in
+the top right to select the window between 1AM and 7:30AM. We then introduce
+a brush to highlight those series for which there is higher demand during
+this time window. Then, referencing the tree, we see that these series
+usually correspond to warm weekends, which makes a lot of sense (not that
+I've ever tried it myself).
 
 ```{r, out.width = "400px"}
 include_graphics("nighttime.png")
