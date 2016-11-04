@@ -1,10 +1,10 @@
 ## ---- setup ----
-library("treelapse")
 library("phyloseq")
 library("cluster")
 library("plyr")
 library("dplyr")
 library("reshape2")
+library("treelapse")
 
 ## ----  prepare-csts ----
 ## code from http://statweb.stanford.edu/~susan/papers/Pregnancy/PNAS_Vaginal_Analysis.Rmd
