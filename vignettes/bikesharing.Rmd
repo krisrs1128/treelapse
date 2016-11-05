@@ -1,10 +1,10 @@
 ---
-title: "A Bikesharing Case Study"
+title: "Bikesharing"
 author: "Kris Sankaran"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{A Bikesharing Case Study}
+  %\VignetteIndexEntry{Bikesharing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: treelapse_intro.bib
@@ -21,7 +21,7 @@ library("dplyr")
 library("reshape2")
 library("caret")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
+opts_chunk$set(fig.width = 10, fig.height = 7, cache = TRUE)
 ```
 
 ```{r, read-chunks}
