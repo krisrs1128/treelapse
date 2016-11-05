@@ -1,0 +1,162 @@
+---
+title: "Microbial Response to Antibiotics"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Microbial Response to Antibiotics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+link-citations: yes
+bibliography: antibiotic.bib
+---
+
+## Introduction ##
+
+
+```{r, setup}
+library("knitr")
+library("ggplot2")
+library("plyr")
+library("dplyr")
+library("phyloseq")
+library("treelapse")
+opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
+
+# minimal theme for ggplots
+theme_set(theme_bw())
+min_theme <- theme_update(
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.ticks = element_blank(),
+  legend.title = element_text(size = 8),
+  legend.text = element_text(size = 6),
+  axis.text = element_text(size = 6),
+  axis.title = element_text(size = 8),
+  strip.background = element_blank(),
+  strip.text = element_text(size = 8),
+  legend.key = element_blank()
+)
+
+data(abt)
+```
+
+```{r, read-chunks}
+read_chunk("~/Documents/programming/treelapse/inst/doc/antibiotic_code.R")
+```
+
+In this vignette, we study the impact of antibiotics on microbial ecology, using
+data from [@dethlefsen2011incomplete]. Even non-scientists know that antibiotics
+kill bacteria -- here we will try to describe the effects of these time courses
+on microbial ecology in a little more precision. For example, how quickly do the
+bacteria die off, does the population return to the initial states, and if so
+how long does that take? Also, are certain microbes more / less resistant to
+antibiotics, and do we see any kinds of competition or shifts in the the
+community's position on the adaptive landscape?
+
+We will answer these questions by studying time series of microbial abundances
+while the their host goes through a few separate periods of antibiotic
+treatment. The series can be arranged along the taxonomic tree; we can represent
+each node by either its sum or average across descendants. Instead of
+identifying each node with the full time series, we can alternatively conisder
+the vector of averages during the different periods (pre, during, and
+post-antibiotic) and see how these averages change across the different periods
+and across different subtrees.
+
+## Data Background ##
+
+We give some preliminary views of the data, just to get some intuition about it.
+If you are familiar with this (type of) study, you can safely skip this section.
+
+First, we look at how many samples there are, how many microbes were found, and
+what types of features were collected about the samples.
+
+```{r, data-view}
+```
+
+Evidently, there are about fifty timepoints collected across three individuals.
+Each timepoint is associated with a condition: before, between, or after
+different antibiotic time courses (Cp, for ciprofloxacin). Unfortunately, the
+treatments were not given at the same time for each person, see the figure
+below.
+
+```{r, sampling-times}
+```
+
+If we had time be very careful, we might want to find a way to align these
+series. Instead, we will just analyze these three subjects separately.
+
+Turning over to the RSV (microbial) abundances, we notice that the counts are
+highly skewed. We're finding that the vast majority of microbes have very small
+abundnaces.
+
+```{r, skewness}
+```
+
+This is actually pretty standard in microbiome data; we'll use the filtering and
+transformation functions in `phyloseq` to down to the ~300 most abundant taxa
+and work with `asinh` transformed counts[^The asinh transformation is like
+taking logs, but is less agressive at smaller values. This is evident from the
+representation, $asinh\left(x\right) = \log\left(x + \sqrt{1 + x^{t}}\right)].
+
+```{r, abt-transform}
+```
+
+These are relatively generic checks we would do with any microbiome data set.
+Next, we consider some preparatory work specific to treelapse.
+
+## Data Preparation ##
+
+Before we can produce any of the `treelapse` figures, we will need to generate
+the following data.
+
+* An edgelist specifying the taxonomy of microbes in the sample.
+* A `values` dataset giving the
+
+```{r abt-values}
+```
+
+```{r get-taxa}
+```
+
+```{r aggregate-tips}
+```
+
+```{r prep-timebox-data}
+```
+
+```{r timebox-mappings}
+```
+
+## Visualization ##
+
+### Tree Sums ###
+
+```{r timebox}
+```
+
+```{r treebox}
+```
+
+### Tree Averages ###
+
+```{r timebox-means-data}
+```
+
+```{r timebox-means}
+```
+
+```{r treebox-means}
+```
+
+### Per-Condition Sankey ###
+
+```{r doi-sankey-data}
+```
+
+```{r doi-sankey}
+```
+
+## Interpretation ##
+
+## References ##
