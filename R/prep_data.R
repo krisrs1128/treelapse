@@ -234,7 +234,7 @@ get_root <- function(edges) {
   setdiff(edges[, 1], edges[, 2])
 }
 
-#' @title Wrapper to compute tree_sums and tree_means
+#' @title Wrapper to compute tree aggregations over many samples
 #' @param el [character data.frame] The edgelist specifying the tree structure.
 #' The first column are character names for the parents, the second are
 #' children.
@@ -246,7 +246,8 @@ get_root <- function(edges) {
 #' performed. The row index can be used for inputting sample / time / group
 #' information after the fact.
 #' @importFrom data.table data.table rbindlist
-tree_values_multi <- function(el, values, tree_fun) {
+#' @export
+tree_fun_multi <- function(el, values, tree_fun) {
   result <- list()
   for (i in seq_len(nrow(values))) {
     if (i %% 10 == 0) {
