@@ -461,7 +461,10 @@ function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
  **/
 function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
   var cur_extent = d3.brushSelection(
-    d3.select("#zoom_brush").select(".zoom_brush").node()
+    d3.select(elem)
+      .select("#zoom_brush")
+      .select(".zoom_brush")
+      .node()
   );
 
   // reset domains for scales
