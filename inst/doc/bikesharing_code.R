@@ -2,22 +2,17 @@
 
 # File description -------------------------------------------------------------
 
-## ---- setup ----
-library("plyr")
-library("dplyr")
-library("reshape2")
-library("caret")
-library("treelapse")
+## ---- data ----
 data(bike)
 bike <- bike %>%
   filter(!(dteday %in% c("2012-10-29", "2012-10-30", "2011-01-18", "2011-01-27")))
+head(bike)
 
 ## ---- featurize ----
 logit <- function(p) {
   log(p / (1 - p))
 }
 
-# we'll build a tree from predicting the total demand per day
 bike_day <- bike %>%
   group_by(dteday) %>%
   summarise(
@@ -120,6 +115,7 @@ values <- do.call(rbind, grouped_list) %>%
   melt(varnames = c("time", "unit"))
 
 ## ---- timeboxes ----
+head(values)
 timebox_tree(values, edges)
 
 ## ---- treeboxes ----

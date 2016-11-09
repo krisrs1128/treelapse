@@ -233,3 +233,34 @@ tip_descendants <- function(el, cur_node) {
 get_root <- function(edges) {
   setdiff(edges[, 1], edges[, 2])
 }
+
+#' @title Wrapper to compute tree aggregations over many samples
+#' @param el [character data.frame] The edgelist specifying the tree structure.
+#' The first column are character names for the parents, the second are
+#' children.
+#' @param values [matrix] Tip values on which to aggregate. The column names
+#' must be the same names as in el. Each row corresponds to a different sample.
+#' @param tree_fun [function] The tree function to apply to each row of values.
+#' @return result [data.table] A data.table giving aggregated values for each of
+#' sample, along with the row index of the sample on which that aggregation was
+#' performed. The row index can be used for inputting sample / time / group
+#' information after the fact.
+#' @importFrom data.table data.table rbindlist
+#' @export
+tree_fun_multi <- function(el, values, tree_fun) {
+  result <- list()
+  for (i in seq_len(nrow(values))) {
+    if (i %% 10 == 0) {
+      cat(sprintf("Processing sample %d \n", i))
+    }
+
+    cur_values <- tree_fun(el, values[i, ])
+    result[[i]] <- data.table(
+      "unit" = names(cur_values),
+      "row" = i,
+      "value" = as.numeric(cur_values)
+    )
+  }
+
+  rbindlist(result)
+}

@@ -2,13 +2,7 @@
 
 # File description -------------------------------------------------------------
 
-## ---- setup ----
-
-library("data.table")
-library("plyr")
-library("dplyr")
-library("treelapse")
-
+## ---- data-prep ----
 tmp <- tempfile()
 zillow_url <- "http://files.zillowstatic.com/research/public/Neighborhood/Neighborhood_Zhvi_AllHomes.csv"
 download.file(zillow_url, tmp)
@@ -75,6 +69,8 @@ for (i in seq_len(ncol(tip_values) - 1)) {
 values <- do.call(rbind, grouped_list) %>%
   melt(varnames = c("time", "unit"))
 
-## ---- timebox-trees ----
+## ---- timebox ----
 timebox_tree(values, edges, size_max = 4)
+
+## ---- treebox ----
 treebox(values, edges, size_max = 4)

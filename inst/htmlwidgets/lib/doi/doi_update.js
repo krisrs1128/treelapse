@@ -49,7 +49,10 @@ function draw_doi(elem,
 
   setup_background(elem, width, height, "#F7F7F7");
   setup_search(elem, d3.set(values.unit).values());
-  setup_groups(d3.select("svg"), ["highlighted_links", "links", "nodes", "text"]);
+  setup_groups(
+    d3.select(elem).select("svg"),
+    ["highlighted_links", "links", "nodes", "text"]
+  );
   doi_update(
     elem,
     width,

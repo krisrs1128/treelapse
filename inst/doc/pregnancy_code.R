@@ -1,11 +1,3 @@
-## ---- setup ----
-library("phyloseq")
-library("cluster")
-library("plyr")
-library("dplyr")
-library("reshape2")
-library("treelapse")
-
 ## ----  prepare-csts ----
 ## code from http://statweb.stanford.edu/~susan/papers/Pregnancy/PNAS_Vaginal_Analysis.Rmd
 pregnancy_path <- "http://statweb.stanford.edu/~susan/papers/Pregnancy/PregnancyClosed15.Rdata"
@@ -35,14 +27,12 @@ sample_info <- sample_data(ps) %>%
   data.frame()
 sample_info$CST <- clust
 
-## ---- get_values ----
+## ---- get-values ----
 taxa <- taxa_edgelist(tax_table(ps))
-
 ps <- PSPreg[[site]] %>%
   filter_taxa(function(x) sum(x > 1) > 0.01 * length(x), TRUE)
 
 values <- list()
-
 for (i in seq_len(nrow(otu_table(ps)))) {
   if (i %% 50 == 0) {
     cat(sprintf("Processing sample %d\n", i))
@@ -64,7 +54,7 @@ values <- do.call(rbind, values)
 doi_sankey(
   values %>%
     group_by(group, unit) %>%
-    summarise(value = mean(value)),
+    dplyr::summarise(value = mean(value)),
   taxa,
   "Bacteria",
   1100,
@@ -80,7 +70,7 @@ for (i in seq_len(5)) {
     values %>%
       filter(group == i) %>%
       group_by(unit, time) %>%
-      summarise(value = mean(value)),
+      dplyr::summarise(value = mean(value)),
     taxa,
     size_min = 1
   )
@@ -89,7 +79,7 @@ for (i in seq_len(5)) {
     values %>%
       filter(group == i) %>%
       group_by(unit, time) %>%
-      summarise(value = mean(value)),
+      dplyr::summarise(value = mean(value)),
     taxa,
     size_min = 1
   )

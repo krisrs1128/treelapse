@@ -20,6 +20,8 @@
     - doi_update.js
     - ts_utils.js
     - ts_update.js
+    - sankey_update.js
+    - sankey_utils.js
     - d3_utils.js
   - name: chosen
     version: 1.6.2
