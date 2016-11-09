@@ -1,4 +1,5 @@
 HTMLWidgets.widget({
+
   name: 'timebox_tree',
   type: 'output',
 

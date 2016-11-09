@@ -28,7 +28,8 @@ function setup_tree_ts(elem, width, height) {
 
   draw_rect(elem, 0.05 * width, height, "y_axis_backdrop", "#F7F7F7");
   draw_rect(elem, width, 0.05 * height, "x_axis_backdrop", "#F7F7F7");
-  d3.select("#x_axis_backdrop")
+  d3.select(elem)
+    .select("#x_axis_backdrop")
     .attr("transform", "translate(0, " + 0.95 * height + ")");
 
   setup_groups(
