@@ -42,3 +42,14 @@ timebox_tree <- function(values,
     package = "treelapse"
   )
 }
+
+#' @export
+timebox_tree_output <- function(outputId, width = "100%", height = "400px") {
+  htmlwidgets::shinyWidgetOutput(outputId, "timebox_tree", width, height, package = "treelapse")
+}
+
+#' @export
+render_timebox_tree <- function(expr, env = parent.frame(), quoted = FALSE) {
+  if (!quoted) { expr <- substitute(expr) } # force quoted
+  htmlwidgets::shinyRenderWidget(expr, timebox_tree_output, env, quoted = TRUE)
+}

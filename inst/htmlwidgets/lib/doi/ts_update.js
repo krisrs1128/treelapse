@@ -19,6 +19,7 @@
  *     for the underlying tree and time series displays.
  **/
 function setup_tree_ts(elem, width, height) {
+  d3.select(elem).selectAll("*").remove();
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
     d3.select(elem).select("svg"),
