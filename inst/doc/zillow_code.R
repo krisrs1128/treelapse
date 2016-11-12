@@ -26,7 +26,6 @@ region_scales <- c(
   "Metro",
   "CountyName",
   "City",
-#  "RegionName",
   "RegionID"
 )
 paths <- zillow[, region_scales, with = F] %>%
@@ -55,22 +54,19 @@ edges <- rbind(
 ## ---- get-values ----
 tip_values <- zillow %>%
   select(RegionID, starts_with("19"), starts_with("20")) %>%
-  as.data.frame()
+  melt.data.table(id.vars = "RegionID", variable.name = "month") %>%
+  dcast.data.table(month ~ RegionID)
 
-grouped_list <- list()
-for (i in seq_len(ncol(tip_values) - 1)) {
-  if (i %% 20 == 0) {
-    cat(sprintf("Processing month %d\n", i))
-  }
-  cur_values <- setNames(tip_values[, i + 1], tip_values[, 1])
-  grouped_list[[i]] <- tree_mean(edges, log(cur_values))
-}
+values <- tree_fun_multi(
+  edges,
+  log(as.matrix(tip_values[, -1, with = F])),
+  tree_mean
+)
 
-values <- do.call(rbind, grouped_list) %>%
-  melt(varnames = c("time", "unit"))
+values$time <- values$row
 
 ## ---- timebox ----
-timebox_tree(values, edges, size_max = 4)
+timebox_tree(values %>% select(unit, time, value), edges, size_max = 4)
 
 ## ---- treebox ----
-treebox(values, edges, size_max = 4)
+treebox(values %>% select(unit, time, value), edges, size_max = 4)
