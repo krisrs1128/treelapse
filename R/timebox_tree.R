@@ -14,15 +14,8 @@ timebox_tree <- function(values,
                          size_max = 10
                          ) {
   root <- get_root(edges)
-
-  # order branches according to abundance
   edges <- edges %>%
-    left_join(values, by = c("child" = "unit")) %>%
-    group_by(parent, child) %>%
-    summarise(mval = mean(value)) %>%
-    arrange(parent, desc(mval)) %>%
-    select(parent, child) %>%
-    as.data.frame()
+    merge_edge_values(values)
 
   # forward options using x
   x <- list(
