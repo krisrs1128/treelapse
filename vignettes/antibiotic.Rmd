@@ -71,7 +71,7 @@ If you are familiar with this (type of) study, you can safely skip this section.
 First, we look at how many samples there are, how many microbes were found, and
 what types of features were collected about the samples.
 
-```{r, data-view}
+```{r, abt-data}
 ```
 
 Evidently, there are about fifty timepoints collected across three individuals.
