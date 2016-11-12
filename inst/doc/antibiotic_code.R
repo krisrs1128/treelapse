@@ -7,6 +7,7 @@
 # DOI sankeys.
 
 ## ---- abt-data ----
+data(abt)
 abt
 mapping <- sample_data(abt)
 summary(mapping)

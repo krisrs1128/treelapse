@@ -79,10 +79,9 @@ taxa_edgelist <- function(taxa) {
 
   el  <- list()
   for (j in seq_len(ncol(taxa) - 1)) {
-    cur_el  <- data.frame(
+    cur_el  <- data.table(
       parent = taxa[, j],
-      child = taxa[, j + 1],
-      stringsAsFactors = FALSE
+      child = taxa[, j + 1]
     )
 
     # discard self-loops introduced by na.locf
@@ -90,8 +89,10 @@ taxa_edgelist <- function(taxa) {
     el[[j]] <- unique(cur_el)
   }
 
-  do.call(rbind, el) %>%
-    arrange(parent, child)
+  el %>%
+    rbindlist() %>%
+    arrange(parent, child) %>%
+    as.matrix()
 }
 
 #' @title Apply a function recursively through the tree
@@ -230,7 +231,9 @@ tip_descendants <- function(el, cur_node) {
 #' first column are character names for the parents, the second are children.
 #' @return [character vector] A vector of nodes that have children but no
 #' parents
+#' @export
 get_root <- function(edges) {
+  edges <- as.matrix(edges)
   setdiff(edges[, 1], edges[, 2])
 }
 
@@ -263,4 +266,33 @@ tree_fun_multi <- function(el, values, tree_fun) {
   }
 
   rbindlist(result)
+}
+
+#' Merge edges and values into one data.table
+#'
+#' @param edges [matrix, data.frame, or data.table] Two columns of characters
+#' giving parents and children for each edge in the tree.
+#' @param values [data.frame or data.table] An object mapping unique units /
+#' times / groups to their values. It must have a column "unit" giving the node
+#' id, and optionally accepts columns "time" or "group" for timeboxes or DOI
+#' sankeys.
+#' @return merged_values [data.table] A data.table mapping each edge to the
+#' value for the associated child node.
+#' @importFrom data.table is.data.table data.table uniqueN
+#' @importFrom dplyr left_join group_by summarise arrange select
+merge_edge_values <- function(edges, values) {
+  values <- data.table(values)[, lapply(.SD, as.character)]
+  values$value <- as.numeric(values$value)
+
+  n_unique <- nrow(values[, setdiff(colnames(values), "value"), with = F])
+  if (n_unique != nrow(values)) {
+    warning("Duplicate values for same unit / time / group, using average.")
+  }
+
+  data.table(edges) %>%
+    left_join(values, by = c("child" = "unit")) %>%
+    group_by(parent, child) %>%
+    summarise(mval = mean(value)) %>%
+    arrange(parent, desc(mval)) %>%
+    select(parent, child)
 }
