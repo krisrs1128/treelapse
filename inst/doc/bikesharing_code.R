@@ -5,8 +5,9 @@
 ## ---- data ----
 data(bike)
 bike <- bike %>%
-  filter(!(dteday %in% c("2012-10-29", "2012-10-30", "2011-01-18", "2011-01-27")))
+  filter(!dteday %in% c("2012-10-29", "2012-10-30", "2011-01-18", "2011-01-27"))
 head(bike)
+bike$dteday <- droplevels(bike$dteday)
 
 ## ---- featurize ----
 logit <- function(p) {
@@ -90,36 +91,33 @@ edges <- taxa_edgelist(paths)
 
 edges <- rbind(
   edges,
-  data.frame(
+  cbind(
     "parent" = leaf_assignment,
-    "child" = paste0("sample_", unique(bike$dteday)),
-    stringsAsFactors = FALSE
+    "child" = paste0("sample_", levels(bike$dteday))
   )
 )
 
 ## ---- time-values ----
-tip_values <- data.frame(
+tip_values <- data.table(
   "unit" = paste0("sample_", bike$dteday),
   "time" = bike$hr,
   "value" = bike$cnt
 ) %>%
-  dcast(unit ~ time, fill = 0)
+  dcast(time ~ unit, fill = 0)
 
-grouped_list <- list()
-for (i in seq_len(ncol(tip_values) - 1)) {
-  cur_values <- setNames(tip_values[, i + 1], tip_values[, 1])
-  grouped_list[[i]] <- tree_mean(edges, cur_values)
-}
+values <- tree_fun_multi(
+  edges,
+  as.matrix(tip_values[, -1, with = F]),
+  tree_mean
+)
 
-values <- do.call(rbind, grouped_list) %>%
-  melt(varnames = c("time", "unit"))
+values$time <- tip_values$time[values$row]
 
 ## ---- timeboxes ----
-head(values)
-timebox_tree(values, edges)
+timebox_tree(values %>% select(unit, time, value), edges)
 
 ## ---- treeboxes ----
-treebox(values, edges)
+treebox(values %>% select(unit, time, value), edges)
 
 ## ---- get-group-values ----
 tip_values <- data.frame(
@@ -131,17 +129,17 @@ tip_values <- data.frame(
   filter(time == 8)
 
 tip_values$group <- cut(tip_values$cnt, 5)
+tip_values <- data.table(tip_values) %>%
+  dcast.data.table(group ~ unit, fill = 0, value.var = "value", fun.aggregate = sum)
 
-tip_values <- tip_values %>%
-  dcast(unit ~ group, fill = 0, value.var = "value", fun.aggregate = sum)
+values <- tree_fun_multi(
+  edges,
+  as.matrix(tip_values[, -1, with = F]),
+  tree_sum
+)
 
-grouped_list <- list()
-for (i in seq_len(ncol(tip_values) - 1)) {
-  cur_values <- setNames(tip_values[, i + 1], tip_values[, 1])
-  grouped_list[[i]] <- tree_sum(edges, cur_values)
-}
-values <- do.call(rbind, grouped_list) %>%
-  melt(varnames = c("group", "unit"))
+values$group <- as.integer(tip_values$group[values$row])
 
 ## ---- doi-sankey ----
-doi_sankey(values, edges, "root", leaf_width = 4)
+head(values)
+doi_sankey(values %>% select(unit, group, value), edges, "root", leaf_width = 4)
