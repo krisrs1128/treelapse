@@ -21,7 +21,7 @@ library("dplyr")
 library("reshape2")
 library("caret")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = TRUE)
+opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
 ```
 
 ```{r, read-chunks}
