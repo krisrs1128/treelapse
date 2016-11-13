@@ -11,15 +11,10 @@ First, install the `devtools` package. Then you can get `treelapse` using
 
 ```r
 devtools::install_github(
-  "krisrs1128/treelapse", 
-  build_vignettes = TRUE, 
+  "krisrs1128/treelapse",
   dependencies = TRUE
 )
 ```
-
-The `build_vignettes` argument makes sure the vignettes can be viewed
-immediately after installation. This will make it take longer to install,
-(it adds about an extra minute), but makes it easy to see examples.
 
 The dependencies argument installs the packages that treelapse depends on
 (see the `DESCRIPTION` file for the list) if these aren't already available.
@@ -29,15 +24,20 @@ The dependencies argument installs the packages that treelapse depends on
 To list the available vignettes, run
 
 ```r
+tools::buildVignettes("treelapse")
 browseVignettes("treelapse")
 ```
 
-Examples of the compiled vignettes are available at,
-- [DOI Trees](http://statweb.stanford.edu/~kriss1/setup_doi.html)
-- [DOI Sankeys](http://statweb.stanford.edu/~kriss1/setup_csts.html)
-- [Timeboxes and Treeboxes](http://statweb.stanford.edu/~kriss1/setup_timeboxes.html)
+It might take some time to build each of the vignettes.
 
-`treelapse` currently supports three kinds displays
+Examples of the compiled vignettes are available at,
+- [Package introduction](http://statweb.stanford.edu/~kriss1/treelapse_intro.html)
+- [Microbial Dynamics of Antibiotics Time Courses](http://statweb.stanford.edu/~kriss1/antibiotic.html)
+- [Differential Microbial Abundance and Preterm Births](http://statweb.stanford.edu/~kriss1/pregnancy.html)
+- [Sources of Variation in Bikesharing Demand](http://statweb.stanford.edu/~kriss1/bikesharing.html)
+- [Dynamics in Housing Prices](http://statweb.stanford.edu/~kriss1/zillow.html)
+
+`treelapse` currently supports four kinds displays
 
 * DOI Trees: Navigate large trees according to the Degree-of-Interest (DOI)
 defined by clicking on different nodes.
@@ -51,6 +51,8 @@ associated.
 It also includes a few utilities for structuring data into the required form.
 
 * `tree_sum()`: Aggregate counts from leaves to internal nodes, given a tree
+structure.
+* `tree_mean()`: Average counts from leaves to internal nodes, given a tree
 structure.
 * `taxa_edgelist()`: Create an edgelist from a taxonomic tables whose columns
 are different levels in the hierarchy and rows are leaves. The `ij`th element
