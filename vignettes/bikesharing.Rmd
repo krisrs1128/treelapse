@@ -31,7 +31,7 @@ This vignette applies the `treelapse` package to explore data on bikesharing.
 Bikesharing lets people use bikes temporarily between different stations, Figure
 \@ref(fig:bike_picture) shows an example station.
 
-```{r, bike_picture, fig.caption="Bikesharing in London, from https://commons.wikimedia.org/wiki/File:Bikesharing_londonIMG_1022.jpg.", out.width = "400px"}
+```{r bike_picture, fig.caption="Bikesharing in London, from https://commons.wikimedia.org/wiki/File:Bikesharing_londonIMG_1022.jpg.", out.width = "400px"}
 include_graphics("bikesharing.jpg")
 ```
 
@@ -48,7 +48,7 @@ The data look like this -- `casual`, `registered`, and `cnt` are measures of
 bike demand, the other columns are potentially explanatory features. We've
 removed a few days that have a lot of missing data for some reason.
 
-```{r, data}
+```{r data}
 ```
 
 The originaly competition was about forecasting demand on an hour-by-hour
@@ -98,13 +98,13 @@ This section carries out the plan sketched above. First, we featurize the
 original data at the daily level -- these will be input to the classification
 model.
 
-```{r, featurize}
+```{r featurize}
 ```
 
 Now we can train our model. We intentionally use a tuning parameter that will
 give a larger tree, since this the display later on more interesting.
 
-```{r, train-model}
+```{r train-model}
 ```
 
 It's a little bit of work to extract the edgelist from the trained tree. First,
@@ -116,7 +116,7 @@ that are contained in them.
 
 All this said, it's only a few lines to get the required code.
 
-```{r, get-tree-paths}
+```{r get-tree-paths}
 ```
 
 From these paths, we can build an edgelist using `taxa_edgelist`. Then, we
@@ -124,7 +124,7 @@ add the edges from decision tree leaves to the samples assigned to them. Note
 that the edgelist names can't just be integers -- this is a bug that should be
 resolved in a future version of the package.
 
-```{r, build-edgelist}
+```{r build-edgelist}
 ```
 
 We are only missing one more piece in order to apply treelapse: We don't have
@@ -134,18 +134,18 @@ individually. This will associate each internal node with the average of all
 sample series (the leaves in our full, extended CART tree) that are its
 descendants.
 
-```{r, time-values}
+```{r time-values}
 ```
 
 ## Visualization ##
 
 Finally, we can produce the time and treebox visualizations.
 
-```{r, timeboxes}
+```{r timeboxes}
 ```
 
 
-```{r, treeboxes}
+```{r treeboxes}
 ```
 
 Also, we can generate the sankey representation getting quantiles of demand at
@@ -157,12 +157,12 @@ The code we use to generate these bin counts at internal nodes is similar to
 that we used to get per-timepoint averages before (it probably could be
 modularized).
 
-```{r, get-group-values}
+```{r get-group-values}
 ```
 
 This can be directly input to the DOI sankey.
 
-```{r, doi-sankey}
+```{r doi-sankey}
 ```
 
 ## Interpretation ##

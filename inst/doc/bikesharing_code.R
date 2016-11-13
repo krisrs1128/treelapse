@@ -103,7 +103,7 @@ tip_values <- data.table(
   "time" = bike$hr,
   "value" = bike$cnt
 ) %>%
-  dcast(time ~ unit, fill = 0)
+  dcast.data.table(time ~ unit, fill = 0)
 
 values <- tree_fun_multi(
   edges,
