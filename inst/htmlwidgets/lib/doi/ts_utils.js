@@ -322,9 +322,7 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
 	return 0.5;
       },
       "d": function(d) {
-	return line_fun(
-	  pairs[d]
-	);
+	return line_fun(pairs[d]);
       },
       "opacity": function(d) {
 	if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
