@@ -1,0 +1,47 @@
+---
+title: "Microbial Ecology during Pregnancy"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Microbial Ecologoy during Pregnancy}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+link-citations: yes
+---
+
+## Introduction ##
+
+
+```{r, setup}
+library("knitr")
+library("plyr")
+library("dplyr")
+library("phyloseq")
+library("cluster")
+library("treelapse")
+opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
+data(abt)
+```
+
+```{r, read-chunks}
+read_chunk("~/Documents/programming/treelapse/inst/doc/pregnancy_code.R")
+```
+
+## Data Preparation ##
+
+```{r prepare-csts}
+```
+
+```{r get-values}
+```
+
+## Visualization ##
+
+```{r doi-sankey}
+```
+
+```{r timeboxes}
+```
+
+## Interpretation ##

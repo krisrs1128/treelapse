@@ -1,0 +1,49 @@
+---
+title: "Home Prices"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Home Prices}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+link-citations: yes
+---
+
+## Introduction ##
+
+
+```{r, setup}
+library("knitr")
+library("plyr")
+library("dplyr")
+library("data.table")
+library("treelapse")
+opts_chunk$set(fig.width = 10, fig.height = 7, cache = TRUE)
+data(abt)
+```
+
+```{r, read-chunks}
+read_chunk("~/Documents/programming/treelapse/inst/doc/zillow_code.R")
+```
+
+## Data Preparation ##
+
+```{r data-prep}
+```
+
+```{r get-edges}
+```
+
+```{r get-values}
+```
+
+## Visualization ##
+
+```{r timebox}
+```
+
+```{r treebox}
+```
+
+## Interpretation ##
