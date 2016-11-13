@@ -88,7 +88,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
-      .on("end", function() {
+      .on("brush", function() {
 	zoom_brush_fun(
 	  elem,
 	  reshaped.pairs,
@@ -247,7 +247,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
-      .on("end", function() {
+      .on("brush", function() {
 	zoom_brush_fun(
 	  elem,
 	  reshaped.pairs,
