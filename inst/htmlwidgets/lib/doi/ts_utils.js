@@ -103,8 +103,7 @@ function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
   }
 
   if (mouseover_text) {
-    ts_select.ts.on("mouseover", mouseover_fun);
-    ts_select.search.on("mouseover", mouseover_fun);
+    ts_select.on("mouseover", mouseover_fun);
   }
 }
 
@@ -277,56 +276,18 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
       .y(function(d) { return scales.y(d.value); });
   var units = Object.keys(pairs);
 
-  // highlighted searched terms
-  var search_selection = d3.select(elem)
-      .select("#" + cur_id)
-      .selectAll(".search-" + cur_id)
-      .data(search_lines, function(d) { return d; });
-
-  search_selection.exit().remove();
-  search_selection.enter()
-    .append("path")
-    .classed("search-" + cur_id, true)
-    .attrs({
-      "id": function(d) { return "search-" + d; },
-      "fill": "none",
-      "stroke": "#C2571A",
-      "stroke-width": 2,
-      "opacity": 0.9,
-      "d": function(d) {
-	if (units.indexOf(d) == -1) {
-	  return;
-	}
-	return line_fun(
-	  pairs[d]
-	);
-      }
-    });
-
-  search_selection.transition()
-    .duration(100)
-    .attrs({
-      "id": function(d) { return "search-" + d; },
-      "fill": "none",
-      "stroke": "#C2571A",
-      "stroke-width": 2,
-      "opacity": 0.9,
-      "d": function(d) {
-	if (units.indexOf(d) == -1) {
-	  return;
-	}
-
-	return line_fun(
-	  pairs[d]
-	);
-      }
-    });
-
   // brushed over lines
   var ts_selection = d3.select(elem)
       .select("#" + cur_id)
       .selectAll("." + cur_id)
       .data(units, function(d) { return d; });
+
+  console.log(cur_lines);
+  console.log(units);
+  ts_selection.order(
+
+  )
+
 
   ts_selection.exit().remove();
   ts_selection.enter()
@@ -349,13 +310,16 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
     .duration(100)
     .attrs({
       "stroke": function(d) {
+	if (search_lines.indexOf(d) != -1) {
+	  return "#C2571A";
+	}
 	if (cur_lines.indexOf(d) != -1) {
 	  return "#2D869F";
 	}
 	return "#696969";
       },
       "stroke-width": function(d) {
-	if (cur_lines.indexOf(d) != -1) {
+	if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
 	  return 1;
 	}
 	return 0.5;
@@ -366,17 +330,14 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
 	);
       },
       "opacity": function(d) {
-	if(cur_lines.indexOf(d) != -1) {
+	if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
 	  return 0.9;
 	}
 	return 0.1;
       }
     });
 
-  return {
-    "ts": ts_selection,
-    "search": search_selection
-  };
+  return ts_selection;
 }
 
 /**
