@@ -39,7 +39,7 @@ for (i in seq_len(nrow(otu_table(ps)))) {
   }
 
   cur_values <- asinh(otu_table(ps)@.Data[i, ])
-  cur_tree_values <- tree_sum(data.frame(taxa), cur_values)
+  cur_tree_values <- tree_sum(taxa, cur_values)
   values[[i]] <- data.frame(
       "group" = sample_info[i, "CST"],
       "time" = -sample_info[i, "D2Del"],
