@@ -282,11 +282,8 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
       .selectAll("." + cur_id)
       .data(units, function(d) { return d; });
 
-  console.log(cur_lines);
-  console.log(units);
-  ts_selection.order(
-
-  )
+  ts_selection.filter(function(d) { return cur_lines.indexOf(d) != -1; })
+    .raise();
 
 
   ts_selection.exit().remove();
