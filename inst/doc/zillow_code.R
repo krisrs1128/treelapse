@@ -12,7 +12,6 @@ zillow <- fread(tmp) %>%
   as.data.table()
 
 zillow$RegionID <- paste0(zillow$RegionID, "_", zillow$RegionName)
-
 zillow_impute <- zillow[, 8:ncol(zillow), with = F] %>%
   as.matrix() %>%
   apply(1, function(x) { na.locf(x, fromLast = T)}) %>%
@@ -30,6 +29,7 @@ region_scales <- c(
 )
 paths <- zillow[, region_scales, with = F] %>%
   as.matrix()
+
 head(paths)
 paths[, "CountyName"] <- paste0("Cn_", paths[, "CountyName"])
 paths[, "Metro"] <- paste0("M_", paths[, "Metro"])
@@ -45,7 +45,7 @@ for (i in seq_len(nrow(paths))) {
 edges <- taxa_edgelist(paths)
 edges <- rbind(
   edges,
-  data.frame(
+  cbind(
     "parent" = "root",
     "child" = setdiff(edges[, 1], edges[, 2])
   )
