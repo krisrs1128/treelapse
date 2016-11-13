@@ -100,7 +100,7 @@ taxa_edgelist <- function(taxa) {
 #' @description Given a value associated with each tip in a tree, this
 #' calculates, for each internal node, the sum across all tips that descend from
 #' it.
-#' @param el [character data.frame] The edgelist specifying the tree structure.
+#' @param el [character matrix] The edgelist specifying the tree structure.
 #' The first column are character names for the parents, the second are
 #' children.
 #' @param values [named vector] Tip values on which to aggregate. The names must
@@ -124,7 +124,7 @@ taxa_edgelist <- function(taxa) {
 #' @export
 tree_fun <- function(el, values, f) {
   units <- el %>%
-    unlist() %>%
+    as.character() %>%
     unique()
 
   result <- setNames(values[units], units)

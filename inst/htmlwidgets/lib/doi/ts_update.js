@@ -1,10 +1,10 @@
 /*******************************************************************************
-* @fileoverview Wrappers that update time + treeboxes trees according to user
-* interaction.
-* @see_also doi_utils.js
-*
-* @author kriss1@stanford.edu
-*******************************************************************************/
+ * @fileoverview Wrappers that update time + treeboxes trees according to user
+ * interaction.
+ * @see_also doi_utils.js
+ *
+ * @author kriss1@stanford.edu
+ *******************************************************************************/
 
 /**
  * Initialize background elements common to both timeboxes and treeboxes
@@ -88,16 +88,16 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
 
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
-    .on("brush", function() {
-      zoom_brush_fun(
-	elem,
-	reshaped.pairs,
-	scales,
-	update_fun,
-	brush_nodes_union
-      );
-    })
-    .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+      .on("brush", function() {
+	zoom_brush_fun(
+	  elem,
+	  reshaped.pairs,
+	  scales,
+	  update_fun,
+	  brush_nodes_union
+	);
+      })
+      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
   d3.select(elem)
     .select("#zoom_brush")
@@ -247,16 +247,16 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
 
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
-    .on("brush", function() {
-      zoom_brush_fun(
-	elem,
-	reshaped.pairs,
-	scales,
-	update_fun,
-	brush_ts_intersection
-      );
-    })
-    .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+      .on("brush", function() {
+	zoom_brush_fun(
+	  elem,
+	  reshaped.pairs,
+	  scales,
+	  update_fun,
+	  brush_ts_intersection
+	);
+      })
+      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
   d3.select(elem)
     .select("#zoom_brush")
@@ -566,13 +566,13 @@ function remove_brush(elem, pairs, scales, update_fun, combine_fun) {
   var brush_ix = 0;
   d3.select(elem)
     .selectAll(".brush").filter(
-    function(d, i) {
-      if(d3.select(this).attr("brush_selected") === "true") {
-	brush_ix = i;
-	return true;
-      }
-      return false;
-    }).remove();
+      function(d, i) {
+	if(d3.select(this).attr("brush_selected") === "true") {
+	  brush_ix = i;
+	  return true;
+	}
+	return false;
+      }).remove();
 
   // renumber brushes
   d3.select(elem)
