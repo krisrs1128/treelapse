@@ -7,7 +7,6 @@
 # DOI sankeys.
 
 ## ---- abt-data ----
-data(abt)
 abt
 mapping <- sample_data(abt)
 summary(mapping)
@@ -47,62 +46,36 @@ for (parent in c("Erysipelotrichi_Erysipelotrichales", "Lachnospiraceae", "Rumin
 edges <- taxa_edgelist(taxa)
 
 ## ---- aggregate-tips ----
-times <- unique(mapping$time)
 subjects <- unique(mapping$ind)
-values <- data.frame(
-  subject = character(0),
-  time = numeric(0),
-  type = character(0),
-  unit = character(0),
-  value = numeric(0)
-)
+values <- list()
+for (i in seq_along(subjects)) {
+  cur_ix  <- mapping$ind == subjects[i]
+  for (fun in c("sum", "mean")) {
+    cur_fun <- get(sprintf("tree_%s", fun))
+    cur_values <- tree_fun_multi(edges, tip_values[cur_ix, ], cur_fun)
 
-for (i in seq_along(times)) {
-  for (j in seq_along(subjects)) {
-    if (i %% 10 == 0) {
-      cat(sprintf(
-        "Computing tree stats for subject %s at time %f \n",
-        subjects[j],
-        times[i]
-      ))
-    }
-
-    cur_ix <- mapping$time == times[i] & mapping$ind == subjects[j]
-    if (!any(cur_ix)) next
-
-    cur_tips <- setNames(tip_values[cur_ix, ], colnames(tip_values))
-    cur_sums <- tree_sum(edges, cur_tips)
-    values <- rbind(
+    values <- c(
       values,
-      data.frame(
-        "subject" = subjects[j],
-        "time" = times[i],
-        "type" = "sum",
-        "unit" = names(cur_sums),
-        "value" = cur_sums
-      )
-    )
-
-    cur_means <- tree_mean(edges, cur_tips)
-    values <- rbind(
-      values,
-      data.frame(
-        "subject" = subjects[j],
-        "time" = times[i],
-        "type" = "mean",
-        "unit" = names(cur_means),
-        "value" = cur_means
+      list(
+        data.table(
+          "subject" = subjects[i],
+          "type" = fun,
+          "time" = mapping$time[cur_ix][cur_values$row],
+          cur_values
+        )
       )
     )
   }
 }
+
+values <- rbindlist(values)
 
 ## ---- prep-timebox-data ----
 cur_subject <- "D"
 time_data <- values %>%
   filter(subject == cur_subject, type == "sum") %>%
   select(time, unit, value) %>%
-  arrange(unit)
+  arrange(unit, time)
 
 ## ---- timebox-mappings ----
 conditions <- mapping %>%
@@ -123,16 +96,16 @@ time_data <- values %>%
   arrange(unit)
 
 ## ---- treebox-means ----
-treebox(time_data, edges, size_min = .5, size_max = 2)
+treebox(time_data, edges, size_min = .5, size_max = 10)
 
 ## ---- timebox-means ----
-timebox_tree(time_data, edges, size_min = .5, size_max = 2)
+timebox_tree(time_data, edges, size_min = .5, size_max = 10)
 
 ## ---- doi-sankey-data ----
 condition_values <- values %>%
   left_join(conditions) %>%
   group_by(subject, unit, type, condition) %>%
-  dplyr::summarise(value = mean(value))
+  summarise(value = mean(value))
 
 sankey_data <- condition_values %>%
    filter(subject == cur_subject, type == "sum") %>%
