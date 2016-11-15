@@ -51,15 +51,17 @@ values <- list()
 for (i in seq_along(subjects)) {
   cur_ix  <- mapping$ind == subjects[i]
   for (fun in c("sum", "mean")) {
-    tree_fun <- get(sprintf("tree_%s", fun))
+    cur_fun <- get(sprintf("tree_%s", fun))
+    cur_values <- tree_fun_multi(edges, tip_values[cur_ix, ], cur_fun)
+
     values <- c(
       values,
       list(
         data.table(
           "subject" = subjects[i],
           "type" = fun,
-          "time" = mapping$time[cur_ix],
-          tree_fun_multi(edges, t(tip_values[cur_ix, ]), tree_fun)
+          "time" = mapping$time[cur_ix][cur_values$row],
+          cur_values
         )
       )
     )
@@ -73,7 +75,7 @@ cur_subject <- "D"
 time_data <- values %>%
   filter(subject == cur_subject, type == "sum") %>%
   select(time, unit, value) %>%
-  arrange(unit)
+  arrange(unit, time)
 
 ## ---- timebox-mappings ----
 conditions <- mapping %>%
@@ -94,16 +96,16 @@ time_data <- values %>%
   arrange(unit)
 
 ## ---- treebox-means ----
-treebox(time_data, edges, size_min = .5, size_max = 2)
+treebox(time_data, edges, size_min = .5, size_max = 10)
 
 ## ---- timebox-means ----
-timebox_tree(time_data, edges, size_min = .5, size_max = 2)
+timebox_tree(time_data, edges, size_min = .5, size_max = 10)
 
 ## ---- doi-sankey-data ----
 condition_values <- values %>%
   left_join(conditions) %>%
   group_by(subject, unit, type, condition) %>%
-  dplyr::summarise(value = mean(value))
+  summarise(value = mean(value))
 
 sankey_data <- condition_values %>%
    filter(subject == cur_subject, type == "sum") %>%
