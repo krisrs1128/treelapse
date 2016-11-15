@@ -7,7 +7,6 @@
 # DOI sankeys.
 
 ## ---- abt-data ----
-data(abt)
 abt
 mapping <- sample_data(abt)
 summary(mapping)
@@ -47,23 +46,27 @@ for (parent in c("Erysipelotrichi_Erysipelotrichales", "Lachnospiraceae", "Rumin
 edges <- taxa_edgelist(taxa)
 
 ## ---- aggregate-tips ----
-
 subjects <- unique(mapping$ind)
 values <- list()
 for (i in seq_along(subjects)) {
-  cur_ix  <- mapping$ind == subjects[j]
+  cur_ix  <- mapping$ind == subjects[i]
   for (fun in c("sum", "mean")) {
     tree_fun <- get(sprintf("tree_%s", fun))
     values <- c(
       values,
-      data.table(
-        "subject" = subjects[i],
-        "type" = fun,
-        tree_fun_multi(edges, t(tip_values[cur_ix, ]), tree_fun)
+      list(
+        data.table(
+          "subject" = subjects[i],
+          "type" = fun,
+          "time" = mapping$time[cur_ix],
+          tree_fun_multi(edges, t(tip_values[cur_ix, ]), tree_fun)
+        )
       )
     )
   }
 }
+
+values <- rbindlist(values)
 
 ## ---- prep-timebox-data ----
 cur_subject <- "D"
