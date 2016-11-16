@@ -32,23 +32,14 @@ taxa <- taxa_edgelist(tax_table(ps))
 ps <- PSPreg[[site]] %>%
   filter_taxa(function(x) sum(x > 1) > 0.01 * length(x), TRUE)
 
-values <- list()
-for (i in seq_len(nrow(otu_table(ps)))) {
-  if (i %% 50 == 0) {
-    cat(sprintf("Processing sample %d\n", i))
-  }
+values <- tree_fun_multi(
+  taxa,
+  asinh(otu_table(ps)@.Data),
+  tree_sum
+)
 
-  cur_values <- asinh(otu_table(ps)@.Data[i, ])
-  cur_tree_values <- tree_sum(taxa, cur_values)
-  values[[i]] <- data.frame(
-      "group" = sample_info[i, "CST"],
-      "time" = -sample_info[i, "D2Del"],
-      "unit" = names(cur_tree_values),
-      "value" = as.numeric(cur_tree_values)
-  )
-}
-
-values <- do.call(rbind, values)
+values$time <- sample_info$D2Del[values$row]
+values$group <- sample_info$CST[values$row]
 
 ## ---- doi-sankey ----
 doi_sankey(
