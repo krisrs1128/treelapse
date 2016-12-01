@@ -25,7 +25,7 @@ opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
 ```
 
 ```{r, read-chunks}
-read_chunk("~/Documents/programming/treelapse/inst/doc/bikesharing_code.R")
+read_chunk("https://raw.githubusercontent.com/krisrs1128/treelapse/master/inst/doc/bikesharing_code.R")
 ```
 This vignette applies the `treelapse` package to explore data on bikesharing.
 Bikesharing lets people use bikes temporarily between different stations, Figure

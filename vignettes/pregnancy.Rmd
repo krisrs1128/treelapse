@@ -25,7 +25,7 @@ data(abt)
 ```
 
 ```{r, read-chunks}
-read_chunk("~/Documents/programming/treelapse/inst/doc/pregnancy_code.R")
+read_chunk("https://raw.githubusercontent.com/krisrs1128/treelapse/master/inst/doc/pregnancy_code.R")
 ```
 
 ## Data Preparation ##

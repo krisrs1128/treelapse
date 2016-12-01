@@ -13,7 +13,7 @@ link-citations: yes
 
 ```{r, setup}
 library("knitr")
-read_chunk("~/Documents/programming/treelapse/inst/doc/treelapse_intro_code.R")
+read_chunk("https://raw.githubusercontent.com/krisrs1128/treelapse/master/inst/doc/treelapse_intro_code.R")
 opts_chunk$set(fig.width = 8, fig.height = 5, cache = TRUE)
 ```
 

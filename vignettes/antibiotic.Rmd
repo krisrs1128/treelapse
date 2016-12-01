@@ -42,7 +42,7 @@ data(abt)
 ```
 
 ```{r, read-chunks}
-read_chunk("~/Documents/programming/treelapse/inst/doc/antibiotic_code.R")
+read_chunk("https://raw.githubusercontent.com/krisrs1128/treelapse/master/inst/doc/antibiotic_code.R")
 ```
 
 In this vignette, we study the impact of antibiotics on microbial ecology, using
