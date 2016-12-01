@@ -10,10 +10,7 @@ literature in the Data Visualization community.
 First, install the `devtools` package. Then you can get `treelapse` using
 
 ```r
-devtools::install_github(
-  "krisrs1128/treelapse",
-  dependencies = TRUE
-)
+devtools::install_github("krisrs1128/treelapse")
 ```
 
 The dependencies argument installs the packages that treelapse depends on
