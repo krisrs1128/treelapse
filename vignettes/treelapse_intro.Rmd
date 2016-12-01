@@ -13,7 +13,12 @@ link-citations: yes
 
 ```{r, setup}
 library("knitr")
-read_chunk("https://raw.githubusercontent.com/krisrs1128/treelapse/master/inst/doc/treelapse_intro_code.R")
+library("ape")
+library("data.table")
+library("plyr")
+library("dplyr")
+library("treelapse")
+
 opts_chunk$set(fig.width = 8, fig.height = 5, cache = TRUE)
 ```
 
@@ -60,6 +65,13 @@ package. The tip nodes are numbered 1 to 100, and all others are internal nodes.
 The root is node 101.
 
 ```{r, make-edgelist}
+n_tips <- 100
+tree <- rtree(n_tips)
+edges <- data.frame(tree$edge)
+edges <- colwise(as.character)(edges)
+
+colnames(edges) <- c("parent", "child")
+head(edges)
 ```
 
 Now, we need to associate data with each node. In general, this will be a
@@ -80,6 +92,11 @@ DOI trees expect just a scalar associated with each node. Here, we generate a
 random uniform variable for each node.
 
 ```{r, doi-values}
+units <- unique(c(edges$parent, edges$child))
+values <- data.frame(
+  "unit" = units,
+  "value" = runif(n_tips + tree$Nnode)
+)
 ```
 
 The result is displayed below. Clicking on a node increases its
@@ -92,6 +109,7 @@ points -- `leaf_width` controls the $x$ spacing between nodes, while `size_min`
 specifies the radius of the smallest node.
 
 ```{r, doi-display-1}
+doi_tree(values, edges, leaf_width = 50, size_min = 2)
 ```
 
 Suppose we didn't have data for each internal node. It might be interesting to
@@ -99,6 +117,18 @@ aggregate up the tree. This is what the `tree_sum` function does. There are
 analogous functions for computing averages and aggregate diversities.
 
 ```{r, doi-tip-values}
+# reduce to just tips
+tip_values <- values %>%
+  filter(unit %in% 1:n_tips)
+tip_names <- tip_values$unit
+tip_values <- setNames(tip_values$value, tip_names)
+
+# aggregate tip values
+summed_values <- tree_sum(edges, tip_values)
+values <- data.frame(
+  unit = names(summed_values),
+  value = summed_values
+)
 ```
 
 The resulting tree is somewhat more pleasing to look at, because width of an
@@ -106,6 +136,7 @@ edge leading into a node is equal to the sum of the widths flowing out (since
 we aggregated values from the tips up).
 
 ```{r, doi-display-2}
+doi_tree(values, edges, leaf_width = 50, size_min = 2)
 ```
 
 ### DOI Sankeys ###
@@ -117,6 +148,23 @@ aggregation. Notice that we have to convert the unit and group columns to
 characters: by default these will be integers, and `doi_sankey` will fail.
 
 ```{r, make-sankey-data}
+make_grouped_data <- function(n_groups, n_tips, edges) {
+  grouped_values <- matrix(
+    runif(n_tips * n_groups), n_tips, n_groups,
+    dimnames = list(seq_len(n_tips), seq_len(n_groups))
+  )
+
+  grouped_list <- list()
+  for (i in seq_len(n_groups)) {
+    grouped_list[[i]] <- tree_sum(edges, grouped_values[, i])
+  }
+
+  grouped_values <- do.call(rbind, grouped_list) %>%
+    melt(varnames = c("group", "unit"))
+  grouped_values$unit <- as.character(grouped_values$unit)
+  grouped_values$group <- as.character(grouped_values$group)
+  grouped_values
+}
 ```
 
 Given this data, we can create the sankey visualization. Clicking on edges
@@ -125,6 +173,8 @@ the groups all have about the same width, because the leaves have randomly
 generated values.
 
 ```{r, vis-sankey-doi}
+grouped_values <- make_grouped_data(3, n_tips, edges)
+doi_sankey(grouped_values, edges)
 ```
 
 ### Time / Treeboxes ###
@@ -135,6 +185,9 @@ where we have multiple measurements of the same unit across multiple timepoints
 toy data.
 
 ```{r, make-timebox-data}
+n_times <- 100
+timebox_values <- make_grouped_data(100, n_tips, edges)
+colnames(timebox_values) <- c("time", "unit", "value")
 ```
 
 Below we display the timebox. Here, pressing "new box" will let you draw a brush
@@ -149,6 +202,7 @@ display the associated time and value ranges. Finally, searching for a node name
 in the search box will highlight the associated series and node in red.
 
 ```{r vis-timebox}
+timebox_tree(timebox_values, edges, size_min = 1)
 ```
 
 Timeoboxes only let you query based on time series shapes. Treeboxes are the
@@ -156,6 +210,7 @@ natural converse -- they let you select nodes in the tree by drawing brushes
 over them. Other than this, the interaction is exactly the same.
 
 ```{r vis-treebox}
+treebox(timebox_values, edges, size_min = 1)
 ```
 
 ## Previous Work ##
