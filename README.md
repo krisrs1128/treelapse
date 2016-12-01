@@ -21,13 +21,8 @@ The dependencies argument installs the packages that treelapse depends on
 
 ## Examples ##
 
-To list the available vignettes, run
-
-```r
-tools::buildVignettes("treelapse")
-browseVignettes("treelapse")
-```
-
+To view vignettes, add the argument `build_vignettes = TRUE` to the
+installation command above and then run `browseVignettes("treelapse")`.
 It might take some time to build each of the vignettes.
 
 Examples of the compiled vignettes are available at,
