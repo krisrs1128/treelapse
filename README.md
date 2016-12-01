@@ -10,7 +10,10 @@ literature in the Data Visualization community.
 First, install the `devtools` package. Then you can get `treelapse` using
 
 ```r
-devtools::install_github("krisrs1128/treelapse")
+devtools::install_github(
+  "krisrs1128/treelapse",
+  dependencies = TRUE
+)
 ```
 
 The dependencies argument installs the packages that treelapse depends on
@@ -18,13 +21,8 @@ The dependencies argument installs the packages that treelapse depends on
 
 ## Examples ##
 
-To list the available vignettes, run
-
-```r
-tools::buildVignettes("treelapse")
-browseVignettes("treelapse")
-```
-
+To view vignettes, add the argument `build_vignettes = TRUE` to the
+installation command above and then run `browseVignettes("treelapse")`.
 It might take some time to build each of the vignettes.
 
 Examples of the compiled vignettes are available at,
