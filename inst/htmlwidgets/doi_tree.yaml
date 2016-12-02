@@ -7,6 +7,10 @@
     version: 0.4.1
     src: htmlwidgets/lib/d3-selection-multi/
     script: d3-selection-multi.v0.4.min.js
+  - name: d3-legend
+    version: 2.18.0
+    src: htmlwidgets/lib/d3-legend/
+    script: d3-legend.min.js
   - name: jquery
     version: 2.2.1
     src: htmlwidgets/lib/jquery
