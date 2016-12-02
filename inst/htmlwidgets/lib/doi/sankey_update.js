@@ -145,10 +145,17 @@ function sankey_update(elem,
   var legend = d3.legendColor()
       .shapePadding(10)
       .scale(scales.fill);
+
   d3.select(elem)
     .select("#legend")
+    .attrs({
+      "transform": "translate(20, 20)",
+      "font-family": "roboto",
+      "font-size": 12
+    })
     .call(legend);
 
+  // Main DOI code
   var layout = doi_tree.tree_block(
     focus_node_id,
     [width, height],
