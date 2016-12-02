@@ -47,7 +47,7 @@ function draw_sankey(elem,
   setup_search(elem, d3.set(values.unit).values());
   setup_groups(
     d3.select(elem).select("svg"),
-    ["links", "text"]
+    ["links", "text", "legend"]
   );
 
   sankey_update(
@@ -140,6 +140,14 @@ function sankey_update(elem,
     "fill": d3.scaleOrdinal(d3.schemeSet3)
       .domain(groups)
   };
+
+  // setup legend
+  var legend = d3.legendColor()
+      .shapePadding(10)
+      .scale(scales.fill);
+  d3.select(elem)
+    .select("#legend")
+    .call(legend);
 
   var layout = doi_tree.tree_block(
     focus_node_id,
