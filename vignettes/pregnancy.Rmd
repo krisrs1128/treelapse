@@ -68,7 +68,7 @@ values <- tree_fun_multi(
 )
 
 values$time <- sample_info$D2Del[values$row]
-values$group <- sample_info$CST[values$row]
+values$group <- paste0("cst_", sample_info$CST[values$row])
 ```
 
 ## Visualization ##
