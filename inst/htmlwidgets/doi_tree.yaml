@@ -20,6 +20,10 @@
     src: htmlwidgets/lib/doi
     stylesheet: style.css
     script:
+    - ts_utils.js
+    - ts_update.js
+    - sankey_utils.js
+    - sankey_update.js
     - doi_utils.js
     - doi_update.js
     - d3_utils.js
