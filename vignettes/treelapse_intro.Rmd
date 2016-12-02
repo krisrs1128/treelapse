@@ -19,7 +19,7 @@ library("plyr")
 library("dplyr")
 library("treelapse")
 
-opts_chunk$set(fig.width = 8, fig.height = 5, cache = TRUE)
+opts_chunk$set(fig.width = 8, fig.height = 5, cache = FALSE)
 ```
 
 ## Introduction ##
@@ -67,11 +67,9 @@ The root is node 101.
 ```{r, make-edgelist}
 n_tips <- 100
 tree <- rtree(n_tips)
-edges <- data.frame(tree$edge)
-edges <- colwise(as.character)(edges)
-
+edges <- tree$edge
+class(edges) <- "character"
 colnames(edges) <- c("parent", "child")
-head(edges)
 ```
 
 Now, we need to associate data with each node. In general, this will be a
@@ -92,7 +90,7 @@ DOI trees expect just a scalar associated with each node. Here, we generate a
 random uniform variable for each node.
 
 ```{r, doi-values}
-units <- unique(c(edges$parent, edges$child))
+units <- unique(as.character(edges))
 values <- data.frame(
   "unit" = units,
   "value" = runif(n_tips + tree$Nnode)
