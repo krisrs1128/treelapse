@@ -170,6 +170,7 @@ function link_id_fun(d) {
 function add_button(elem, text, click_fun) {
   d3.select(elem)
     .append("button")
+    .style("height", 10)
     .on("click", click_fun)
     .text(text);
 }
