@@ -11,6 +11,10 @@
     version: 1.0.1
     src: htmlwidgets/lib/d3-scale-chromatic/
     script: d3-scale-chromatic.v1.min.js
+  - name: d3-legend
+    version: 2.18.0
+    src: htmlwidgets/lib/d3-legend/
+    script: d3-legend.min.js
   - name: jquery
     version: 2.2.1
     src: htmlwidgets/lib/jquery
@@ -20,6 +24,8 @@
     src: htmlwidgets/lib/doi
     stylesheet: style.css
     script:
+    - ts_utils.js
+    - ts_update.js
     - sankey_utils.js
     - sankey_update.js
     - doi_utils.js

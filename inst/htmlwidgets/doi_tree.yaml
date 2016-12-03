@@ -7,6 +7,10 @@
     version: 0.4.1
     src: htmlwidgets/lib/d3-selection-multi/
     script: d3-selection-multi.v0.4.min.js
+  - name: d3-legend
+    version: 2.18.0
+    src: htmlwidgets/lib/d3-legend/
+    script: d3-legend.min.js
   - name: jquery
     version: 2.2.1
     src: htmlwidgets/lib/jquery
@@ -16,12 +20,12 @@
     src: htmlwidgets/lib/doi
     stylesheet: style.css
     script:
-    - doi_utils.js
-    - doi_update.js
     - ts_utils.js
     - ts_update.js
     - sankey_utils.js
     - sankey_update.js
+    - doi_utils.js
+    - doi_update.js
     - d3_utils.js
   - name: chosen
     version: 1.6.2
