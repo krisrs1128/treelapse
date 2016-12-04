@@ -203,7 +203,7 @@ in the search box will highlight the associated series and node in red.
 timebox_tree(timebox_values, edges, size_min = 1)
 ```
 
-Timeoboxes only let you query based on time series shapes. Treeboxes are the
+Timeboxes only let you query based on time series shapes. Treeboxes are the
 natural converse -- they let you select nodes in the tree by drawing brushes
 over them. Other than this, the interaction is exactly the same.
 

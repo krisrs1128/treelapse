@@ -141,7 +141,14 @@ function setup_search(elem, options) {
     .append("option")
     .attr("value", function(d) { return d;})
     .text(function(d) { return d;});
-  $("#search_box-" + elem_id).chosen();
+  $("#search_box-" + elem_id).chosen({
+    "search_contains": true,
+    "width": "30%"
+  });
+
+  search.selectAll(".chosen-container .chosen-choices")
+    .style("max-height", "25px")
+    .style("font-size", "12px");
 }
 
 /**
@@ -170,6 +177,7 @@ function link_id_fun(d) {
 function add_button(elem, text, click_fun) {
   d3.select(elem)
     .append("button")
+    .style("height", 10)
     .on("click", click_fun)
     .text(text);
 }
@@ -287,7 +295,6 @@ function selection_update(svg_type, selection, data, class_name, attr_funs, dura
     .transition(transitioner)
     .attrs(attr_funs);
 }
-
 
 /**
  * Get the IDs in the search box
