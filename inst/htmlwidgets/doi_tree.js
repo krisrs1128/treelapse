@@ -10,7 +10,7 @@ HTMLWidgets.widget({
 	draw_doi(
 	  el,
 	  width,
-	  height,
+	  height - 30,
 	  x[0],
 	  stratified_tree(x[1], x[2]),
 	  x[3],
