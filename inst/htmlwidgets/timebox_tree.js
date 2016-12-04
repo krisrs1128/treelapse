@@ -10,7 +10,7 @@ HTMLWidgets.widget({
 	draw_timebox(
 	  el,
 	  width,
-	  height - 20,
+	  height - 30,
 	  x[0],
 	  stratified_tree(x[2], x[1]),
 	  x[3],
