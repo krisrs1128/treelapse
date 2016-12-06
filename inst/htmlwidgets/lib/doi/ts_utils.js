@@ -28,19 +28,36 @@
  *     giving scales for computing positions in the time + treeboxes.
  **/
 function get_scales(values, width, height, size_min, size_max) {
-  return {
-    "x": d3.scaleLinear()
+  var x_scale;
+  var zoom_x_scale;
+
+  if (isNumeric(values.time[0])) {
+    // numeric x case
+    x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.05 * width, width]),
+      .range([0.05 * width, width]);
+    zoom_x_scale = d3.scaleLinear()
+      .domain(d3.extent(values.time))
+      .range([0.8 * width, width]);
+  } else {
+    // ordinal (parallel coordinates) x case
+    x_scale = d3.scaleBand()
+      .domain(d3.set(values.time).values())
+      .range([0.05 * width, width]);
+    zoom_x_scale = d3.scaleBand()
+      .domain(d3.set(values.time).values())
+      .range([0.8 * width, width]);
+  }
+
+  return {
+    "x": x_scale,
     "y": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([0.95 * height, 0.43 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([size_min, size_max]),
-    "zoom_x": d3.scaleLinear()
-      .domain(d3.extent(values.time))
-      .range([0.8 * width, width]),
+    "zoom_x": zoom_x_scale,
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([0.15 * height, 0.05 * height])
