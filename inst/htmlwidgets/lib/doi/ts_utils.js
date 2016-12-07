@@ -28,19 +28,36 @@
  *     giving scales for computing positions in the time + treeboxes.
  **/
 function get_scales(values, width, height, size_min, size_max) {
-  return {
-    "x": d3.scaleLinear()
+  var x_scale;
+  var zoom_x_scale;
+
+  if (isNumeric(values.time[0])) {
+    // numeric x case
+    x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.05 * width, width]),
+      .range([0.05 * width, 0.95 * width]);
+    zoom_x_scale = d3.scaleLinear()
+      .domain(d3.extent(values.time))
+      .range([0.8 * width, 0.95 * width]);
+  } else {
+    // ordinal (parallel coordinates) x case
+    x_scale = d3.scalePoint()
+      .domain(d3.set(values.time).values())
+      .range([0.05 * width, 0.95 * width]);
+    zoom_x_scale = d3.scaleBand()
+      .domain(d3.set(values.time).values())
+      .range([0.8 * width, 0.95 * width]);
+  }
+
+  return {
+    "x": x_scale,
     "y": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([0.95 * height, 0.43 * height]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([size_min, size_max]),
-    "zoom_x": d3.scaleLinear()
-      .domain(d3.extent(values.time))
-      .range([0.8 * width, width]),
+    "zoom_x": zoom_x_scale,
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([0.15 * height, 0.05 * height])
@@ -285,7 +302,6 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
   ts_selection.filter(function(d) { return cur_lines.indexOf(d) != -1; })
     .raise();
 
-
   ts_selection.exit().remove();
   ts_selection.enter()
     .append("path")
@@ -467,6 +483,28 @@ function change_focus(elem) {
 }
 
 /**
+* Invert a rangeBands scale
+*
+* Based on https://github.com/d3/d3/pull/598
+*
+* @param {d3.scaleRangeBand} scale A rangebands scale mapping ordinals
+* to continuous values.
+* @return {function} function A function that returns the domain-category
+* closest to the observed continuous range value (the input x).
+**/
+function ordinal_invert(scale) {
+  return function(x) {
+    var x_pos = [0].concat(scale.domain().map(scale));
+    for (var i = 0; i < x_pos.length - 1; i++) {
+      x_pos[i] = 0.5 * (x_pos[i] + x_pos[i + 1]);
+    }
+    x_pos.pop();
+
+    return scale.domain()[d3.bisect(x_pos, x) - 1];
+  };
+}
+
+/**
  * Get the extent of a brush
  *
  * @param brushes {array of d3-brush} An array containing all the d3-brushes on
@@ -482,6 +520,10 @@ function change_focus(elem) {
  *       - y_max {float} Same, for maximum y-value.
  **/
 function get_box_extent(brush, scales) {
+  if (typeof scales.x.invert === "undefined") {
+    scales.x.invert = ordinal_invert(scales.x);
+  }
+
   var box_extent = d3.brushSelection(brush);
   return {
     "x_min": scales.x.invert(box_extent[0][0]),

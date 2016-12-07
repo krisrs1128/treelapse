@@ -1,0 +1,43 @@
+---
+title: "Hierarchical Clustering and the Iris Data"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hierarchical Clustering and the Iris Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is an application motivated by this
+nice
+[walkthrough](https://cran.r-project.org/web/packages/dendextend/vignettes/Cluster_Analysis.html).
+
+```{r setup}
+library("dendextend")
+library("treelapse")
+data(iris)
+```
+
+```{r, prep_data}
+hc_iris <- hclust(dist(iris[, 1:4]), method = "complete")
+edges <- ape::as.phylo(hc_iris)$edge
+colnames(edges) <- c("parent", "child")
+class(edges) <- "character"
+
+X <- t(iris[, 1:4])
+colnames(X) <- 1:150
+
+values <- tree_fun_multi(
+  edges,
+  X,
+  tree_mean
+)
+
+values$time <- rownames(X)[values$row]
+timebox_tree(values, edges)
+```
+
+```{r}
+treebox(values, edges)
+```

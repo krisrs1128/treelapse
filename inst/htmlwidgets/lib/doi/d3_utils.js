@@ -334,3 +334,14 @@ function stratified_tree(edge_arrays, root) {
     .parentId(function(d) { return d.parent; })
   (edges);
 }
+
+/**
+ * Helper function to check if value is numeric
+ *
+ * http://stackoverflow.com/questions/9716468/is-there-any-function-like-isnumeric-in-javascript-to-validate-numbers
+ * @param {string or float} n The value we want to check is numeric or not.
+ * @return {bool} true if is numeric, false otherwise.
+ **/
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
