@@ -35,18 +35,18 @@ function get_scales(values, width, height, size_min, size_max) {
     // numeric x case
     x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.05 * width, 0.95 * width]);
+      .range([0.05 * width, width]);
     zoom_x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.8 * width, 0.95 * width]);
+      .range([0.8 * width, width]);
   } else {
     // ordinal (parallel coordinates) x case
     x_scale = d3.scalePoint()
       .domain(d3.set(values.time).values())
-      .range([0.05 * width, 0.95 * width]);
-    zoom_x_scale = d3.scaleBand()
+      .range([0.05 * width, width]);
+    zoom_x_scale = d3.scalePoint()
       .domain(d3.set(values.time).values())
-      .range([0.8 * width, 0.95 * width]);
+      .range([0.8 * width, width]);
   }
 
   return {
@@ -289,7 +289,13 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
  **/
 function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) {
   var line_fun = d3.line()
-      .x(function(d) { return scales.x(d.time); })
+      .x(function(d) {
+	var pos = scales.x(d.time);
+	if (isNaN(pos)) {
+	  return 0;
+	}
+	return pos;
+      })
       .y(function(d) { return scales.y(d.value); });
   var units = Object.keys(pairs);
 
