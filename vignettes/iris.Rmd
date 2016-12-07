@@ -14,7 +14,6 @@ nice
 [walkthrough](https://cran.r-project.org/web/packages/dendextend/vignettes/Cluster_Analysis.html).
 
 ```{r setup}
-library("dendextend")
 library("treelapse")
 data(iris)
 ```
