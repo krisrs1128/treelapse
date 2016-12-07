@@ -468,11 +468,23 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
       .node()
   );
 
+  // check if ordinal or not, and adjust scales accordingly
+  var ordinal = !isNumeric(pairs[Object.keys(pairs)[0]][0].time);
+  if (typeof scales.zoom_x.invert === "undefined") {
+    scales.zoom_x.invert = ordinal_invert(scales.zoom_x);
+  }
+
   // reset domains for scales
-  scales.x.domain(
-    [scales.zoom_x.invert(cur_extent[0][0]),
-     scales.zoom_x.invert(cur_extent[1][0])]
-  );
+  var new_x0 = scales.zoom_x.invert(cur_extent[0][0]);
+  var new_x1 = scales.zoom_x.invert(cur_extent[1][0]);
+  if (ordinal) {
+    var start_ix = scales.zoom_x.domain().indexOf(new_x0);
+    var end_ix = scales.zoom_x.domain().indexOf(new_x1);
+    scales.x.domain(scales.zoom_x.domain().slice(start_ix, end_ix + 1));
+  } else {
+    scales.x.domain([new_x0, new_x1]);
+  }
+
   scales.y.domain(
     [scales.zoom_y.invert(cur_extent[1][1]),
      scales.zoom_y.invert(cur_extent[0][1])]

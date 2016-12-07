@@ -31,6 +31,7 @@ Examples of the compiled vignettes are available at,
 - [Differential Microbial Abundance and Preterm Births](http://statweb.stanford.edu/~kriss1/pregnancy.html)
 - [Sources of Variation in Bikesharing Demand](http://statweb.stanford.edu/~kriss1/bikesharing.html)
 - [Dynamics in Housing Prices](http://statweb.stanford.edu/~kriss1/zillow.html)
+- [Hierarchical Clustering and the Iris Data](http://statweb.stanford.edu/~kriss1/iris.html)
 
 `treelapse` currently supports four kinds displays
 
