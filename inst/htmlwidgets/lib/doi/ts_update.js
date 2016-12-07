@@ -468,29 +468,23 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
       .node()
   );
 
-  var ordinal = false;
+  // check if ordinal or not, and adjust scales accordingly
+  var ordinal = !isNumeric(pairs[Object.keys(pairs)[0]][0].time);
   if (typeof scales.zoom_x.invert === "undefined") {
-    ordinal = true;
-    scales.zoom_x.invert = ordinal_invert(scales.x);
+    scales.zoom_x.invert = ordinal_invert(scales.zoom_x);
   }
 
   // reset domains for scales
+  var new_x0 = scales.zoom_x.invert(cur_extent[0][0]);
+  var new_x1 = scales.zoom_x.invert(cur_extent[1][0]);
   if (ordinal) {
-    var start_label = scales.zoom_x.invert(cur_extent[0][0]);
-    var end_label = scales.zoom_x.invert(cur_extent[0][0]);
-    var start_ix = scales.x.domain().indexOf(start_label);
-    var end_ix = scales.x.domain().indexOf(start_label);
-    var new_range = scales.x.range()
-	.map(function(z) {
-	  return z * scales.x.domain().length / (end_ix - start_ix + 1);
-	});
-    scales.x.range(new_range);
+    var start_ix = scales.zoom_x.domain().indexOf(new_x0);
+    var end_ix = scales.zoom_x.domain().indexOf(new_x1);
+    scales.x.domain(scales.zoom_x.domain().slice(start_ix, end_ix + 1));
   } else {
-    scales.x.domain(
-      [scales.zoom_x.invert(cur_extent[0][0]),
-       scales.zoom_x.invert(cur_extent[1][0])]
-    );
+    scales.x.domain([new_x0, new_x1]);
   }
+
   scales.y.domain(
     [scales.zoom_y.invert(cur_extent[1][1]),
      scales.zoom_y.invert(cur_extent[0][1])]
