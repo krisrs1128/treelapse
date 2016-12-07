@@ -468,11 +468,29 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
       .node()
   );
 
+  var ordinal = false;
+  if (typeof scales.zoom_x.invert === "undefined") {
+    ordinal = true;
+    scales.zoom_x.invert = ordinal_invert(scales.x);
+  }
+
   // reset domains for scales
-  scales.x.domain(
-    [scales.zoom_x.invert(cur_extent[0][0]),
-     scales.zoom_x.invert(cur_extent[1][0])]
-  );
+  if (ordinal) {
+    var start_label = scales.zoom_x.invert(cur_extent[0][0]);
+    var end_label = scales.zoom_x.invert(cur_extent[0][0]);
+    var start_ix = scales.x.domain().indexOf(start_label);
+    var end_ix = scales.x.domain().indexOf(start_label);
+    var new_range = scales.x.range()
+	.map(function(z) {
+	  return z * scales.x.domain().length / (end_ix - start_ix + 1);
+	});
+    scales.x.range(new_range);
+  } else {
+    scales.x.domain(
+      [scales.zoom_x.invert(cur_extent[0][0]),
+       scales.zoom_x.invert(cur_extent[1][0])]
+    );
+  }
   scales.y.domain(
     [scales.zoom_y.invert(cur_extent[1][1]),
      scales.zoom_y.invert(cur_extent[0][1])]
