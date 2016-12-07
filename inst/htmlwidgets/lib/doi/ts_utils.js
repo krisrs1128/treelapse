@@ -35,18 +35,18 @@ function get_scales(values, width, height, size_min, size_max) {
     // numeric x case
     x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.05 * width, width]);
+      .range([0.05 * width, 0.95 * width]);
     zoom_x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.8 * width, width]);
+      .range([0.8 * width, 0.95 * width]);
   } else {
     // ordinal (parallel coordinates) x case
-    x_scale = d3.scaleBand()
+    x_scale = d3.scalePoint()
       .domain(d3.set(values.time).values())
-      .range([0.05 * width, width]);
+      .range([0.05 * width, 0.95 * width]);
     zoom_x_scale = d3.scaleBand()
       .domain(d3.set(values.time).values())
-      .range([0.8 * width, width]);
+      .range([0.8 * width, 0.95 * width]);
   }
 
   return {
@@ -302,7 +302,6 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
   ts_selection.filter(function(d) { return cur_lines.indexOf(d) != -1; })
     .raise();
 
-
   ts_selection.exit().remove();
   ts_selection.enter()
     .append("path")
@@ -485,7 +484,12 @@ function change_focus(elem) {
 
 function ordinal_invert(scale) {
   return function(x) {
-    var x_pos = scale.domain().map(scale);
+    var x_pos = [0].concat(scale.domain().map(scale));
+    for (var i = 0; i < x_pos.length - 1; i++) {
+      x_pos[i] = 0.5 * (x_pos[i] + x_pos[i + 1]);
+    }
+    x_pos.pop();
+
     return scale.domain()[d3.bisect(x_pos, x) - 1];
   };
 }
