@@ -482,6 +482,16 @@ function change_focus(elem) {
   focus_brush(elem, brush_ix);
 }
 
+/**
+* Invert a rangeBands scale
+*
+* Based on https://github.com/d3/d3/pull/598
+*
+* @param {d3.scaleRangeBand} scale A rangebands scale mapping ordinals
+* to continuous values.
+* @return {function} function A function that returns the domain-category
+* closest to the observed continuous range value (the input x).
+**/
 function ordinal_invert(scale) {
   return function(x) {
     var x_pos = [0].concat(scale.domain().map(scale));
