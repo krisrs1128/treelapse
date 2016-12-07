@@ -483,6 +483,13 @@ function change_focus(elem) {
   focus_brush(elem, brush_ix);
 }
 
+function ordinal_invert(scale) {
+  return function(x) {
+    var x_pos = scale.domain().map(scale);
+    return scale.domain()[d3.bisect(x_pos, x) - 1];
+  };
+}
+
 /**
  * Get the extent of a brush
  *
@@ -499,6 +506,10 @@ function change_focus(elem) {
  *       - y_max {float} Same, for maximum y-value.
  **/
 function get_box_extent(brush, scales) {
+  if (typeof scales.x.invert === "undefined") {
+    scales.x.invert = ordinal_invert(scales.x);
+  }
+
   var box_extent = d3.brushSelection(brush);
   return {
     "x_min": scales.x.invert(box_extent[0][0]),
