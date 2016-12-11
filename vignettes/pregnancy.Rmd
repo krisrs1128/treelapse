@@ -63,7 +63,7 @@ ps <- PSPreg[[site]] %>%
 
 values <- tree_fun_multi(
   taxa,
-  asinh(otu_table(ps)@.Data),
+  asinh(as(otu_table(ps), "matrix")),
   tree_sum
 )
 
