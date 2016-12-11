@@ -93,7 +93,7 @@ highly skewed. We're finding that the vast majority of microbes have very small
 abundnaces.
 
 ```{r, skewness}
-hist(asinh(otu_table(abt)@.Data), main = "Raw RSV Counts")
+hist(asinh(as(otu_table(abt), "matrix")), main = "Raw RSV Counts")
 ```
 
 This is actually pretty standard in microbiome data; we'll use the filtering and
@@ -107,7 +107,7 @@ abt <- abt %>%
   filter_taxa(function(x) sd(x) > 7.5, prune = TRUE) %>%
   transform_sample_counts(asinh)
 abt
-hist(otu_table(abt)@.Data, main = "Processed RSV Counts")
+hist(as(otu_table(abt), "matrix"), main = "Processed RSV Counts")
 ```
 
 These are relatively generic checks we would do with any microbiome data set.
@@ -122,11 +122,14 @@ the following data.
 * A `values` dataset giving the
 
 ```{r abt-values}
-tip_values <- t(otu_table(abt))@.Data
+tip_values <- otu_table(abt) %>%
+  as("matrix") %>%
+  t()
 ```
 
 ```{r get-taxa}
-taxa <- tax_table(abt)
+taxa <- tax_table(abt) %>%
+  as("matrix")
 taxa <- gsub("_1", "", taxa)
 taxa <- gsub("_2", "", taxa)
 taxa <- gsub("uncultured", "", taxa)
@@ -135,8 +138,8 @@ taxa[taxa == ""] <- NA
 incertae_ix <- which(taxa == "Incertae Sedis", arr.ind = TRUE)
 for (parent in c("Erysipelotrichi_Erysipelotrichales", "Lachnospiraceae", "Ruminococcaceae")) {
   cur_parent_ix <- which(taxa == parent, arr.ind = TRUE)
-  cur_ix <- incertae_ix[incertae_ix[, "row"] %in% cur_parent_ix[, "row"],]
-  taxa@.Data[cur_ix] <- paste0("Incerate Sedis_", parent)
+  cur_ix <- incertae_ix[incertae_ix[, "row"] %in% cur_parent_ix[, "row"], ]
+  taxa[cur_ix] <- paste0("Incerate Sedis_", parent)
 }
 
 edges <- taxa_edgelist(taxa)
