@@ -371,28 +371,28 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
     .duration(100)
     .attrs({
       "stroke": function(d) {
-	if (search_lines.indexOf(d) != -1) {
-	  return "#C2571A";
-	}
-	if (cur_lines.indexOf(d) != -1) {
-	  return "#2D869F";
-	}
-	return "#696969";
+	      if (search_lines.indexOf(d) != -1) {
+	        return "#C2571A";
+	      }
+	      if (cur_lines.indexOf(d) != -1) {
+	        return "#2D869F";
+	      }
+	      return "#696969";
       },
       "stroke-width": function(d) {
-	if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
-	  return 1;
-	}
-	return 0.5;
+	      if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
+	        return 1;
+	      }
+	      return 0.5;
       },
       "d": function(d) {
-	return line_fun(pairs[d]);
+	      return line_fun(pairs[d]);
       },
       "opacity": function(d) {
-	if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
-	  return 0.9;
-	}
-	return 0.1;
+	      if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
+	        return 0.9;
+	      }
+	      return 0.1;
       }
     });
 
