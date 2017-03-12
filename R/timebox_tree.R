@@ -44,14 +44,3 @@ render_timebox_tree <- function(expr, env = parent.frame(), quoted = FALSE) {
   htmlwidgets::shinyRenderWidget(expr, timebox_tree_output, env, quoted = TRUE)
 }
 
-merge_style_opts <- function(opts) {
-  default_opts <- list(
-    "size_min" = 0,
-    "size_max" = 10,
-    "font_size" = 14,
-    "mouseover_font_size" = 14,
-    "axis_font_size" = 14,
-    "font_family" = "roboto"
-  )
-  modifyList(default_opts, opts)
-}
