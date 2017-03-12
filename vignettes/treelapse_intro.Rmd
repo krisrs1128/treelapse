@@ -200,7 +200,8 @@ display the associated time and value ranges. Finally, searching for a node name
 in the search box will highlight the associated series and node in red.
 
 ```{r vis-timebox}
-timebox_tree(timebox_values, edges, size_min = 1)
+style_opts <- list("size_min" = 1)
+timebox_tree(timebox_values, edges, style_opts = style_opts)
 ```
 
 Timeboxes only let you query based on time series shapes. Treeboxes are the
@@ -208,7 +209,8 @@ natural converse -- they let you select nodes in the tree by drawing brushes
 over them. Other than this, the interaction is exactly the same.
 
 ```{r vis-treebox}
-treebox(timebox_values, edges, size_min = 1)
+document("~/Desktop/treelapse"); install("~/Desktop/treelapse")
+treebox(timebox_values, edges, style_opts = style_opts)
 ```
 
 ## Previous Work ##
