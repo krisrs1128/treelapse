@@ -26,10 +26,9 @@ function setup_tree_ts(elem, width, height, style_opts) {
     ["all_ts"]
   );
 
-  draw_rect(elem, style_opts.margin.left, height, "y_axis_backdrop", "#F7F7F7");
+  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", "#F7F7F7");
   d3.select(elem)
-    .select("#y_axis_backdrop")
-    .attr("transform", "translate(0, 0)");
+    .select("#y_axis_backdrop");
 
   draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", "#F7F7F7");
   d3.select(elem)
