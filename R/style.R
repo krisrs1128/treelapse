@@ -19,7 +19,9 @@ merge_style_opts <- function(opts) {
     "font_family" = "Roboto",
     "n_ticks_x" = 5,
     "n_ticks_y" = 5,
-    "tick_size" = 6
+    "tick_size" = 6,
+    "margin" = list("bottom" = 20),
+    "tree_frac" = 0.43
   )
   modifyList(default_opts, opts)
 }
