@@ -38,10 +38,13 @@ function setup_background(elem, width, height, fill) {
  * @side-effects Draws x and y axes on group elements #x_axis and #y_axis
  **/
 function draw_axes(elem, scales, style_opts) {
+  x_axis = d3.axisBottom(scales.x)
+    .ticks(style_opts.n_ticks_x)
+    .tickSize(style_opts.tick_size);
   d3.select(elem)
     .select("#x_axis")
     .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
-    .call(d3.axisBottom(scales.x));
+    .call(x_axis);
   d3.select(elem)
     .selectAll("#x_axis > .tick > text")
     .attrs({
@@ -50,10 +53,12 @@ function draw_axes(elem, scales, style_opts) {
     });
 
   // almost same, for y-axis now
-  d3.select(elem)
-    .select("#y_axis")
+  y_axis = d3.axisLeft(scales.y)
+    .ticks(style_opts.n_ticks_y)
+    .tickSize(style_opts.tick_size);
+  d3.select("#y_axis")
     .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
-    .call(d3.axisLeft(scales.y));
+    .call(y_axis);
   d3.select(elem)
     .selectAll("#y_axis > .tick > text")
     .attrs({
@@ -74,17 +79,37 @@ function draw_axes(elem, scales, style_opts) {
  * @side-effects Updates x and y axes on group elements #x_axis and #y_axis
  *     to reflect the new scales.
  **/
-function update_axes(elem, scales) {
+function update_axes(elem, scales, style_opts) {
+  x_axis = d3.axisBottom(scales.x)
+    .ticks(style_opts.n_ticks_x)
+    .tickSize(style_opts.tick_size);
   d3.select(elem)
     .select("#x_axis")
+    .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
     .transition()
     .duration(100)
-    .call(d3.axisBottom(scales.x));
+    .call(x_axis);
   d3.select(elem)
-    .select("#y_axis")
+    .selectAll("#x_axis > .tick > text")
+    .attrs({
+      "font-size": style_opts.axis_font_size,
+      "font-family": style_opts.font_family
+    });
+
+  y_axis = d3.axisLeft(scales.y)
+    .ticks(style_opts.n_ticks_y)
+    .tickSize(style_opts.tick_size);
+  d3.select("#y_axis")
+    .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
     .transition()
     .duration(100)
-    .call(d3.axisLeft(scales.y));
+    .call(y_axis);
+  d3.select(elem)
+    .selectAll("#y_axis > .tick > text")
+    .attrs({
+      "font-size": style_opts.axis_font_size,
+      "font-family": style_opts.font_family
+    });
 }
 
 /**

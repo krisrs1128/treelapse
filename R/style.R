@@ -16,7 +16,10 @@ merge_style_opts <- function(opts) {
     "font_size" = 14,
     "mouseover_font_size" = 14,
     "axis_font_size" = 14,
-    "font_family" = "Roboto"
+    "font_family" = "Roboto",
+    "n_ticks_x" = 5,
+    "n_ticks_y" = 5,
+    "tick_size" = 6
   )
   modifyList(default_opts, opts)
 }
