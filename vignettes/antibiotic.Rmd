@@ -192,7 +192,8 @@ conditions <- mapping %>%
 
 ```{r timebox}
 style_opts <- list("size_min" = 1, "size_max" = 10)
-timebox_tree(time_data, edges, height = 250, width = 300, style_opts)
+timebox_tree(time_data, edges, 700, 700, style_opts = style_opts)
+
 ```
 
 ```{r treebox}
