@@ -33,7 +33,7 @@ function setup_tree_ts(elem, width, height, style_opts) {
   draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", "#F7F7F7");
   d3.select(elem)
     .select("#x_axis_backdrop")
-    .attr("transform", "translate(0, " + style_opts.margin.bottom + ")");
+    .attr("transform", "translate(0, " + (height - style_opts.margin.bottom) + ")");
 
   setup_groups(
     d3.select(elem).select("svg"),
