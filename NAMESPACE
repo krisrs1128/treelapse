@@ -3,6 +3,7 @@
 export(doi_sankey)
 export(doi_tree)
 export(get_root)
+export(merge_style_opts)
 export(render_timebox_tree)
 export(render_treebox)
 export(taxa_edgelist)
