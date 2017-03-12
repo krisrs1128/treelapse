@@ -27,7 +27,7 @@
  * @return {dictionary of d3-scale} A dictionary keyed by "x", "y", and "r"
  *     giving scales for computing positions in the time + treeboxes.
  **/
-function get_scales(values, width, height, size_min, size_max) {
+function get_scales(values, width, height, style_opts) {
   var x_scale;
   var zoom_x_scale;
 
@@ -53,10 +53,13 @@ function get_scales(values, width, height, size_min, size_max) {
     "x": x_scale,
     "y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.95 * height, 0.43 * height]),
+      .range([
+        height - style_opts.margin.bottom,
+        style_opts.tree_frac * (height - style_opts.margin.bottom)
+      ]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([size_min, size_max]),
+      .range([style_opts.size_min, style_opts.size_max]),
     "zoom_x": zoom_x_scale,
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
@@ -233,7 +236,10 @@ function draw_tree(elem,
 
   // width + height info are in the scales
   var cluster = d3.tree()
-      .size([0.8 * scales.x.range()[1], 0.37 * scales.y.range()[0]]);
+      .size([
+        0.8 * scales.x.range()[1],
+        0.95 * style_opts.tree_frac * scales.y.range()[0]
+      ]);
   var layout = cluster(hierarchy);
 
   // draw links
