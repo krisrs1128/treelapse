@@ -191,11 +191,12 @@ conditions <- mapping %>%
 ### Tree Sums ###
 
 ```{r timebox}
-timebox_tree(time_data, edges, size_min = 1, size_max = 10)
+style_opts <- list("size_min" = 1, "size_max" = 10)
+timebox_tree(time_data, edges, height = 250, width = 300, style_opts)
 ```
 
 ```{r treebox}
-treebox(time_data, edges, size_min = 1, size_max = 10)
+treebox(time_data, edges, height = 250, width = 300, style_opts)
 ```
 
 ### Tree Averages ###
@@ -208,11 +209,12 @@ time_data <- values %>%
 ```
 
 ```{r timebox-means}
-timebox_tree(time_data, edges, size_min = .5, size_max = 10)
+style_opts$size_min <- 0.5
+timebox_tree(time_data, edges, style_opts = style_opts)
 ```
 
 ```{r treebox-means}
-treebox(time_data, edges, size_min = .5, size_max = 10)
+treebox(time_data, edges, style_opts = style_opts)
 ```
 
 ### Per-Condition Sankey ###

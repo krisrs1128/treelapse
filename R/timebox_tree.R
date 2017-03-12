@@ -10,9 +10,7 @@ timebox_tree <- function(values,
                          edges,
                          width = NULL,
                          height = NULL,
-                         size_min = 0,
-                         size_max = 10
-                         ) {
+                         style_opts = list()) {
   root <- get_root(edges)
   edges <- edges %>%
     merge_edge_values(values)
@@ -22,8 +20,7 @@ timebox_tree <- function(values,
     values,
     root,
     edges,
-    size_min,
-    size_max
+    merge_style_opts(style_opts)
   )
 
   # create widget
@@ -46,3 +43,4 @@ render_timebox_tree <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
   htmlwidgets::shinyRenderWidget(expr, timebox_tree_output, env, quoted = TRUE)
 }
+
