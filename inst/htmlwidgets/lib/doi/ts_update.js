@@ -72,7 +72,7 @@ function setup_tree_ts(elem, width, height) {
 function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   var scales = get_scales(values, width, height, size_min, size_max);
   setup_tree_ts(elem, width, height);
-  draw_axes(elem, scales);
+  draw_axes(elem, scales, style_opts);
 
   var reshaped = get_reshaped_values(values);
   setup_search(elem, Object.keys(reshaped.dvalues));
@@ -228,10 +228,16 @@ function get_reshaped_values(values) {
  * @side-effects Sets up the time series and tree associated with the timebox
  *     display.
  **/
-function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
-  var scales = get_scales(values, width, height, size_min, size_max);
+function draw_timebox(elem, width, height, values, tree, style_opts) {
+  var scales = get_scales(
+    values,
+    width,
+    height,
+    style_opts.size_min,
+    style_opts.size_max
+  );
   setup_tree_ts(elem, width, height);
-  draw_axes(elem, scales);
+  draw_axes(elem, scales, style_opts);
 
   var reshaped = get_reshaped_values(values);
   setup_search(elem, Object.keys(reshaped.dvalues));
@@ -242,7 +248,8 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
     reshaped,
     tree,
     [],
-    scales
+    scales,
+    style_opts
   );
 
   // add brush in top right for zooming
@@ -300,7 +307,7 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, reshaped, tree, [], scales);
+  timebox_update(elem, reshaped, tree, [], scales, style_opts);
 }
 
 /**
@@ -322,11 +329,11 @@ function draw_timebox(elem, width, height, values, tree, size_min, size_max) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, reshaped, tree, cur_lines, scales) {
+function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   update_axes(elem, scales);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
-  draw_ts(elem, reshaped.pairs, cur_lines, scales, false);
-  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true, style_opts);
 }
 
 /**
@@ -351,9 +358,22 @@ function timebox_update(elem, reshaped, tree, cur_lines, scales) {
  * @return {function} A version of the base_function function with options
  *    filled in according to the arguments in the factory.
  **/
-function update_factory(base_fun, elem, reshaped, tree, cur_lines, cur_scales) {
+function update_factory(base_fun,
+                        elem,
+                        reshaped,
+                        tree,
+                        cur_lines,
+                        cur_scales,
+                        style_opts) {
   function f(cur_lines, cur_scales) {
-    base_fun(elem, reshaped, tree, cur_lines, cur_scales);
+    base_fun(
+      elem,
+      reshaped,
+      tree,
+      cur_lines,
+      cur_scales,
+      style_opts
+    );
   }
 
   return f;
