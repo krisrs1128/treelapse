@@ -113,7 +113,10 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
 	        brush_nodes_union
 	      );
       })
-      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+      .extent([
+        [scales.zoom_x.range()[0], scales.zoom_y.range()[1]],
+        [scales.zoom_x.range()[1], scales.zoom_y.range()[0]]
+      ]);
 
   d3.select(elem)
     .select("#zoom_brush")
@@ -281,7 +284,10 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
 	        brush_ts_intersection
 	      );
       })
-      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+      .extent([
+        [scales.zoom_x.range()[0], scales.zoom_y.range()[1]],
+        [scales.zoom_x.range()[1], scales.zoom_y.range()[0]]
+      ]);
 
   d3.select(elem)
     .select("#zoom_brush")

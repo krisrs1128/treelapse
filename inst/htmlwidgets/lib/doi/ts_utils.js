@@ -72,7 +72,10 @@ function get_scales(values, width, height, style_opts) {
     "zoom_x": zoom_x_scale,
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([style_opts.scent_frac.height * height, 0.05 * height])
+      .range([
+        style_opts.margin.top + style_opts.scent_frac.height * (height - style_opts.margin.top - style_opts.margin.bottom),
+        style_opts.margin.top
+      ])
   };
 }
 
