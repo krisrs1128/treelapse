@@ -337,7 +337,7 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
  *     series.
  **/
 function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
-  update_axes(elem, scales);
+  update_axes(elem, scales, style_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true, style_opts);
@@ -408,7 +408,7 @@ function update_factory(base_fun,
  *     order to highlight the currently selected IDs.
  **/
 function treebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
-  update_axes(elem, scales);
+  update_axes(elem, scales, style_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true, style_opts);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false, style_opts);

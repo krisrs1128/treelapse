@@ -209,7 +209,6 @@ natural converse -- they let you select nodes in the tree by drawing brushes
 over them. Other than this, the interaction is exactly the same.
 
 ```{r vis-treebox}
-document("~/Desktop/treelapse"); install("~/Desktop/treelapse")
 treebox(timebox_values, edges, style_opts = style_opts)
 ```
 
