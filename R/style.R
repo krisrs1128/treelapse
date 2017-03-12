@@ -32,4 +32,3 @@ merge_style_opts <- function(opts) {
   )
   modifyList(default_opts, opts)
 }
- 
