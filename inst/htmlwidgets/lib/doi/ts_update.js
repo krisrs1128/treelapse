@@ -44,7 +44,7 @@ function setup_tree_ts(elem, width, height, style_opts) {
   draw_rect(
     elem,
     width,
-    style_opts.tree_frac * (height - style_opts.margin_bottom),
+    style_opts.tree_frac * (height - style_opts.margin.bottom),
     "tree_backdrop",
     "#F7F7F7"
   );
