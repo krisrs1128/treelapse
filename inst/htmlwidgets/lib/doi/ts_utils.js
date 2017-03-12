@@ -83,7 +83,7 @@ function get_scales(values, width, height, size_min, size_max) {
  * @return null
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
-function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
+function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text, style_opts) {
   var ts_select = draw_ts_internal(
     elem,
     dvalues,
@@ -107,15 +107,15 @@ function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text) {
     d3.select(elem)
       .select("#mouseover")
       .attrs({
-	"transform": "translate(" + cur_pos[0] + "," + cur_pos[1] + ")"
+	      "transform": "translate(" + cur_pos[0] + "," + cur_pos[1] + ")"
       });
 
     d3.select(elem)
       .select("#mouseover > text")
       .text(d)
       .attrs({
-	"font-size": 14,
-	"font-family": "roboto"
+	      "font-size": style_opts.mouseover_font_size,
+	      "font-family": style_opts.font_family
       });
   }
 
@@ -217,7 +217,13 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales) {
  * @side-effects Draws the static tree structure (circles and paths between
  *     them) on elem.
  **/
-function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
+function draw_tree(elem,
+                   dvalues,
+                   cur_lines,
+                   tree,
+                   scales,
+                   mouseover_text,
+                   style_opts) {
   var hierarchy = d3.hierarchy(tree);
 
   // width + height info are in the scales
@@ -264,8 +270,8 @@ function draw_tree(elem, dvalues, cur_lines, tree, scales, mouseover_text) {
 	      .select("#mouseover > text")
 	      .text(d.data.id)
 	      .attrs({
-		"font-size": 11,
-		"font-family": "roboto"
+		      "font-size": style_opts.mouseover_font_size,
+		      "font-family": style_opts.font_family
 	      });
 	  });
   }
@@ -698,7 +704,6 @@ function nodes_in_box(elem, box_extent) {
   );
   return node_ids;
 }
-
 
 /*******************************************************************************
 * Miscellaneous helpers
