@@ -20,7 +20,15 @@ merge_style_opts <- function(opts) {
     "n_ticks_x" = 5,
     "n_ticks_y" = 5,
     "tick_size" = 6,
-    "margin" = list("bottom" = 20),
+    "scent_frac" = list("width" = 0.15, "height" = 0.2),
+    "margin" = list(
+      "bottom" = 20,
+      "top" = 20,
+      "ts_right" = 10,
+      "ts_left" = 10,
+      "tree_right" = 10,
+      "tree_left" = 10
+    ),
     "tree_frac" = 0.43
   )
   modifyList(default_opts, opts)
