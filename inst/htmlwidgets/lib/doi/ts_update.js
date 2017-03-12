@@ -18,7 +18,7 @@
  *     treeboxes. This includes the background rectangle and the group elements
  *     for the underlying tree and time series displays.
  **/
-function setup_tree_ts(elem, width, height) {
+function setup_tree_ts(elem, width, height, style_opts) {
   d3.select(elem).selectAll("*").remove();
   setup_background(elem, width, height, "#F7F7F7");
   setup_groups(
@@ -26,18 +26,27 @@ function setup_tree_ts(elem, width, height) {
     ["all_ts"]
   );
 
-  draw_rect(elem, 0.05 * width, height, "y_axis_backdrop", "#F7F7F7");
-  draw_rect(elem, width, 0.05 * height, "x_axis_backdrop", "#F7F7F7");
+  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", "#F7F7F7");
+  d3.select(elem)
+    .select("#y_axis_backdrop");
+
+  draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", "#F7F7F7");
   d3.select(elem)
     .select("#x_axis_backdrop")
-    .attr("transform", "translate(0, " + 0.95 * height + ")");
+    .attr("transform", "translate(0, " + (height - style_opts.margin.bottom) + ")");
 
   setup_groups(
     d3.select(elem).select("svg"),
     ["x_axis", "y_axis"]
   );
 
-  draw_rect(elem, width, 0.43 * height, "tree_backdrop", "#F7F7F7");
+  draw_rect(
+    elem,
+    width,
+    style_opts.tree_frac * (height - style_opts.margin.bottom),
+    "tree_backdrop",
+    "#F7F7F7"
+  );
   setup_groups(
     d3.select(elem).select("svg"),
     ["zoom_ts", "links", "nodes", "ts_brushes", "zoom_brush", "mouseover"]
@@ -74,10 +83,9 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
     values,
     width,
     height,
-    style_opts.size_min,
-    style_opts.size_max
+    style_opts
   );
-  setup_tree_ts(elem, width, height);
+  setup_tree_ts(elem, width, height, style_opts);
   draw_axes(elem, scales, style_opts);
 
   var reshaped = get_reshaped_values(values);
@@ -96,15 +104,18 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
       .on("brush", function() {
-	zoom_brush_fun(
-	  elem,
-	  reshaped.pairs,
-	  scales,
-	  update_fun,
-	  brush_nodes_union
-	);
+	      zoom_brush_fun(
+	        elem,
+	        reshaped.pairs,
+	        scales,
+	        update_fun,
+	        brush_nodes_union
+	      );
       })
-      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+      .extent([
+        [scales.zoom_x.range()[0], scales.zoom_y.range()[1]],
+        [scales.zoom_x.range()[1], scales.zoom_y.range()[0]]
+      ]);
 
   d3.select(elem)
     .select("#zoom_brush")
@@ -113,7 +124,10 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
     .call(zoom_brush);
 
   // draw main brush for selecting tree nodes
-  var brush_extent = [[0, 0], [0.8 * width, 0.39 * height]];
+  var brush_extent = [
+    [0, 0],
+    [0.8 * width, (1 - style_opts.tree_frac) * height]
+  ];
   function add_fun() {
     new_brush(
       elem,
@@ -240,10 +254,9 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
     values,
     width,
     height,
-    style_opts.size_min,
-    style_opts.size_max
+    style_opts
   );
-  setup_tree_ts(elem, width, height);
+  setup_tree_ts(elem, width, height, style_opts);
   draw_axes(elem, scales, style_opts);
 
   var reshaped = get_reshaped_values(values);
@@ -270,7 +283,10 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
 	        brush_ts_intersection
 	      );
       })
-      .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
+      .extent([
+        [scales.zoom_x.range()[0], scales.zoom_y.range()[1]],
+        [scales.zoom_x.range()[1], scales.zoom_y.range()[0]]
+      ]);
 
   d3.select(elem)
     .select("#zoom_brush")

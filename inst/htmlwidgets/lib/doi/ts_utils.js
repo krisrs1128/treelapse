@@ -27,7 +27,7 @@
  * @return {dictionary of d3-scale} A dictionary keyed by "x", "y", and "r"
  *     giving scales for computing positions in the time + treeboxes.
  **/
-function get_scales(values, width, height, size_min, size_max) {
+function get_scales(values, width, height, style_opts) {
   var x_scale;
   var zoom_x_scale;
 
@@ -35,32 +35,47 @@ function get_scales(values, width, height, size_min, size_max) {
     // numeric x case
     x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.05 * width, width]);
+      .range([
+        style_opts.margin.ts_left,
+        width - style_opts.margin.ts_right
+      ]);
     zoom_x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
-      .range([0.8 * width, width]);
+      .range([
+        style_opts.margin.tree_left + (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
+        width - style_opts.margin.tree_right
+      ]);
   } else {
     // ordinal (parallel coordinates) x case
     x_scale = d3.scalePoint()
       .domain(d3.set(values.time).values())
-      .range([0.05 * width, width]);
+      .range([
+        style_opts.margin.ts_left,
+        width - style_opts.margin.ts_right
+      ]);
     zoom_x_scale = d3.scalePoint()
       .domain(d3.set(values.time).values())
-      .range([0.8 * width, width]);
+      .range([(1 - style_opts.scent_frac.width) * width, width]);
   }
 
   return {
     "x": x_scale,
     "y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.95 * height, 0.43 * height]),
+      .range([
+        height - style_opts.margin.bottom,
+        style_opts.tree_frac * (height - style_opts.margin.bottom)
+      ]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([size_min, size_max]),
+      .range([style_opts.size_min, style_opts.size_max]),
     "zoom_x": zoom_x_scale,
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
-      .range([0.15 * height, 0.05 * height])
+      .range([
+        style_opts.margin.top + style_opts.scent_frac.height * (height - style_opts.margin.top - style_opts.margin.bottom),
+        style_opts.margin.top
+      ])
   };
 }
 
@@ -230,10 +245,15 @@ function draw_tree(elem,
                    mouseover_text,
                    style_opts) {
   var hierarchy = d3.hierarchy(tree);
+  var width = d3.select(elem).select("svg").attr("width");
+  var height = d3.select(elem).select("svg").attr("height");
 
   // width + height info are in the scales
   var cluster = d3.tree()
-      .size([0.8 * scales.x.range()[1], 0.37 * scales.y.range()[0]]);
+      .size([
+        0.95 * (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
+        0.95 * style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top)
+      ]);
   var layout = cluster(hierarchy);
 
   // draw links
@@ -245,6 +265,17 @@ function draw_tree(elem,
     timebox_link_attrs(dvalues, cur_lines, scales),
     100
   );
+
+  // translate according to margins
+  var tree_groups = ["#links", "#nodes"];
+  for (var i = 0; i < tree_groups.length; i++) {
+    d3.select(elem)
+      .select(tree_groups[i])
+      .attr(
+        "transform",
+        "translate(" + style_opts.margin.tree_left + "," + style_opts.margin.top + ")"
+      );
+  }
 
   // draw nodes
   var search_lines = get_search_values(elem);
@@ -262,23 +293,23 @@ function draw_tree(elem,
     d3.select(elem)
       .selectAll(".tree_node")
       .on("mouseover",
-	  function(d) {
-	    var r = parseFloat(d3.select(this).attr("r"));
-	    d3.select(elem)
-	      .select("#mouseover")
-	      .attrs({
-		"transform": "translate(" + (d.x + 2 * Math.sqrt(r))+
-		  "," + (d.y - 2 * Math.sqrt(r)) + ")"
-	      });
+	        function(d) {
+	          var r = parseFloat(d3.select(this).attr("r"));
+	          d3.select(elem)
+	            .select("#mouseover")
+	            .attrs({
+		            "transform": "translate(" + (d.x + 2 * Math.sqrt(r))+
+		              "," + (d.y - 2 * Math.sqrt(r)) + ")"
+	            });
 
-	    d3.select(elem)
-	      .select("#mouseover > text")
-	      .text(d.data.id)
-	      .attrs({
-		      "font-size": style_opts.mouseover_font_size,
-		      "font-family": style_opts.font_family
-	      });
-	  });
+	          d3.select(elem)
+	            .select("#mouseover > text")
+	            .text(d.data.id)
+	            .attrs({
+		            "font-size": style_opts.mouseover_font_size,
+		            "font-family": style_opts.font_family
+	            });
+	        });
   }
 }
 
@@ -340,28 +371,28 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
     .duration(100)
     .attrs({
       "stroke": function(d) {
-	if (search_lines.indexOf(d) != -1) {
-	  return "#C2571A";
-	}
-	if (cur_lines.indexOf(d) != -1) {
-	  return "#2D869F";
-	}
-	return "#696969";
+	      if (search_lines.indexOf(d) != -1) {
+	        return "#C2571A";
+	      }
+	      if (cur_lines.indexOf(d) != -1) {
+	        return "#2D869F";
+	      }
+	      return "#696969";
       },
       "stroke-width": function(d) {
-	if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
-	  return 1;
-	}
-	return 0.5;
+	      if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
+	        return 1;
+	      }
+	      return 0.5;
       },
       "d": function(d) {
-	return line_fun(pairs[d]);
+	      return line_fun(pairs[d]);
       },
       "opacity": function(d) {
-	if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
-	  return 0.9;
-	}
-	return 0.1;
+	      if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
+	        return 0.9;
+	      }
+	      return 0.1;
       }
     });
 
