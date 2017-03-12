@@ -69,8 +69,14 @@ function setup_tree_ts(elem, width, height) {
  * @side-effects Sets up the time series and tree associated with the treebox
  *     display.
  **/
-function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
-  var scales = get_scales(values, width, height, size_min, size_max);
+function draw_treebox(elem, width, height, values, tree, style_opts) {
+  var scales = get_scales(
+    values,
+    width,
+    height,
+    style_opts.size_min,
+    style_opts.size_max
+  );
   setup_tree_ts(elem, width, height);
   draw_axes(elem, scales, style_opts);
 
@@ -83,7 +89,8 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
     reshaped,
     tree,
     [],
-    scales
+    scales,
+    style_opts
   );
 
   // add brush in top right for zooming
@@ -137,7 +144,7 @@ function draw_treebox(elem, width, height, values, tree, size_min, size_max) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  treebox_update(elem, reshaped, tree, [], scales);
+  treebox_update(elem, reshaped, tree, [], scales, style_opts);
 }
 
 /**
@@ -255,13 +262,13 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
   // add brush in top right for zooming
   var zoom_brush = d3.brush()
       .on("brush", function() {
-	zoom_brush_fun(
-	  elem,
-	  reshaped.pairs,
-	  scales,
-	  update_fun,
-	  brush_ts_intersection
-	);
+	      zoom_brush_fun(
+	        elem,
+	        reshaped.pairs,
+	        scales,
+	        update_fun,
+	        brush_ts_intersection
+	      );
       })
       .extent([[0.8 * width, 0.05 * height], [width, 0.15 * height]]);
 
@@ -400,11 +407,11 @@ function update_factory(base_fun,
  * @side_effects Redraws the tree and time series in the treebox display in
  *     order to highlight the currently selected IDs.
  **/
-function treebox_update(elem, reshaped, tree, cur_lines, scales) {
+function treebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   update_axes(elem, scales);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales);
-  draw_ts(elem, reshaped.pairs, cur_lines, scales, true);
-  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, true, style_opts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false, style_opts);
 }
 
 /**

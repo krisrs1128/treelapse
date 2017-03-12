@@ -83,7 +83,12 @@ function get_scales(values, width, height, size_min, size_max) {
  * @return null
  * @side-effects Draws the static time series (svg-paths) on the elem.
  **/
-function draw_ts(elem, dvalues, cur_lines, scales, mouseover_text, style_opts) {
+function draw_ts(elem,
+                 dvalues,
+                 cur_lines,
+                 scales,
+                 mouseover_text,
+                 style_opts) {
   var ts_select = draw_ts_internal(
     elem,
     dvalues,
