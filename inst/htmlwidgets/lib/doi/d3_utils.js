@@ -49,7 +49,9 @@ function draw_axes(elem, scales, style_opts) {
     .selectAll("#x_axis > .tick > text")
     .attrs({
       "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family
+      "font-family": style_opts.font_family,
+      "text-anchor": style_opts.axis_text_anchor,
+      "transform": "rotate("+ style_opts.x_axis_rotation + ")"
     });
 
   // almost same, for y-axis now
@@ -63,7 +65,8 @@ function draw_axes(elem, scales, style_opts) {
     .selectAll("#y_axis > .tick > text")
     .attrs({
       "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family
+      "font-family": style_opts.font_family,
+      "transform": "rotate("+ style_opts.y_axis_rotation + ")"
     });
 }
 
@@ -93,7 +96,8 @@ function update_axes(elem, scales, style_opts) {
     .selectAll("#x_axis > .tick > text")
     .attrs({
       "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family
+      "font-family": style_opts.font_family,
+      "transform": "rotate("+ style_opts.x_axis_rotation + ")"
     });
 
   y_axis = d3.axisLeft(scales.y)
@@ -108,7 +112,8 @@ function update_axes(elem, scales, style_opts) {
     .selectAll("#y_axis > .tick > text")
     .attrs({
       "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family
+      "font-family": style_opts.font_family,
+      "transform": "rotate("+ style_opts.y_axis_rotation + ")"
     });
 }
 
