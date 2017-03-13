@@ -27,10 +27,7 @@ gp_subset <- GlobalPatterns %>%
 
 ```{r, prep_data}
 ## Code from http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html
-# (Re)load UniFrac distance matrix and GlobalPatterns data
 GPUF <- UniFrac(gp_subset)
-
-# Manually define color-shading vector based on sample type.
 gp_hclust <- hclust(GPUF, method = "complete")
 
 edges <- ape::as.phylo(gp_hclust)$edge
@@ -48,6 +45,11 @@ for (i in seq_len(nrow(taxa))) {
   taxa[i, ] <- na.locf(as.character(taxa[i, ]))
 }
 rownames(X) <- paste(taxa[, "Genus"], rownames(taxa), sep = "_")
+plot_order <- dist(X) %>%
+  hclust() %>%
+  as.dendrogram() %>%
+  order.dendrogram() 
+X <- X[plot_order, ]
 
 values <- tree_fun_multi(
   edges,
@@ -56,9 +58,28 @@ values <- tree_fun_multi(
 )
 
 values$time <- rownames(X)[values$row]
-timebox_tree(values, edges, style_opts = list("size_max" = 10))
+
+document(); install();
+style_opts <- list(
+  "x_axis_rotation" = 90,
+  "axis_text_anchor" = "start",
+  "axis_font_size" = 2,
+  "margin" = list(
+    "top" = 20,
+    "bottom" = 150,
+    "ts_right" = 50,
+    "ts_left" = 30,
+    "tree_right" = 15,
+    "tree_left" = 15
+  )
+)
+timebox_tree(values, edges, style_opts = style_opts)
 ```
 
 ```{r}
-treebox(values, edges)
+treebox(
+  values,
+  edges,
+  style_opts = style_opts
+)
 ```
