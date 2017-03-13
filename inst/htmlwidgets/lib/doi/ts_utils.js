@@ -64,7 +64,8 @@ function get_scales(values, width, height, style_opts) {
       .domain(d3.extent(values.value))
       .range([
         height - style_opts.margin.bottom,
-        style_opts.tree_frac * (height - style_opts.margin.bottom)
+        style_opts.margin.top +
+          style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top)
       ]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
@@ -73,7 +74,8 @@ function get_scales(values, width, height, style_opts) {
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([
-        style_opts.margin.top + style_opts.scent_frac.height * (height - style_opts.margin.top - style_opts.margin.bottom),
+        style_opts.margin.top +
+          style_opts.scent_frac.height * (height - style_opts.margin.top - style_opts.margin.bottom),
         style_opts.margin.top
       ])
   };
@@ -256,7 +258,13 @@ function draw_tree(elem,
       ]);
   var layout = cluster(hierarchy);
 
-  // draw links
+  // translate nodes according to margins
+  var nodes = layout.descendants();
+  nodes.forEach(function(n) {
+    n.y += style_opts.margin.top;
+    n.x += style_opts.margin.tree_left;
+  });
+
   selection_update(
     "path",
     d3.select(elem).select("#links"),
@@ -266,23 +274,12 @@ function draw_tree(elem,
     100
   );
 
-  // translate according to margins
-  var tree_groups = ["#links", "#nodes"];
-  for (var i = 0; i < tree_groups.length; i++) {
-    d3.select(elem)
-      .select(tree_groups[i])
-      .attr(
-        "transform",
-        "translate(" + style_opts.margin.tree_left + "," + style_opts.margin.top + ")"
-      );
-  }
-
   // draw nodes
   var search_lines = get_search_values(elem);
   selection_update(
     "circle",
     d3.select(elem).select("#nodes"),
-    layout.descendants(),
+    nodes,
     "tree_node",
     timebox_node_attrs(dvalues, cur_lines, search_lines, scales),
     100

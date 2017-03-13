@@ -11,7 +11,7 @@
 #' @export
 merge_style_opts <- function(opts) {
   default_opts <- list(
-    "size_min" = 0,
+    "size_min" = 1,
     "size_max" = 10,
     "mouseover_font_size" = 15,
     "axis_font_size" = 13,
