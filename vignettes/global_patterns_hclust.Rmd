@@ -16,13 +16,13 @@ nice
 ```{r setup}
 library("treelapse")
 library("phyloseq")
+library("ape")
 library("knitr")
-opts_chunk$set(fig.width = 8, fig.height = 5, cache = FALSE)
+opts_chunk$set(out.width = "400px", out.height = "250px", cache = FALSE)
 data(GlobalPatterns)
 gp_subset <- GlobalPatterns %>%
-  filter_taxa(function(x) { var(x) > 921000 }, prune = TRUE)
-gp_subset <- GlobalPatterns %>%
-  filter_taxa(function(x) { var(x) > 30000000 }, prune = TRUE)
+  filter_taxa(function(x) { var(x) > 921000 }, prune = TRUE) %>%
+  transform_sample_counts(asinh)
 ```
 
 ```{r, prep_data}
@@ -30,7 +30,8 @@ gp_subset <- GlobalPatterns %>%
 GPUF <- UniFrac(gp_subset)
 gp_hclust <- hclust(GPUF, method = "complete")
 
-edges <- ape::as.phylo(gp_hclust)$edge
+## extract edges from hierarchical clustering
+edges <- as.phylo(gp_hclust)$edge
 colnames(edges) <- c("parent", "child")
 class(edges) <- "character"
 sample_names_sub <- sample_names(gp_subset)
@@ -38,8 +39,8 @@ names(sample_names_sub) <- seq_len(nsamples(gp_subset))
 rownames(edges) <- edges[, "child"]
 edges[names(sample_names_sub), "child"] <- sample_names_sub
 
-X <- asinh(get_taxa(gp_subset))
-
+## Prepare aggregated values
+X <- get_taxa(gp_subset)
 taxa <- tax_table(gp_subset)
 for (i in seq_len(nrow(taxa))) {
   taxa[i, ] <- na.locf(as.character(taxa[i, ]))
@@ -56,24 +57,20 @@ values <- tree_fun_multi(
   X,
   tree_mean
 )
-
 values$time <- rownames(X)[values$row]
 
-document(); install();
 style_opts <- list(
-  "x_axis_rotation" = 90,
+  "x_axis_rotation" = 45,
   "axis_text_anchor" = "start",
-  "axis_font_size" = 2,
   "margin" = list(
-    "top" = 20,
-    "bottom" = 150,
-    "ts_right" = 50,
-    "ts_left" = 30,
-    "tree_right" = 15,
-    "tree_left" = 15
+    "bottom" = 150
   )
 )
-timebox_tree(values, edges, style_opts = style_opts)
+timebox_tree(
+  values,
+  edges,
+  style_opts = style_opts
+)
 ```
 
 ```{r}

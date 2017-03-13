@@ -97,6 +97,7 @@ function update_axes(elem, scales, style_opts) {
     .attrs({
       "font-size": style_opts.axis_font_size,
       "font-family": style_opts.font_family,
+      "text-anchor": style_opts.axis_text_anchor,
       "transform": "rotate("+ style_opts.x_axis_rotation + ")"
     });
 
