@@ -1,0 +1,64 @@
+---
+title: "Hierarchical Clustering and the Iris Data"
+author: "Kris Sankaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hierarchical Clustering and the Iris Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is an application motivated by this
+nice
+[walkthrough](https://cran.r-project.org/web/packages/dendextend/vignettes/Cluster_Analysis.html).
+
+```{r setup}
+library("treelapse")
+library("phyloseq")
+library("knitr")
+opts_chunk$set(fig.width = 8, fig.height = 5, cache = FALSE)
+data(GlobalPatterns)
+gp_subset <- GlobalPatterns %>%
+  filter_taxa(function(x) { var(x) > 921000 }, prune = TRUE)
+gp_subset <- GlobalPatterns %>%
+  filter_taxa(function(x) { var(x) > 30000000 }, prune = TRUE)
+```
+
+```{r, prep_data}
+## Code from http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html
+# (Re)load UniFrac distance matrix and GlobalPatterns data
+GPUF <- UniFrac(gp_subset)
+
+# Manually define color-shading vector based on sample type.
+gp_hclust <- hclust(GPUF, method = "complete")
+
+edges <- ape::as.phylo(gp_hclust)$edge
+colnames(edges) <- c("parent", "child")
+class(edges) <- "character"
+sample_names_sub <- sample_names(gp_subset)
+names(sample_names_sub) <- seq_len(nsamples(gp_subset))
+rownames(edges) <- edges[, "child"]
+edges[names(sample_names_sub), "child"] <- sample_names_sub
+
+X <- asinh(get_taxa(gp_subset))
+
+taxa <- tax_table(gp_subset)
+for (i in seq_len(nrow(taxa))) {
+  taxa[i, ] <- na.locf(as.character(taxa[i, ]))
+}
+rownames(X) <- paste(taxa[, "Genus"], rownames(taxa), sep = "_")
+
+values <- tree_fun_multi(
+  edges,
+  X,
+  tree_mean
+)
+
+values$time <- rownames(X)[values$row]
+timebox_tree(values, edges, style_opts = list("size_max" = 10))
+```
+
+```{r}
+treebox(values, edges)
+```
