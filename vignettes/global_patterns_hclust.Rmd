@@ -18,7 +18,7 @@ library("treelapse")
 library("phyloseq")
 library("ape")
 library("knitr")
-opts_chunk$set(out.width = "400px", out.height = "250px", cache = FALSE)
+opts_chunk$set(out.width = "700px", out.height = "600px", cache = FALSE)
 data(GlobalPatterns)
 gp_subset <- GlobalPatterns %>%
   filter_taxa(function(x) { var(x) > 921000 }, prune = TRUE) %>%
@@ -45,7 +45,7 @@ taxa <- tax_table(gp_subset)
 for (i in seq_len(nrow(taxa))) {
   taxa[i, ] <- na.locf(as.character(taxa[i, ]))
 }
-rownames(X) <- paste(taxa[, "Genus"], rownames(taxa), sep = "_")
+rownames(X) <- paste0("s", rownames(taxa))
 plot_order <- dist(X) %>%
   hclust() %>%
   as.dendrogram() %>%
@@ -61,9 +61,10 @@ values$time <- rownames(X)[values$row]
 
 style_opts <- list(
   "x_axis_rotation" = 45,
+  "axis_font_size" = 9,
   "axis_text_anchor" = "start",
   "margin" = list(
-    "bottom" = 150
+    "bottom" = 75
   )
 )
 timebox_tree(
@@ -73,7 +74,7 @@ timebox_tree(
 )
 ```
 
-```{r}
+```{r treebox}
 treebox(
   values,
   edges,
