@@ -43,7 +43,8 @@ function setup_tree_ts(elem, width, height, style_opts) {
   draw_rect(
     elem,
     width,
-    style_opts.tree_frac * (height - style_opts.margin.bottom),
+    style_opts.margin.top +
+      style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top),
     "tree_backdrop",
     "#F7F7F7"
   );
@@ -125,9 +126,14 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
 
   // draw main brush for selecting tree nodes
   var brush_extent = [
-    [0, 0],
-    [0.8 * width, (1 - style_opts.tree_frac) * height]
+    [style_opts.margin.tree_left, style_opts.margin.top],
+    [
+      (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
+      style_opts.margin.top +
+        (style_opts.tree_frac) * (height - style_opts.margin.top - style_opts.margin.bottom)
+    ]
   ];
+
   function add_fun() {
     new_brush(
       elem,

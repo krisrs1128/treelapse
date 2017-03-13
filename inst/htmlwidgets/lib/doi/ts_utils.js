@@ -64,7 +64,8 @@ function get_scales(values, width, height, style_opts) {
       .domain(d3.extent(values.value))
       .range([
         height - style_opts.margin.bottom,
-        style_opts.tree_frac * (height - style_opts.margin.bottom)
+        style_opts.margin.top +
+          style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top)
       ]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
@@ -73,7 +74,8 @@ function get_scales(values, width, height, style_opts) {
     "zoom_y": d3.scaleLinear()
       .domain(d3.extent(values.value))
       .range([
-        style_opts.margin.top + style_opts.scent_frac.height * (height - style_opts.margin.top - style_opts.margin.bottom),
+        style_opts.margin.top +
+          style_opts.scent_frac.height * (height - style_opts.margin.top - style_opts.margin.bottom),
         style_opts.margin.top
       ])
   };
@@ -247,6 +249,8 @@ function draw_tree(elem,
   var hierarchy = d3.hierarchy(tree);
   var width = d3.select(elem).select("svg").attr("width");
   var height = d3.select(elem).select("svg").attr("height");
+
+  console.log(style_opts)
 
   // width + height info are in the scales
   var cluster = d3.tree()
@@ -573,6 +577,8 @@ function get_box_extent(brush, scales) {
   }
 
   var box_extent = d3.brushSelection(brush);
+  console.log(box_extent)
+  console.log(scales)
   return {
     "x_min": scales.x.invert(box_extent[0][0]),
     "y_min": scales.y.invert(box_extent[1][1]),
