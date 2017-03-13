@@ -42,7 +42,8 @@ function get_scales(values, width, height, style_opts) {
     zoom_x_scale = d3.scaleLinear()
       .domain(d3.extent(values.time))
       .range([
-        style_opts.margin.tree_left + (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
+        style_opts.margin.tree_left +
+          (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
         width - style_opts.margin.tree_right
       ]);
   } else {
@@ -52,10 +53,15 @@ function get_scales(values, width, height, style_opts) {
       .range([
         style_opts.margin.ts_left,
         width - style_opts.margin.ts_right
-      ]);
+      ])
+      .align(0);
     zoom_x_scale = d3.scalePoint()
       .domain(d3.set(values.time).values())
-      .range([(1 - style_opts.scent_frac.width) * width, width]);
+      .range([
+        style_opts.margin.tree_left +
+          (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
+        width - style_opts.margin.tree_right
+      ]);
   }
 
   return {
@@ -327,13 +333,24 @@ function draw_tree(elem,
  * @side-effects Draws the ts encoded in pairs onto the element elem.
  **/
 function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) {
+  var first_pairs = pairs[Object.keys(pairs)[0]];
+  if (!isNumeric(first_pairs.time)) {
+    var x_levels = first_pairs.map(function(d) { return d.time });
+    var cur_x_domain = scales.x.domain();
+    var domain_ends = [cur_x_domain[0], cur_x_domain[cur_x_domain.length - 1]];
+  }
+
   var line_fun = d3.line()
       .x(function(d) {
-	var pos = scales.x(d.time);
-	if (isNaN(pos)) {
-	  return 0;
-	}
-	return pos;
+	      var pos = scales.x(d.time);
+	      if (isNaN(pos)) {
+          if (x_levels.indexOf(d.time) < x_levels.indexOf(domain_ends[0])) {
+            return scales.x.range()[0] - 100; // subtract 10 to hide from view
+          } else {
+            return scales.x.range()[1] + 100;
+          }
+	      }
+	      return pos;
       })
       .y(function(d) { return scales.y(d.value); });
   var units = Object.keys(pairs);
@@ -469,25 +486,25 @@ function focus_brush(elem, brush_ix) {
     .selectAll(".brush")
     .attrs({
       "brush_selected": function (d) {
-	var cur_id = d3.select(this).attr("id");
-	if (cur_id == "brush-" + brush_ix) {
-	  return true;
-	}
-	return false;
+	      var cur_id = d3.select(this).attr("id");
+	      if (cur_id == "brush-" + brush_ix) {
+	        return true;
+	      }
+	      return false;
       },
       "pointer-events": function(d) {
-	var cur_id = d3.select(this).attr("id");
-	if (cur_id == "brush-" + brush_ix) {
-	  return "all";
-	}
-	return "none";
+	      var cur_id = d3.select(this).attr("id");
+	      if (cur_id == "brush-" + brush_ix) {
+	        return "all";
+	      }
+	      return "none";
       },
       "opacity": function(d) {
-	var cur_id = d3.select(this).attr("id");
-	if (cur_id == "brush-" + brush_ix) {
-	  return 1;
-	}
-	return 0.4;
+	      var cur_id = d3.select(this).attr("id");
+	      if (cur_id == "brush-" + brush_ix) {
+	        return 1;
+	      }
+	      return 0.4;
       }
     });
 
@@ -496,8 +513,8 @@ function focus_brush(elem, brush_ix) {
     .selectAll(".brush > rect")
     .attrs({
       "pointer-events": function(d) {
-	return d3.select(this.parentNode)
-	  .attr("pointer-events");
+	      return d3.select(this.parentNode)
+	        .attr("pointer-events");
       }
     });
 }
@@ -544,7 +561,6 @@ function ordinal_invert(scale) {
       x_pos[i] = 0.5 * (x_pos[i] + x_pos[i + 1]);
     }
     x_pos.pop();
-
     return scale.domain()[d3.bisect(x_pos, x) - 1];
   };
 }
@@ -600,7 +616,7 @@ function brush_ts_intersection(elem, pairs, brushes, scales) {
     var box_extent = get_box_extent(brushes[i], scales);
     units = intersect(
       units,
-      lines_in_box(pairs, box_extent)
+      lines_in_box(pairs, box_extent, scales)
     );
 
   }
@@ -621,7 +637,14 @@ function brush_ts_intersection(elem, pairs, brushes, scales) {
  * @return {bool} An indicator of whether the given point goes through the
  *     box_extent.
  **/
-function point_in_box(point, box_extent) {
+function point_in_box(point, box_extent, scales) {
+  if (!isNumeric(point.time)) {
+    var x_domain = scales.x.domain()
+    return (x_domain.indexOf(point.time) >= x_domain.indexOf(box_extent.x_min)) &&
+      (x_domain.indexOf(point.time) <= x_domain.indexOf(box_extent.x_max)) &&
+      (point.value >= box_extent.y_min) &&
+      (point.value <= box_extent.y_max)
+  }
   return (point.time >= box_extent.x_min) &&
     (point.time <= box_extent.x_max) &&
     (point.value >= box_extent.y_min) &&
@@ -643,9 +666,9 @@ function point_in_box(point, box_extent) {
  * @return {bool} An indicator of whether the specified line has any points
  *     going through the box_extent.
  **/
-function line_in_box(pairs, box_extent) {
+function line_in_box(pairs, box_extent, scales) {
   for (var i = 0; i < pairs.length; i++) {
-    var cur_check = point_in_box(pairs[i], box_extent);
+    var cur_check = point_in_box(pairs[i], box_extent, scales);
     if (cur_check) {
       return true;
     }
@@ -668,10 +691,10 @@ function line_in_box(pairs, box_extent) {
  * @return contained_ids {array of string} The IDs for each time series that has
  *      at least one timepoint / value pair going through the box_extent.
  **/
-function lines_in_box(pairs, box_extent) {
+function lines_in_box(pairs, box_extent, scales) {
   var contained_ids = [];
   for (var line_id in pairs) {
-    if (line_in_box(pairs[line_id], box_extent)) {
+    if (line_in_box(pairs[line_id], box_extent, scales)) {
       contained_ids.push(line_id);
     }
   }
@@ -727,10 +750,10 @@ function nodes_in_box(elem, box_extent) {
   var nodes = d3.select(elem)
       .selectAll(".tree_node")
       .filter(function(d) {
-	return d.x >= box_extent.x_min &&
-	  d.x <= box_extent.x_max &&
-	  d.y >= box_extent.y_max &&
-	  d.y <= box_extent.y_min;
+	      return d.x >= box_extent.x_min &&
+	        d.x <= box_extent.x_max &&
+	        d.y >= box_extent.y_max &&
+	        d.y <= box_extent.y_min;
       }).nodes();
   var node_ids = nodes.map(
     function(d) { return d.id; }
