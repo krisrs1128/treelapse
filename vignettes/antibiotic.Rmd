@@ -191,9 +191,16 @@ conditions <- mapping %>%
 ### Tree Sums ###
 
 ```{r timebox}
-style_opts <- list("size_min" = 1, "size_max" = 10)
-timebox_tree(time_data, edges, 700, 700, style_opts = style_opts)
-
+style_opts <- list(
+  "margin" = list("ts_right" = 30, "ts_left" = 35, "tree_right" = 15, "tree_left" = 15),
+  "size_min" = 1,
+  "size_max" = 10
+)
+timebox_tree(
+  time_data,
+  edges,
+  style_opts = style_opts
+)
 ```
 
 ```{r treebox}
