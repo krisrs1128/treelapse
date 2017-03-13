@@ -250,8 +250,6 @@ function draw_tree(elem,
   var width = d3.select(elem).select("svg").attr("width");
   var height = d3.select(elem).select("svg").attr("height");
 
-  console.log(style_opts)
-
   // width + height info are in the scales
   var cluster = d3.tree()
       .size([
@@ -260,7 +258,13 @@ function draw_tree(elem,
       ]);
   var layout = cluster(hierarchy);
 
-  // draw links
+  // translate nodes according to margins
+  var nodes = layout.descendants();
+  nodes.forEach(function(n) {
+    n.y += style_opts.margin.top;
+    n.x += style_opts.margin.tree_left;
+  });
+
   selection_update(
     "path",
     d3.select(elem).select("#links"),
@@ -270,23 +274,12 @@ function draw_tree(elem,
     100
   );
 
-  // translate according to margins
-  var tree_groups = ["#links", "#nodes"];
-  for (var i = 0; i < tree_groups.length; i++) {
-    d3.select(elem)
-      .select(tree_groups[i])
-      .attr(
-        "transform",
-        "translate(" + style_opts.margin.tree_left + "," + style_opts.margin.top + ")"
-      );
-  }
-
   // draw nodes
   var search_lines = get_search_values(elem);
   selection_update(
     "circle",
     d3.select(elem).select("#nodes"),
-    layout.descendants(),
+    nodes,
     "tree_node",
     timebox_node_attrs(dvalues, cur_lines, search_lines, scales),
     100
@@ -577,8 +570,6 @@ function get_box_extent(brush, scales) {
   }
 
   var box_extent = d3.brushSelection(brush);
-  console.log(box_extent)
-  console.log(scales)
   return {
     "x_min": scales.x.invert(box_extent[0][0]),
     "y_min": scales.y.invert(box_extent[1][1]),
