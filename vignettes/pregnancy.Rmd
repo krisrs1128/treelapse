@@ -92,21 +92,19 @@ doi_sankey(
 for (i in seq_len(5)) {
   timebox_tree(
     values %>%
-      filter(group == i) %>%
+      filter(group == paste0("cst_", i)) %>%
       group_by(unit, time) %>%
       dplyr::summarise(value = mean(value)),
-    taxa,
-    size_min = 1
+    taxa
   ) %>%
     print()
 
   treebox(
     values %>%
-      filter(group == i) %>%
+      filter(group == paste0("cst_", i)) %>%
       group_by(unit, time) %>%
       dplyr::summarise(value = mean(value)),
-    taxa,
-    size_min = 1
+    taxa
   ) %>%
     print()
 }
