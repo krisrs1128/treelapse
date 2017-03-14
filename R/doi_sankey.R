@@ -11,9 +11,7 @@ doi_sankey <- function(values,
                        focus_node_id = NULL,
                        width = NULL,
                        height = NULL,
-                       size_max = 20,
-                       leaf_width = 10,
-                       leaf_height = 100) {
+                       style_opts = list()) {
   root <- get_root(edges)
   if (is.null(focus_node_id)) {
     focus_node_id  <- root
@@ -28,9 +26,7 @@ doi_sankey <- function(values,
     edges,
     root,
     focus_node_id,
-    size_max,
-    leaf_width,
-    leaf_height
+    merge_doi_style(style_opts)
   )
 
   # create widget

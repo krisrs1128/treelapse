@@ -114,13 +114,15 @@ for (i in seq_len(5)) {
 values$group <- sample_info$Outcome[values$row]
 doi_sankey(
   values %>%
-    group_by(group, unit) %>%
-    dplyr::summarise(value = mean(value)),
+  group_by(group, unit) %>%
+  dplyr::summarise(value = mean(value)),
   taxa,
   "Bacteria",
   1100,
   500,
   style_opts = list(
+    "focus_font_size" = 25,
+    "font_size" = 17,
     "leaf_width" = 15,
     "leaf_height" = 75
   )
