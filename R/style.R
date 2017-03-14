@@ -18,8 +18,14 @@ merge_timebox_style<- function(opts) {
     "font_family" = "Roboto",
     "n_ticks_x" = 4,
     "n_ticks_y" = 4,
+    "x_axis_rotation" = 0,
+    "y_axis_rotation" = 0,
+    "axis_text_anchor" = "middle",
     "tick_size" = 6,
-    "scent_frac" = list("width" = 0.15, "height" = 0.2),
+    "scent_frac" = list(
+      "width" = 0.15,
+      "height" = 0.2
+    ),
     "margin" = list(
       "bottom" = 30,
       "top" = 20,

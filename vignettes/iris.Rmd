@@ -36,7 +36,7 @@ values <- tree_fun_multi(
 )
 
 values$time <- rownames(X)[values$row]
-timebox_tree(values, edges, size_max = 4)
+timebox_tree(values, edges)
 ```
 
 ```{r}

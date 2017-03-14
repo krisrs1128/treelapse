@@ -26,14 +26,18 @@ function setup_tree_ts(elem, width, height, style_opts) {
     ["all_ts"]
   );
 
-  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", "#F7F7F7");
-  d3.select(elem)
-    .select("#y_axis_backdrop");
+  var tree_y_border = style_opts.margin.top +
+      style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top);
 
+  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", "#F7F7F7");
   draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", "#F7F7F7");
+  draw_rect(elem, style_opts.margin.ts_right, height - tree_y_border, "ts_right_backdrop", "#F7F7F7");
   d3.select(elem)
     .select("#x_axis_backdrop")
     .attr("transform", "translate(0, " + (height - style_opts.margin.bottom) + ")");
+  d3.select(elem)
+    .select("#ts_right_backdrop")
+    .attr("transform", "translate(" + (width - style_opts.margin.ts_right) + ", " + tree_y_border + ")");
 
   setup_groups(
     d3.select(elem).select("svg"),
@@ -43,8 +47,7 @@ function setup_tree_ts(elem, width, height, style_opts) {
   draw_rect(
     elem,
     width,
-    style_opts.margin.top +
-      style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top),
+    tree_y_border,
     "tree_backdrop",
     "#F7F7F7"
   );
