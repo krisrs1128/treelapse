@@ -5,7 +5,7 @@
 \title{<Add Title>}
 \usage{
 doi_sankey(values, edges, focus_node_id = NULL, width = NULL,
-  height = NULL, size_max = 20, leaf_width = 10, leaf_height = 100)
+  height = NULL, style_opts = list())
 }
 \description{
 <Add Description>
