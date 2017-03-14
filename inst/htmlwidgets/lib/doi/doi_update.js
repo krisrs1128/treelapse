@@ -144,7 +144,7 @@ function doi_update(elem,
     layout.descendants(),
     "tree_node",
     doi_node_attrs(values, scales, tree_obj, search_strs),
-    1000
+    style_opts.transition_duration
   );
 
   selection_update(
@@ -153,7 +153,7 @@ function doi_update(elem,
     layout.links(),
     "tree_link",
     doi_link_attrs(values, scales),
-    1000
+    style_opts.transition_duration
   );
 
   selection_update(
@@ -162,7 +162,7 @@ function doi_update(elem,
     layout.links(),
     "highlighted_tree_links",
     doi_highlight_link_attrs(values, scales, tree_obj, search_strs),
-    1000
+    style_opts.transition_duration
   );
 
   selection_update(
@@ -171,7 +171,7 @@ function doi_update(elem,
     layout.descendants(),
     "tree_text",
     doi_text_attrs(values, scales, style_opts),
-    1000
+    style_opts.transition_duration
   );
 
   d3.select(elem).

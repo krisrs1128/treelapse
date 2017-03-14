@@ -48,6 +48,7 @@ merge_doi_style <- function(opts) {
     "font_size" = 10,
     "text_offset" = 0.5
     "text_display_neighbors" = 1
+    "transition_duration" = 1000
   )
   modifyList(default_opts, opts)
 }

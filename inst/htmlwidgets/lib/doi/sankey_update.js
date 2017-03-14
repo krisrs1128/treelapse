@@ -186,7 +186,7 @@ function sankey_update(elem,
 	      tree_obj,
 	      search_strs
       ),
-      1000
+      style_opts.transition_duration
     );
   }
 
@@ -196,7 +196,7 @@ function sankey_update(elem,
     layout.descendants(),
     "tree_text",
     sankey_text_attrs(values, scales, style_opts),
-    1000
+    style_opts.transition_duration
   );
 
   d3.select(elem)
