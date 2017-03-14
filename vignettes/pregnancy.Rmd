@@ -120,8 +120,10 @@ doi_sankey(
   "Bacteria",
   1100,
   500,
-  leaf_width = 15,
-  leaf_height = 75
+  style_opts = list(
+    "leaf_width" = 15,
+    "leaf_height" = 75
+  )
 )
 ```
 

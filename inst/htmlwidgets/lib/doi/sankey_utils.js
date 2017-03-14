@@ -90,31 +90,31 @@ function edge_centers(x_pos, links, values, scale, center_type) {
   for (var i = 0; i < x_pos.length; i++) {
     if (center_type == "target") {
       var cur_targets = links
-	  .filter(function(d) { return d.source == x_pos[i].unit; })
-	  .map(function(d) { return d.target; });
+	        .filter(function(d) { return d.source == x_pos[i].unit; })
+	        .map(function(d) { return d.target; });
 
       // case we're at a leaf, no need to offset according to children
       if (cur_targets.length === 0) {
-	cur_targets = [x_pos[i].unit];
+	      cur_targets = [x_pos[i].unit];
       }
     } else if (center_type == "source") {
       var cur_targets = [x_pos[i].unit];
     }
 
     var cur_values = reshaped_values
-	.filter(function(d) {
-	  return cur_targets.indexOf(d.unit) != -1;
-	});
+	      .filter(function(d) {
+	        return cur_targets.indexOf(d.unit) != -1;
+	      });
 
     var widths = cur_values
-	.map(function(d) {
-	  return {
-	    "target": d.unit,
-	    "group": d.group,
-	    "width": scale(d.value)
-	  };
-	})
-	.sort(compare);
+	      .map(function(d) {
+	        return {
+	          "target": d.unit,
+	          "group": d.group,
+	          "width": scale(d.value)
+	        };
+	      })
+	      .sort(compare);
 
     var cur_coords = offset_x(
       x_pos[i].x,
@@ -123,11 +123,11 @@ function edge_centers(x_pos, links, values, scale, center_type) {
 
     for (var j = 0; j < cur_coords.length; j++) {
       centers.push({
-	"source": x_pos[i].unit,
-	"target": widths[j].target,
-	"group": widths[j].group,
-	"x": cur_coords[j],
-	"width": widths[j].width
+	      "source": x_pos[i].unit,
+	      "target": widths[j].target,
+	      "group": widths[j].group,
+	      "x": cur_coords[j],
+	      "width": widths[j].width
       });
     }
   }
@@ -169,18 +169,18 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
     // targets need to be based on overall abundance of edge flowing in, not
     // widths of each descendant edge
     var target_center = centers.source
-	.filter(function(center) {
-	  return (center.target == d.target.data.id) &&
-	    (center.group == group);
-	})[0].x;
+	      .filter(function(center) {
+	        return (center.target == d.target.data.id) &&
+	          (center.group == group);
+	      })[0].x;
 
     // sources need to be based abundances of edges flowing out
     var source_center = centers.target
-	.filter(function(center) {
-	  return (center.source == d.source.data.id) &&
-	    (center.group == group) &&
-	    (center.target == d.target.data.id);
-	})[0].x;
+	      .filter(function(center) {
+	        return (center.source == d.source.data.id) &&
+	          (center.group == group) &&
+	          (center.target == d.target.data.id);
+	      })[0].x;
 
     return "M" + target_center + "," + d.target.y +
       "C" + target_center + "," + (d.target.y + d.source.y) / 2 +
@@ -192,8 +192,8 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
   attrs["stroke-width"] = function(d) {
     return centers.source
       .filter(function(center) {
-	return (center.group == group) &&
-	  (center.target == d.target.data.id);
+	      return (center.group == group) &&
+	        (center.target == d.target.data.id);
       })[0].width;
   };
 
@@ -205,9 +205,9 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
     var cur_tree = tree.get_subtree(d.target.data.id);
     for (var i = 0; i < search_strs.length; i++) {
       if (search_strs[i] !== null &&
-	  search_strs[i] !== "" &&
-	  cur_tree.contains_partial_match(search_strs[i])) {
-	return 0.8;
+	        search_strs[i] !== "" &&
+	        cur_tree.contains_partial_match(search_strs[i])) {
+	      return 0.8;
       }
     }
     return 0.2;
@@ -232,7 +232,7 @@ function sankey_link_attrs(values, scales, group, centers, tree, search_strs) {
  *     be directly input to a d3 text selection's .attr() to give styling /
  *     position for Sankey trees.
  **/
-function sankey_text_attrs(values, scales) {
+function sankey_text_attrs(values, scales, style_opts) {
   var attrs = text_attr_defaults();
 
   attrs.x = function(d) {
@@ -242,22 +242,22 @@ function sankey_text_attrs(values, scales) {
       d.data.id
     );
 
-    return d.x + 0.5 * scales.size(d3.sum(cur_values)) + 5;
+    return d.x + style_opts.text_offset * scales.size(d3.sum(cur_values)) + 5;
   };
 
   attrs.y = function(d) { return d.y; };
   attrs.fill = "#474747";
   attrs.text = function(d) {
-    if (d.data.doi >= -1) {
+    if (d.data.doi >= -style_opts.text_display_neighbors) {
       return d.data.id;
     }
   };
 
   attrs["font-size"] = function(d) {
     if (d.data.doi === 0) {
-      return 20;
+      return style_opts.focus_font_size;
     }
-    return 10;
+    return style_opts.font_size;
   };
 
   return attrs;

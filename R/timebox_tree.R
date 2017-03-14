@@ -20,7 +20,7 @@ timebox_tree <- function(values,
     values,
     root,
     edges,
-    merge_style_opts(style_opts)
+    merge_timebox_style(style_opts)
   )
 
   # create widget

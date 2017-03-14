@@ -107,7 +107,11 @@ points -- `leaf_width` controls the $x$ spacing between nodes, while `size_min`
 specifies the radius of the smallest node.
 
 ```{r, doi-display-1}
-doi_tree(values, edges, leaf_width = 50, size_min = 2)
+doi_tree(
+  values,
+  edges,
+  style_opts = list("leaf_width" = 50, "size_min" = 2)
+)
 ```
 
 Suppose we didn't have data for each internal node. It might be interesting to
@@ -134,7 +138,14 @@ edge leading into a node is equal to the sum of the widths flowing out (since
 we aggregated values from the tips up).
 
 ```{r, doi-display-2}
-doi_tree(values, edges, leaf_width = 50, size_min = 2)
+doi_tree(
+  values,
+  edges,
+  style_opts = list(
+    "leaf_width" = 50,
+    "size_min" = 2
+  )
+)
 ```
 
 ### DOI Sankeys ###

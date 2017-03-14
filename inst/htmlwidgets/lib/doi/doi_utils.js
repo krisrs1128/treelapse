@@ -813,7 +813,7 @@ function doi_highlight_link_attrs(values, scales, tree_obj, search_strs) {
  *     be directly input to a d3 text selection's .attr() to give styling /
  *     positioning for text on DoiTrees.
  **/
-function doi_text_attrs(values, scales) {
+function doi_text_attrs(values, scales, style_opts) {
   var attrs = text_attr_defaults();
 
   attrs.x = function(d) {
@@ -823,7 +823,7 @@ function doi_text_attrs(values, scales) {
       d.data.id
     );
 
-    return d.x + 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+    return d.x + style_opts.text_offset * Math.sqrt(scales.size(d3.mean(cur_values)));
   };
 
   attrs.y = function(d) {
@@ -833,7 +833,7 @@ function doi_text_attrs(values, scales) {
       d.data.id
     );
 
-    return d.y - 1.75 * Math.sqrt(scales.size(d3.mean(cur_values)));
+    return d.y - style_opts.text_offset * Math.sqrt(scales.size(d3.mean(cur_values)));
   };
 
   attrs.fill = function(d) {
@@ -841,16 +841,16 @@ function doi_text_attrs(values, scales) {
   };
 
   attrs.text = function(d) {
-    if (d.data.doi >= -1) {
+    if (d.data.doi >= -style_opts.text_display_neighbors) {
       return d.data.id;
     }
   };
 
   attrs["font-size"] = function(d) {
     if (d.data.doi === 0) {
-      return 20;
+      return style_opts.focus_font_size;
     }
-    return 10;
+    return style_opts.font_size;
   };
 
   return attrs;

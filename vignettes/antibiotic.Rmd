@@ -242,7 +242,14 @@ sankey_data$group <- gsub(" ", "", sankey_data$group)
 ```
 
 ```{r doi-sankey}
-doi_sankey(sankey_data, edges, width = 4000, leaf_width = 30)
+doi_sankey(
+  sankey_data,
+  edges,
+  width = 4000,
+  style_opts = list(
+    "leaf_width" = 30
+  )
+)
 ```
 
 ## Interpretation ##

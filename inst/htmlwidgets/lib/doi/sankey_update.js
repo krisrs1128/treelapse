@@ -35,14 +35,12 @@
  *     overall groups, for links and text.
  **/
 function draw_sankey(elem,
-		     width,
-		     height,
-		     values,
-		     tree,
-		     focus_node_id,
-		     size_max,
-		     leaf_width,
-		     leaf_height) {
+		                 width,
+		                 height,
+		                 values,
+		                 tree,
+                     focus_node_id,
+		                 style_opts) {
   setup_background(elem, width, height, "#F7F7F7");
   setup_search(elem, d3.set(values.unit).values());
   setup_groups(
@@ -57,9 +55,7 @@ function draw_sankey(elem,
     values,
     tree,
     focus_node_id,
-    size_max,
-    leaf_width,
-    leaf_height
+    style_opts
   );
 }
 
@@ -94,14 +90,12 @@ function draw_sankey(elem,
  * @side-effects Updates the Sankey DOI to a new focus node.
  **/
 function sankey_update(elem,
-		       width,
-		       height,
-		       values,
-		       tree,
-		       focus_node_id,
-		       size_max,
-		       leaf_width,
-		       leaf_height) {
+		                   width,
+		                   height,
+		                   values,
+		                   tree,
+		                   focus_node_id,
+		                   style_opts) {
 
   function sankey_update_wrapper(x) {
     sankey_update(
@@ -111,9 +105,7 @@ function sankey_update(elem,
       values,
       tree,
       x,
-      size_max,
-      leaf_width,
-      leaf_height
+      style_opts
     );
   }
 
@@ -136,7 +128,7 @@ function sankey_update(elem,
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([0, size_max]),
+      .range([0, style_opts.size_max]),
     "fill": d3.scaleOrdinal(d3.schemeSet3)
       .domain(groups)
   };
@@ -159,7 +151,7 @@ function sankey_update(elem,
   var layout = doi_tree.tree_block(
     focus_node_id,
     [width, height],
-    [leaf_width, leaf_height]
+    [style_opts.leaf_width, style_opts.leaf_height]
   );
 
   var x_pos = layout.descendants()
@@ -187,14 +179,14 @@ function sankey_update(elem,
       layout.links(),
       "tree_link_" + groups[i],
       sankey_link_attrs(
-	values,
-	scales,
-	groups[i],
-	centers,
-	tree_obj,
-	search_strs
+	      values,
+	      scales,
+	      groups[i],
+	      centers,
+	      tree_obj,
+	      search_strs
       ),
-      1000
+      style_opts.transition_duration
     );
   }
 
@@ -203,8 +195,8 @@ function sankey_update(elem,
     d3.select(elem).select("#text"),
     layout.descendants(),
     "tree_text",
-    sankey_text_attrs(values, scales),
-    1000
+    sankey_text_attrs(values, scales, style_opts),
+    style_opts.transition_duration
   );
 
   d3.select(elem)

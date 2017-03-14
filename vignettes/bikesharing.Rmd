@@ -281,7 +281,15 @@ This can be directly input to the DOI sankey.
 
 ```{r doi-sankey}
 head(values)
-doi_sankey(values %>% select(unit, group, value), edges, "root", leaf_width = 4)
+doi_sankey(
+  values %>%
+    select(unit, group, value),
+  edges,
+  "root",
+  style_opts = list(
+    "leaf_width" = 4
+  )
+)
 ```
 
 ## Interpretation ##
