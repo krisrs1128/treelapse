@@ -1,5 +1,3 @@
-# treelapse
-
 This is an R package for interactive visualization of counts and time series
 arranged along trees. Motivated by the problem of describing abundances of
 evolutionarily related microbes, we designed representations inspired by
