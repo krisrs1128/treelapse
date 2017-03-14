@@ -46,7 +46,8 @@ merge_doi_style <- function(opts) {
     "leaf_height" = 100,
     "focus_font_size" = 20,
     "font_size" = 10,
-    "text_offset" = 1.75
+    "text_offset" = 0.5
+    "text_display_neighbors" = 1
   )
   modifyList(default_opts, opts)
 }
