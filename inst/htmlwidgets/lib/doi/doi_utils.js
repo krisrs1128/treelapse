@@ -841,7 +841,7 @@ function doi_text_attrs(values, scales, style_opts) {
   };
 
   attrs.text = function(d) {
-    if (d.data.doi >= -1) {
+    if (d.data.doi >= -style_opts.text_display_neighbors) {
       return d.data.id;
     }
   };
