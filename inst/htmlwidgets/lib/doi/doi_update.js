@@ -23,26 +23,23 @@
  * @param {string} focus_node_id A string specifying the .id field in the
  *     object that will be considered the "focus" node, around which to set the
  *     doi distibution.
- * @param {float} size_min The minimum size (in pixels) of any node.
- * @param {float} size_max The maximum size (in pixels) of any node.
- * @param {float} leaf_height The height of the rectangle allocated to each
+ * @param {float} style_opts.size_min The minimum size (in pixels) of any node.
+ * @param {float} style_opts.size_max The maximum size (in pixels) of any node.
+ * @param {float} style_opts.leaf_height The height of the rectangle allocated to each
  *     leaf node
- * @param {float} leaf_width The width of the rectangle allocated to each
+ * @param {float} style_opts.leaf_width The width of the rectangle allocated to each
  *     leaf node
  * @return null
  * @side-effects Sets up and draws the DOI tree on elem. This includes 4 overall
  *     groups, for links, nodes, mouseover text, and highlighted links.
  **/
 function draw_doi(elem,
-		  width,
-		  height,
-		  values,
-		  tree,
-		  focus_node_id,
-		  size_min,
-		  size_max,
-		  leaf_width,
-		  leaf_height) {
+		              width,
+		              height,
+		              values,
+		              tree,
+		              focus_node_id,
+		              style_opts) {
 
   var tree_obj = new Tree(tree);
   var doi_tree = new DoiTree(tree);
@@ -60,10 +57,7 @@ function draw_doi(elem,
     values,
     tree,
     focus_node_id,
-    size_min,
-    size_max,
-    leaf_width,
-    leaf_height
+    style_opts
   );
 }
 
@@ -88,25 +82,22 @@ function draw_doi(elem,
  * @param {string} focus_node_id A string specifying the .id field in the
  *     object that will be considered the "focus" node, around which to set the
  *     doi distibution.
- * @param {float} size_min The minimum size (in pixels) of any node.
- * @param {float} size_max The maximum size (in pixels) of any node.
- * @param {float} leaf_height The height of the rectangle allocated to each
+ * @param {float} style_opts.size_min The minimum size (in pixels) of any node.
+ * @param {float} style_opts.size_max The maximum size (in pixels) of any node.
+ * @param {float} style_opts.leaf_height The height of the rectangle allocated to each
  *     leaf node
- * @param {float} leaf_width The width of the rectangle allocated to each
+ * @param {float} style_opts.leaf_width The width of the rectangle allocated to each
  *     leaf node
  * @return null
  * @side-effects Updates the DOI tree to a new focus node.
  **/
 function doi_update(elem,
-		    width,
-		    height,
-		    values,
-		    tree,
-		    focus_node_id,
-		    size_min,
-		    size_max,
-		    leaf_width,
-		    leaf_height) {
+		                width,
+		                height,
+		                values,
+		                tree,
+		                focus_node_id,
+                    style_opts) {
   function doi_update_wrapper(x) {
     doi_update(
       elem,
@@ -115,10 +106,7 @@ function doi_update(elem,
       values,
       tree,
       x,
-      size_min,
-      size_max,
-      leaf_width,
-      leaf_height
+      style_opts
     );
   }
 
@@ -138,7 +126,7 @@ function doi_update(elem,
   var scales = {
     "size": d3.scaleLinear()
       .domain([0, d3.max(values.value)])
-      .range([size_min, size_max]),
+      .range([style_opts.size_min, style_opts.size_max]),
     "fill": d3.scalePow().exponent([1e-15])
       .domain(d3.extent(doi_tree.get_attr_array("doi")))
       .range(["#F7F7F7", "#000000"]),
@@ -147,7 +135,7 @@ function doi_update(elem,
   var layout = doi_tree.tree_block(
     focus_node_id,
     [width, height],
-    [leaf_width, leaf_height]
+    [style_opts.leaf_width, style_opts.leaf_height]
   );
 
   selection_update(
@@ -182,7 +170,7 @@ function doi_update(elem,
     d3.select(elem).select("#text"),
     layout.descendants(),
     "tree_text",
-    doi_text_attrs(values, scales),
+    doi_text_attrs(values, scales, style_opts),
     1000
   );
 
