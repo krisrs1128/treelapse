@@ -21,7 +21,7 @@ library("knitr")
 opts_chunk$set(out.width = "700px", out.height = "600px", cache = FALSE)
 data(GlobalPatterns)
 gp_subset <- GlobalPatterns %>%
-  filter_taxa(function(x) { var(x) > 921000 }, prune = TRUE) %>%
+  filter_taxa(function(x) { var(x) > 9.22 * 1e5 }, prune = TRUE) %>%
   transform_sample_counts(asinh)
 ```
 
