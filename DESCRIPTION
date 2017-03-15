@@ -1,23 +1,18 @@
 Package: treelapse
-Title: Visualization for Tree-Structured Collections of Counts and Series
+Title: Visualization for Tree-Structured Collections of Counts and
+        Series
 Version: 0.0.0.9000
 Authors@R: person("Kris", "Sankaran", email = "kriss1@stanford.edu", role = c("aut", "cre"))
 Description: This is an R package for interactive visualization of counts and time series arranged along trees. Motivated by the problem of describing abundances of evolutionarily related microbes, we designed representations inspired by literature in the Data Visualization community.
-Depends:
-    htmlwidgets,
-    data.table,
-    dplyr,
-    igraph,
-    jsonlite,
-    magrittr,
-    zoo,
-    R (>= 3.2.2)
+Depends: htmlwidgets, data.table, dplyr, igraph, jsonlite, magrittr,
+        zoo, R (>= 3.2.2)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Suggests:
-    knitr,
-    rmarkdown,
-    testthat
+Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
+NeedsCompilation: no
+Packaged: 2017-03-15 23:01:58 UTC; krissankaran
+Author: Kris Sankaran [aut, cre]
+Maintainer: Kris Sankaran <kriss1@stanford.edu>
