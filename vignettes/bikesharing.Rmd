@@ -21,7 +21,7 @@ library("dplyr")
 library("reshape2")
 library("caret")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
+opts_chunk$set(out.width = "450px", out.height = "250px", cache = FALSE)
 ```
 
 This vignette applies the `treelapse` package to explore data on bikesharing.
@@ -283,11 +283,15 @@ This can be directly input to the DOI sankey.
 head(values)
 doi_sankey(
   values %>%
-    select(unit, group, value),
+  select(unit, group, value),
   edges,
   "root",
+  800, 400,
   style_opts = list(
-    "leaf_width" = 4
+    "leaf_width" = 25,
+    "leaf_height" = 50,
+    "focus_font_size" = 25,
+    "font_size" = 16
   )
 )
 ```
