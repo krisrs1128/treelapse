@@ -18,8 +18,6 @@ library("data.table")
 library("plyr")
 library("dplyr")
 library("treelapse")
-
-opts_chunk$set(out.width = "450", out.height = "200px", cache = FALSE)
 ```
 
 ## Introduction ##

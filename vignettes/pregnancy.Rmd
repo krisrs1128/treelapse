@@ -20,8 +20,6 @@ library("dplyr")
 library("phyloseq")
 library("cluster")
 library("treelapse")
-opts_chunk$set(out.width = "450px", out.height = "200px", cache = FALSE)
-data(abt)
 ```
 
 ## Data Preparation ##

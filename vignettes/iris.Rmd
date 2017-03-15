@@ -16,7 +16,6 @@ nice
 ```{r setup}
 library("treelapse")
 library("knitr")
-opts_chunk$set(out.width = "450px", out.height = "200px", cache = FALSE)
 data(iris)
 ```
 

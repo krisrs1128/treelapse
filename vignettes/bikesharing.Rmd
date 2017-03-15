@@ -21,7 +21,6 @@ library("dplyr")
 library("reshape2")
 library("caret")
 library("treelapse")
-opts_chunk$set(out.width = "450px", out.height = "250px", cache = FALSE)
 ```
 
 This vignette applies the `treelapse` package to explore data on bikesharing.

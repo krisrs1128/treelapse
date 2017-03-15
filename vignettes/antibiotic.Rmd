@@ -21,7 +21,6 @@ library("plyr")
 library("dplyr")
 library("phyloseq")
 library("treelapse")
-opts_chunk$set(out.width = "450px", out.height = "200px", cache = FALSE)
 
 # minimal theme for ggplots
 theme_set(theme_bw())

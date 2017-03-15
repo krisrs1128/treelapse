@@ -1,5 +1,5 @@
 ---
-title: "Hierarchical Clustering and the Iris Data"
+title: "Hierarchical Clustering, Parallel Coordinates, and Phyloseq"
 author: "Kris Sankaran"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -8,10 +8,6 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-This is an application motivated by this
-nice
-[walkthrough](https://cran.r-project.org/web/packages/dendextend/vignettes/Cluster_Analysis.html).
 
 ```{r setup}
 library("treelapse")

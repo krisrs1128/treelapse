@@ -19,8 +19,6 @@ library("plyr")
 library("dplyr")
 library("data.table")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
-data(abt)
 ```
 
 ## Data Preparation ##
