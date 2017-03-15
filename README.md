@@ -52,6 +52,12 @@ structure.
 are different levels in the hierarchy and rows are leaves. The `ij`th element
 is leaf `i`'s ancestors at level `j`.
 
+## Interaction ##
+
+To get a sense of how to navigate treelapse visualizations, click the demo video linked below.
+
+[![Watch on youtube](youtube_screenshot.png)](https://youtu.be/p3beLRLwPhk "Treelapse Interaction and Interpretation")
+
 ## References ##
 
 The essential ideas behind the visualizations in this package come from these
