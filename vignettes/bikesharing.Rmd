@@ -7,7 +7,6 @@ vignette: >
   %\VignetteIndexEntry{Bikesharing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: treelapse_intro.bib
 link-citations: yes
 graphics: yes
 ---

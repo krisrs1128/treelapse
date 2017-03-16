@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 link-citations: yes
-bibliography: antibiotic.bib
+bibliography: materials/antibiotic.bib
 ---
 
 ## Introduction ##
