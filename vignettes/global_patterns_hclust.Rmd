@@ -9,6 +9,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+This application is motivated by [http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html](http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html).
+
 ```{r setup}
 library("treelapse")
 library("phyloseq")
