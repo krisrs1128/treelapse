@@ -20,18 +20,18 @@
  **/
 function setup_tree_ts(elem, width, height, style_opts) {
   d3.select(elem).selectAll("*").remove();
-  setup_background(elem, width, height, "#F7F7F7");
+  setup_background(elem, width, height, style_opts.col_background);
   setup_groups(
     d3.select(elem).select("svg"),
     ["all_ts"]
   );
 
   var tree_y_border = style_opts.margin.top +
-      style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top);
+      style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top);
 
-  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", "#F7F7F7");
-  draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", "#F7F7F7");
-  draw_rect(elem, style_opts.margin.ts_right, height - tree_y_border, "ts_right_backdrop", "#F7F7F7");
+  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", style_opts.col_background);
+  draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", style_opts.col_background);
+  draw_rect(elem, style_opts.margin.ts_right, height - tree_y_border, "ts_right_backdrop", style_opts.col_background);
   d3.select(elem)
     .select("#x_axis_backdrop")
     .attr("transform", "translate(0, " + (height - style_opts.margin.bottom) + ")");
@@ -49,7 +49,7 @@ function setup_tree_ts(elem, width, height, style_opts) {
     width,
     tree_y_border,
     "tree_backdrop",
-    "#F7F7F7"
+    style_opts.col_background
   );
   setup_groups(
     d3.select(elem).select("svg"),
@@ -133,7 +133,7 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
     [
       (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
       style_opts.margin.top +
-        (style_opts.tree_frac) * (height - style_opts.margin.top - style_opts.margin.bottom)
+        (style_opts.tree.frac) * (height - style_opts.margin.top - style_opts.margin.bottom)
     ]
   ];
 
@@ -363,7 +363,7 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
  **/
 function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   update_axes(elem, scales, style_opts);
-  draw_zoom(elem, reshaped.pairs, cur_lines, scales);
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true, style_opts);
 }
