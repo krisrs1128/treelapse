@@ -26,10 +26,6 @@ This vignette applies the `treelapse` package to explore data on bikesharing.
 Bikesharing lets people use bikes temporarily between different stations, Figure
 \@ref(fig:bike_picture) shows an example station.
 
-```{r bike_picture, fig.caption="Bikesharing in London, from https://commons.wikimedia.org/wiki/File:Bikesharing_londonIMG_1022.jpg.", out.width = "400px"}
-include_graphics("materials/bikesharing.jpg")
-```
-
 The main questions of interest from an operational point of view are forecasting
 demand across bike rack locations and planning the locations for new ones. We
 will build some visualizations to help with this first forecasting problem. Our
