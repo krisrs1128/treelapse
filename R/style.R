@@ -34,7 +34,22 @@ merge_timebox_style<- function(opts) {
       "tree_right" = 15,
       "tree_left" = 15
     ),
-    "tree_frac" = 0.43
+    "col_background" = "#F7F7F7",
+    "tree" = list(
+      "frac" = 0.43,
+      "col_unselected" = "#CDCDCD",
+      "col_selected" = "#2D869F",
+      "col_search" = "#C2571A"
+    ),
+    "ts" = list(
+      "col_unselected" = "#696969",
+      "col_selected" = "#2D869F",
+      "col_search" = "#C2571A",
+      "width_unselected" = 1,
+      "width_selected" = 2,
+      "opacity_unselected" = 0.1,
+      "opacity_selected" = 0.9
+    )
   )
   modifyList(default_opts, opts)
 }
