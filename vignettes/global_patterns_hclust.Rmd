@@ -1,17 +1,15 @@
 ---
-title: "Hierarchical Clustering and the Iris Data"
+title: "Hierarchical Clustering, Parallel Coordinates, and Phyloseq"
 author: "Kris Sankaran"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Hierarchical Clustering and the Iris Data}
+  %\VignetteIndexEntry{Hierarchical Clustering, Parallel Coordinates, and Phyloseq}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-This is an application motivated by this
-nice
-[walkthrough](https://cran.r-project.org/web/packages/dendextend/vignettes/Cluster_Analysis.html).
+This application is motivated by [http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html](http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html).
 
 ```{r setup}
 library("treelapse")
@@ -21,7 +19,7 @@ library("knitr")
 opts_chunk$set(out.width = "700px", out.height = "600px", cache = FALSE)
 data(GlobalPatterns)
 gp_subset <- GlobalPatterns %>%
-  filter_taxa(function(x) { var(x) > 921000 }, prune = TRUE) %>%
+  filter_taxa(function(x) { var(x) > 9.22 * 1e5 }, prune = TRUE) %>%
   transform_sample_counts(asinh)
 ```
 

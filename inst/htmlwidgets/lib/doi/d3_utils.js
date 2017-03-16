@@ -58,7 +58,8 @@ function draw_axes(elem, scales, style_opts) {
   y_axis = d3.axisLeft(scales.y)
     .ticks(style_opts.n_ticks_y)
     .tickSize(style_opts.tick_size);
-  d3.select("#y_axis")
+  d3.select(elem)
+    .select("#y_axis")
     .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
     .call(y_axis);
   d3.select(elem)
@@ -104,7 +105,8 @@ function update_axes(elem, scales, style_opts) {
   y_axis = d3.axisLeft(scales.y)
     .ticks(style_opts.n_ticks_y)
     .tickSize(style_opts.tick_size);
-  d3.select("#y_axis")
+  d3.select(elem)
+    .select("#y_axis")
     .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
     .transition()
     .duration(100)

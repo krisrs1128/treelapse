@@ -4,10 +4,10 @@ author: "Kris Sankaran"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{DOI Trees for Microbial Abundance}
+  %\VignetteIndexEntry{An Introduction to the Treelapse Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: treelapse_intro.bib
+bibliography: materials/treelapse_intro.bib
 link-citations: yes
 ---
 
@@ -18,8 +18,6 @@ library("data.table")
 library("plyr")
 library("dplyr")
 library("treelapse")
-
-opts_chunk$set(fig.width = 8, fig.height = 5, cache = FALSE)
 ```
 
 ## Introduction ##

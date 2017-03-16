@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 link-citations: yes
-bibliography: antibiotic.bib
+bibliography: materials/antibiotic.bib
 ---
 
 ## Introduction ##
@@ -21,7 +21,6 @@ library("plyr")
 library("dplyr")
 library("phyloseq")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
 
 # minimal theme for ggplots
 theme_set(theme_bw())
@@ -79,7 +78,7 @@ different antibiotic time courses (Cp, for ciprofloxacin). Unfortunately, the
 treatments were not given at the same time for each person, see the figure
 below.
 
-```{r, sampling-times}
+```{r, sampling-times, out.width = "700px", out.height = "600px"}
 ggplot(mapping) +
   geom_tile(aes(x = time, y = ind, fill = condition)) +
   scale_fill_brewer(palette = "Set3")
@@ -92,7 +91,7 @@ Turning over to the RSV (microbial) abundances, we notice that the counts are
 highly skewed. We're finding that the vast majority of microbes have very small
 abundnaces.
 
-```{r, skewness}
+```{r, skewness, out.width = "700px", out.height = "600px"}
 hist(asinh(as(otu_table(abt), "matrix")), main = "Raw RSV Counts")
 ```
 
@@ -102,7 +101,7 @@ and work with `asinh` transformed counts[^The asinh transformation is like
 taking logs, but is less agressive at smaller values. This is evident from the
 representation, $asinh\left(x\right) = \log\left(x + \sqrt{1 + x^{t}}\right)].
 
-```{r, abt-transform}
+```{r, abt-transform, out.width = "700px", out.height = "600px"}
 abt <- abt %>%
   filter_taxa(function(x) sd(x) > 7.5, prune = TRUE) %>%
   transform_sample_counts(asinh)
@@ -204,7 +203,11 @@ timebox_tree(
 ```
 
 ```{r treebox}
-treebox(time_data, edges, height = 250, width = 300, style_opts)
+treebox(
+  time_data,
+  edges,
+  style_opts = style_opts
+)
 ```
 
 ### Tree Averages ###
@@ -218,11 +221,19 @@ time_data <- values %>%
 
 ```{r timebox-means}
 style_opts$size_min <- 0.5
-timebox_tree(time_data, edges, style_opts = style_opts)
+timebox_tree(
+  time_data,
+  edges,
+  style_opts = style_opts
+)
 ```
 
 ```{r treebox-means}
-treebox(time_data, edges, style_opts = style_opts)
+treebox(
+  time_data,
+  edges,
+  style_opts = style_opts
+)
 ```
 
 ### Per-Condition Sankey ###

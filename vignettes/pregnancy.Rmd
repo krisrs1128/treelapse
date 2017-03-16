@@ -20,8 +20,6 @@ library("dplyr")
 library("phyloseq")
 library("cluster")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
-data(abt)
 ```
 
 ## Data Preparation ##
@@ -80,10 +78,14 @@ doi_sankey(
     dplyr::summarise(value = mean(value)),
   taxa,
   "Bacteria",
-  1100,
-  500,
-  leaf_width = 15,
-  leaf_height = 75
+  900,
+  300,
+  style_opts = list(
+    "focus_font_size" = 20,
+    "font_size" = 15,
+    "leaf_width" = 37,
+    "leaf_height" = 75
+  )
 )
 ```
 
@@ -118,12 +120,12 @@ doi_sankey(
   dplyr::summarise(value = mean(value)),
   taxa,
   "Bacteria",
-  1100,
-  500,
+  900,
+  300,
   style_opts = list(
-    "focus_font_size" = 25,
-    "font_size" = 17,
-    "leaf_width" = 15,
+    "focus_font_size" = 20,
+    "font_size" = 15,
+    "leaf_width" = 37,
     "leaf_height" = 75
   )
 )

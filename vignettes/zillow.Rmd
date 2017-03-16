@@ -19,8 +19,6 @@ library("plyr")
 library("dplyr")
 library("data.table")
 library("treelapse")
-opts_chunk$set(fig.width = 10, fig.height = 7, cache = FALSE)
-data(abt)
 ```
 
 ## Data Preparation ##
@@ -94,11 +92,23 @@ values$time <- values$row
 ## Visualization ##
 
 ```{r timebox}
-timebox_tree(values %>% select(unit, time, value), edges, size_max = 4)
+timebox_tree(
+  values %>% select(unit, time, value),
+  edges,
+  style_opts = list(
+    "size_max" = 4
+  )
+)
 ```
 
 ```{r treebox}
-treebox(values %>% select(unit, time, value), edges, size_max = 4)
+treebox(
+  values %>% select(unit, time, value),
+  edges,
+  style_opts = list(
+    "size_max" = 4
+  )
+)
 ```
 
 ## Interpretation ##
