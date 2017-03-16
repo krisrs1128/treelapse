@@ -71,7 +71,7 @@ function get_scales(values, width, height, style_opts) {
       .range([
         height - style_opts.margin.bottom,
         style_opts.margin.top +
-          style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top)
+          style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top)
       ]),
     "r": d3.scaleLinear()
       .domain(d3.extent(values.value))
@@ -118,7 +118,8 @@ function draw_ts(elem,
     scales,
     "all_ts",
     cur_lines,
-    get_search_values(elem)
+    get_search_values(elem),
+    style_opts.ts
   );
 
   d3.select(elem)
@@ -168,9 +169,9 @@ function draw_ts(elem,
  *     be directly input to a d3 path selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_link_attrs(dvalues, cur_lines, scales) {
+function timebox_link_attrs(dvalues, cur_lines, scales, tree_style) {
   var attr_funs = link_attr_defaults();
-  attr_funs.stroke = "#F0F0F0";
+  attr_funs.stroke = tree_style.col_unselected;
 
   attr_funs["stroke-width"] = function(d) {
     var cur_values = dvalues[d.target.data.id];
@@ -195,7 +196,7 @@ function timebox_link_attrs(dvalues, cur_lines, scales) {
  *     be directly input to a d3 circles selection's .attr() to give styling /
  *     positioning for text on time + treeboxes tree nodes.
  **/
-function timebox_node_attrs(dvalues, cur_lines, search_lines, scales) {
+function timebox_node_attrs(dvalues, cur_lines, search_lines, scales, tree_style) {
   var attr_funs = node_attr_defaults();
 
   attr_funs.r = function(d) {
@@ -205,12 +206,12 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales) {
 
   attr_funs.fill = function(d) {
     if (cur_lines.indexOf(d.data.id) != -1) {
-      return "#2D869F";
+      return tree_style.col_selected;
     }
-    return "#F0F0F0";
+    return tree_style.col_unselected;
   };
 
-  attr_funs.stroke = "#C2571A";
+  attr_funs.stroke = tree_style.col_search;
   attr_funs["stroke-width"] = function(d) {
     if (search_lines.indexOf(d.data.id) != -1) {
       var cur_values = dvalues[d.data.id];
@@ -260,7 +261,7 @@ function draw_tree(elem,
   var cluster = d3.tree()
       .size([
         0.95 * (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
-        0.95 * style_opts.tree_frac * (height - style_opts.margin.bottom - style_opts.margin.top)
+        0.95 * style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top)
       ]);
   var layout = cluster(hierarchy);
 
@@ -276,7 +277,7 @@ function draw_tree(elem,
     d3.select(elem).select("#links"),
     layout.links(),
     "tree_link",
-    timebox_link_attrs(dvalues, cur_lines, scales),
+    timebox_link_attrs(dvalues, cur_lines, scales, style_opts.tree),
     100
   );
 
@@ -287,7 +288,7 @@ function draw_tree(elem,
     d3.select(elem).select("#nodes"),
     nodes,
     "tree_node",
-    timebox_node_attrs(dvalues, cur_lines, search_lines, scales),
+    timebox_node_attrs(dvalues, cur_lines, search_lines, scales, style_opts.tree),
     100
   );
 
@@ -332,10 +333,16 @@ function draw_tree(elem,
  * @return {d3 selection} ts_selection The d3 html selection with bound data.
  * @side-effects Draws the ts encoded in pairs onto the element elem.
  **/
-function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) {
+function draw_ts_internal(elem,
+                          pairs,
+                          scales,
+                          cur_id,
+                          cur_lines,
+                          search_lines,
+                          ts_style) {
   var first_pairs = pairs[Object.keys(pairs)[0]];
   if (!isNumeric(first_pairs.time)) {
-    var x_levels = first_pairs.map(function(d) { return d.time });
+    var x_levels = first_pairs.map(function(d) { return d.time; });
     var cur_x_domain = scales.x.domain();
     var domain_ends = [cur_x_domain[0], cur_x_domain[cur_x_domain.length - 1]];
   }
@@ -371,13 +378,13 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
     .attrs({
       "id": function(d) { return d; },
       "fill": "none",
-      "stroke": "#696969",
-      "stroke-width": 0.5,
-      "opacity": 0.1,
+      "stroke": ts_style.col_unselected,
+      "stroke-width": ts_style.width_unselected,
+      "opacity": ts_style.opacity_unselected,
       "d": function(d) {
-	return line_fun(
-	  pairs[d]
-	);
+	      return line_fun(
+	        pairs[d]
+	      );
       }
     });
 
@@ -386,27 +393,27 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
     .attrs({
       "stroke": function(d) {
 	      if (search_lines.indexOf(d) != -1) {
-	        return "#C2571A";
+	        return ts_style.col_search;
 	      }
 	      if (cur_lines.indexOf(d) != -1) {
-	        return "#2D869F";
+	        return ts_style.col_selected;
 	      }
-	      return "#696969";
+	      return ts_style.col_unselected;
       },
       "stroke-width": function(d) {
 	      if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
-	        return 1;
+	        return ts_style.width_selected;
 	      }
-	      return 0.5;
+	      return ts_style.width_unselected;
       },
       "d": function(d) {
 	      return line_fun(pairs[d]);
       },
       "opacity": function(d) {
 	      if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
-	        return 0.9;
+	        return ts_style.opacity_selected;
 	      }
-	      return 0.1;
+	      return ts_style.opacity_unselected;
       }
     });
 
@@ -427,10 +434,18 @@ function draw_ts_internal(elem, pairs, scales, cur_id, cur_lines, search_lines) 
  * @return null
  * @side-effects Draws zooming time series on the #zoom_ts group on elem
  **/
-function draw_zoom(elem, pairs, cur_lines, scales) {
+function draw_zoom(elem, pairs, cur_lines, scales, ts_style) {
   var search_lines = get_search_values(elem);
   var cur_scales = {"x": scales.zoom_x, "y": scales.zoom_y};
-  draw_ts_internal(elem, pairs, cur_scales, "zoom_ts", cur_lines, search_lines);
+  draw_ts_internal(
+    elem,
+    pairs,
+    cur_scales,
+    "zoom_ts",
+    cur_lines,
+    search_lines,
+    ts_style
+  );
 }
 
 /*******************************************************************************
