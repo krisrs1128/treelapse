@@ -27,7 +27,7 @@ Bikesharing lets people use bikes temporarily between different stations, Figure
 \@ref(fig:bike_picture) shows an example station.
 
 ```{r bike_picture, fig.caption="Bikesharing in London, from https://commons.wikimedia.org/wiki/File:Bikesharing_londonIMG_1022.jpg.", out.width = "400px"}
-include_graphics("bikesharing.jpg")
+include_graphics("materials/bikesharing.jpg")
 ```
 
 The main questions of interest from an operational point of view are forecasting
@@ -312,13 +312,13 @@ highlight just these series on their own.
 These three boxes highlight mostly weekday series.
 
 ```{r working-fig, out.width = "400px"}
-include_graphics("working.png")
+include_graphics("materials/working.png")
 ```
 
 And these highlight the weekend series.
 
 ```{r weekend-fig, out.width = "400px"}
-include_graphics("weekend.png")
+include_graphics("materials/weekend.png")
 ```
 
 Note that at each split in the tree, we place the series with higher mean on the
@@ -337,11 +337,11 @@ and down (keeping the low rush-hour boxes to ensure we were in weekend series)
 and then hovered over the highlighted nodes in the tree.
 
 ```{r weekend-warm-fig, out.width = "400px"}
-include_graphics("weekend_warm.png")
+include_graphics("materials/weekend_warm.png")
 ```
 
 ```{r weekend-cold-fig, out.width = "400px"}
-include_graphics("weekend_cold.png")
+include_graphics("materials/weekend_cold.png")
 ```
 
 Another major source of variation in these series seems to be whether the
@@ -367,11 +367,11 @@ of both a trend of overall increasing demand as well as strong seasonal
 influence.
 
 ```{r working-high-fig, out.width = "400px"}
-include_graphics("working_high_overlaid.png")
+include_graphics("materials/working_high_overlaid.png")
 ```
 
 ```{r working-low-fig, out.width = "400px"}
-include_graphics("working_low_overlaid.png")
+include_graphics("materials/working_low_overlaid.png")
 ```
 
 In our final timebox view, we use zooming to ask a very specific question: On what
@@ -383,7 +383,7 @@ usually correspond to warm weekends, which makes a lot of sense (not that
 I've ever tried it myself).
 
 ```{r nighttime-fig, out.width = "400px"}
-include_graphics("nighttime.png")
+include_graphics("materials/nighttime.png")
 ```
 
 ### Treeboxes ###
@@ -398,7 +398,7 @@ associated with high 8AM demand. Reinforcing our conclusions from before, the
 first split places all of the bottom quintile into the "weekend" branch.
 
 ```{r root-doi, out.width = "400px"}
-include_graphics("root_doi.png")
+include_graphics("materials/root_doi.png")
 ```
 
 Next, we follow the branches associated with the top two quintiles (red and
@@ -408,7 +408,7 @@ proportion of the red (second highest quintile) go down this branch too, but
 the red also makes up a large part of the earlier season, second year branch.
 
 ```{r medium-demand-doi, out.width = "400px"}
-include_graphics("medium_demand_doi.png")
+include_graphics("materials/medium_demand_doi.png")
 ```
 
 If we click to the branches on the left, we see branches that are made mostly
@@ -417,5 +417,5 @@ samples from the first year. The main difference between the second and third
 quintiles is that the third quintile samples are usually on warmer days.
 
 ```{r high-demand-doi, out.width = "400px"}
-include_graphics("high_demand_doi.png")
+include_graphics("materials/high_demand_doi.png")
 ```
