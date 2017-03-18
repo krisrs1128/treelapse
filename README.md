@@ -56,7 +56,7 @@ is leaf `i`'s ancestors at level `j`.
 
 To get a sense of how to navigate treelapse visualizations, click the demo video linked below.
 
-[![Watch on youtube](youtube_screenshot.png)](https://youtu.be/p3beLRLwPhk "Treelapse Interaction and Interpretation")
+[![Watch on youtube](youtube_screenshot.png)](https://www.youtube.com/watch?v=EcmYBRMVMbI "Treelapse Interaction and Interpretation")
 
 ## References ##
 
