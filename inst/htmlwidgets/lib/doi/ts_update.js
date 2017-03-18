@@ -434,7 +434,7 @@ function update_factory(base_fun,
  **/
 function treebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   update_axes(elem, scales, style_opts);
-  draw_zoom(elem, reshaped.pairs, cur_lines, scales);
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true, style_opts);
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false, style_opts);
 }
