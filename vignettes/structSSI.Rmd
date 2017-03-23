@@ -1,9 +1,14 @@
 ---
-title: title
+title: "Visually Inspecting Confirmatory Analysis"
 author: Kris Sankaran
 date: "`r Sys.Date()`"
-output: bookdown::pdf_book
+bibliography: "materials/structSSI.bib"
 ---
+
+Often, it becomes easier to interpret the results of different confirmatory
+analysis when the results can be studied interactively. Here, we take an example
+hierarchical testing analysis from [@callahan2016bioconductor] and study the
+output interactively using the parallel coordinates version of timebox trees.
 
 ```{r, echo = F}
 library("knitr")
@@ -63,13 +68,8 @@ adj_p <- cbind(adj_p, mt.rawp2adjp(adj_p$unadjp))
 values <- adj_p %>%
   select(starts_with("adjp"), id) %>%
   dplyr::rename(structSSI = adjp) %>%
-  melt(
-    id.vars = "id",
-  ) %>%
-  dplyr::rename(
-    unit = id,
-    time = variable
-    ) %>%
+  melt(id.vars = "id",) %>%
+  dplyr::rename(unit = id, time = variable) %>%
   mutate(
     value = - log(value),
     time = gsub("adjp.", "", time)
