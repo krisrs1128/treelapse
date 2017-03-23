@@ -31,13 +31,15 @@ geoMeans <- apply(counts(ps_dds), 1, geo_mean_protected)
 ps_dds <- estimateSizeFactors(ps_dds, geoMeans = geoMeans)
 ps_dds <- estimateDispersions(ps_dds)
 abund <- getVarianceStabilizedData(ps_dds)
+```
 
-## ---- structssi-shorten-names ----
+```{r structssi-shorten-names}
 short_names <- substr(rownames(abund), 1, 5)%>%
   make.names(unique = TRUE)
 rownames(abund) <- short_names
+```
 
-## ---- structssi-unadjp ----
+```{r structssi-unadjp}
 el <- phy_tree(mouse_diet)$edge
 el0 <- el
 el0 <- el0[nrow(el):1, ]
@@ -45,12 +47,14 @@ el_names <- c(short_names, seq_len(phy_tree(mouse_diet)$Nnode))
 el[, 1] <- el_names[el0[, 1]]
 el[, 2] <- el_names[as.numeric(el0[, 2])]
 unadj_p <- treePValues(el, abund, sample_data(mouse_diet)$age_binned)
+```
 
-## ---- structssi-test ----
+```{r structssi-test}
 hfdr_res <- hFDR.adjust(unadj_p, el, .75)
 summary(hfdr_res)
+```
 
-## ---- treebox ----
+```{r treebox}
 adj_p <- hfdr_res@p.vals
 adj_p$id <- rownames(adj_p)
 adj_p$adjp[is.na(adj_p$adjp)] <- 1
@@ -91,8 +95,9 @@ timebox_tree(
     "n_ticks_y" = 2
   )
 )
+```
 
-## ---- structssi-tax ----
+```{r structssi-tax}
 tax <- tax_table(mouse_diet) %>%
   data.frame()
 tax$seq <- short_names
