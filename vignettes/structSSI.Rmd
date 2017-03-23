@@ -1,0 +1,76 @@
+---
+title: title
+author: Kris Sankaran
+date: "`r Sys.Date()`"
+output: bookdown::pdf_book
+---
+
+```{r, echo = F}
+library("knitr")
+opts_chunk$set(fig.width = 8, fig.height = 8, fig.align = "center")
+data(mouse_diet)
+ps_dds <- phyloseq_to_deseq2(mouse_diet,  ~ age_binned + family_relationship)
+
+# geometric mean, set to zero when all coordinates are zero
+geo_mean_protected <- function(x) {
+  if (all(x == 0)) {
+    return (0)
+  }
+  exp(mean(log(x[x != 0])))
+}
+
+geoMeans <- apply(counts(ps_dds), 1, geo_mean_protected)
+ps_dds <- estimateSizeFactors(ps_dds, geoMeans = geoMeans)
+ps_dds <- estimateDispersions(ps_dds)
+abund <- getVarianceStabilizedData(ps_dds)
+
+## ---- structssi-shorten-names ----
+short_names <- substr(rownames(abund), 1, 5)%>%
+  make.names(unique = TRUE)
+rownames(abund) <- short_names
+
+## ---- structssi-unadjp ----
+el <- phy_tree(mouse_diet)$edge
+el0 <- el
+el0 <- el0[nrow(el):1, ]
+el_names <- c(short_names, seq_len(phy_tree(mouse_diet)$Nnode))
+el[, 1] <- el_names[el0[, 1]]
+el[, 2] <- el_names[as.numeric(el0[, 2])]
+unadj_p <- treePValues(el, abund, sample_data(mouse_diet)$age_binned)
+
+## ---- structssi-test ----
+hfdr_res <- hFDR.adjust(unadj_p, el, .75)
+summary(hfdr_res)
+
+
+## ---- treebox ----
+adj_p <- hfdr_res@p.vals
+adj_p$id <- rownames(adj_p)
+adj_p$adjp[is.na(adj_p$adjp)] <- 1
+adj_p <- cbind(adj_p, mt.rawp2adjp(adj_p$unadjp))
+test <- adj_p %>%
+  select(-adj.significance) %>%
+  melt(
+    id.vars = "id",
+  ) %>%
+  dplyr::rename(
+    unit = id,
+    time = variable
+    ) %>%
+  mutate(
+    value = - log(value)
+  )
+
+colnames(el) <- c("parent", "child")
+timebox_tree(test, el)
+
+## ---- structssi-tax ----
+tax <- tax_table(pslog)[, c("Family", "Genus")] %>%
+  data.frame()
+tax$seq <- short_names
+
+hfdr_res@p.vals$seq <- rownames(hfdr_res@p.vals)
+tax %>%
+  left_join(hfdr_res@p.vals) %>%
+  arrange(adjp) %>% head(10)
+```
