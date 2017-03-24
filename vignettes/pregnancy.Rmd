@@ -114,6 +114,7 @@ for (i in seq_len(5)) {
 
 ```{r doi-direct}
 values$group <- sample_info$Outcome[values$row]
+levels(values$group) <- c("VeryPretern", "Preterm", "Marginal", "Term")
 doi_sankey(
   values %>%
   group_by(group, unit) %>%
