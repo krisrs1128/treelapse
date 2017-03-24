@@ -114,6 +114,7 @@ for (i in seq_len(5)) {
 
 ```{r doi-direct}
 values$group <- sample_info$Outcome[values$row]
+levels(values$group) <- c("VeryPretern", "Preterm", "Marginal", "Term")
 doi_sankey(
   values %>%
   group_by(group, unit) %>%
@@ -123,7 +124,7 @@ doi_sankey(
   900,
   300,
   style_opts = list(
-    "focus_font_size" = 20,
+    "focus_font_size" = 12,
     "font_size" = 15,
     "leaf_width" = 37,
     "leaf_height" = 75
