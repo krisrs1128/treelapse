@@ -124,7 +124,7 @@ doi_sankey(
   900,
   300,
   style_opts = list(
-    "focus_font_size" = 12,
+    "focus_font_size" = 20,
     "font_size" = 15,
     "leaf_width" = 37,
     "leaf_height" = 75
