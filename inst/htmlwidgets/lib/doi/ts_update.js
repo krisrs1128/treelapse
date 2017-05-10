@@ -53,7 +53,8 @@ function setup_tree_ts(elem, width, height, style_opts) {
   );
   setup_groups(
     d3.select(elem).select("svg"),
-    ["zoom_ts", "links", "nodes", "ts_brushes", "zoom_brush", "mouseover"]
+    ["zoom_ts", "links", "nodes", "tree_voronoi", "ts_voronoi", "ts_brushes",
+     "zoom_brush", "mouseover"]
   );
 
   d3.select(elem)

@@ -121,9 +121,7 @@ the following data.
 * A `values` dataset giving the
 
 ```{r abt-values}
-tip_values <- otu_table(abt) %>%
-  as("matrix") %>%
-  t()
+tip_values <- t(get_taxa(abt))
 ```
 
 ```{r get-taxa}
