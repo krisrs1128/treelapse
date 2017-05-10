@@ -127,29 +127,46 @@ function draw_ts(elem,
     .attr("font-size", 0);
 
   var search_lines = get_search_values(elem);
-  function mouseover_fun(d) {
-    if (cur_lines.concat(search_lines).indexOf(d) == -1) {
-      return;
+
+  var ts_points = [];
+  var keys = Object.keys(dvalues);
+  for (var i = 0; i < keys.length; i++) {
+    if (cur_lines.indexOf(keys[i]) != -1) {
+      var cur_points = dvalues[keys[i]].map(
+        function(x) {
+          return {"data": {"id": keys[i]}, "x": x.time, "y": x.value};
+        }
+      );
+      ts_points = ts_points.concat(cur_points);
     }
-
-    var cur_pos = d3.mouse(this);
-    d3.select(elem)
-      .select("#mouseover")
-      .attrs({
-	      "transform": "translate(" + cur_pos[0] + "," + cur_pos[1] + ")"
-      });
-
-    d3.select(elem)
-      .select("#mouseover > text")
-      .text(d)
-      .attrs({
-	      "font-size": style_opts.mouseover_font_size,
-	      "font-family": style_opts.font_family
-      });
   }
 
+  d3.select("#ts_voronoi")
+    .selectAll("path")
+    .remove()
+
+  // setup voronoi mouseover background
+  var voronoi = d3.voronoi()
+      .x(function(d) { return scales.x(d.x) })
+      .y(function(d) { return scales.y(d.y) })
+      .extent([[0, scales.y.range()[1]], [scales.x.range()[1], scales.y.range()[0]]]);
+
+  var poly = voronoi(ts_points)
+      .polygons()
+      .filter(function(d) { return typeof(d) != "undefined"; });
+
+  var voronoi_paths = d3.select("#ts_voronoi")
+      .selectAll("path")
+	    .data(poly).enter()
+      .append("path")
+      .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
+      .attrs({
+        "fill": "none",
+        "pointer-events": "all"
+      });
+
   if (mouseover_text) {
-    ts_select.on("mouseover", mouseover_fun);
+    voronoi_paths.on("mouseover", function(d) { return info_over(d, scales); });
   }
 }
 
@@ -222,6 +239,27 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales, tree_style
   };
 
   return attr_funs;
+}
+
+/**
+ * Update the mouseover text
+ *
+ * @param d {object} The mouse-overed voronoi polygon, computed by
+ *    d3.voronoi().polygon()
+ * @return null
+ * @side-effects Removes the current mouseover text and changes it to the new
+ * voronoi cell's label.
+ **/
+function info_over(d, scales) {
+  d3.select("#mouseover")
+    .selectAll("text")
+    .remove();
+  d3.select("#mouseover")
+    .append("text")
+    .text(d.data.data.id)
+    .attrs({
+      "transform": "translate(" + scales.x(d.data.x) + "," + scales.y(d.data.y) + ")"
+    });
 }
 
 /**
@@ -299,38 +337,22 @@ function draw_tree(elem,
 
   var poly = voronoi(nodes)
       .polygons()
-  poly = poly.filter(function(d) { return typeof(d) != "undefined" });
+      .filter(function(d) { return typeof(d) != "undefined" });
 
-  var voronoi_paths = d3.select("#voronoi")
+  var voronoi_paths = d3.select("#tree_voronoi")
     .selectAll("path")
-	  .data(poly) .enter()
+	  .data(poly).enter()
     .append("path")
     .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
     .attrs({
-      "class": function(d, i) { return "voronoi" + d.data.x + "-" + d.data.y; },
       "fill": "none",
       "pointer-events": "all"
     });
 
-  function info_out(d) {
-  }
-
-  function info_over(d) {
-    d3.select("#mouseover")
-      .selectAll("text")
-      .remove();
-    d3.select("#mouseover")
-      .append("text")
-      .text(d.data.data.id)
-      .attrs({
-        "transform": "translate(" + d.data.x + "," + d.data.y + ")"
-      });
-  }
-
   // display names on mouseover
   if (mouseover_text) {
-    voronoi_paths.on("mouseover", info_over)
-	    .on("mouseout", info_out);
+    id_scale = {"x": function(x) { return x;}, "y": function(x) { return x; }};
+    voronoi_paths.on("mouseover", function(d) { return info_over(d, id_scale); });
   }
 }
 
