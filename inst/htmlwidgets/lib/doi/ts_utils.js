@@ -292,28 +292,45 @@ function draw_tree(elem,
     100
   );
 
+  var voronoi = d3.voronoi()
+      .x(function(d) { return d.x })
+      .y(function(d) { return d.y })
+      .extent([[0, 0], [scales.x.range()[1], scales.y.range()[1]]]);
+
+  var poly = voronoi(nodes)
+      .polygons()
+  poly = poly.filter(function(d) { return typeof(d) != "undefined" });
+
+  var voronoi_paths = d3.select("#voronoi")
+    .selectAll("path")
+	  .data(poly) .enter()
+    .append("path")
+    .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
+    .attrs({
+      "class": function(d, i) { return "voronoi" + d.data.x + "-" + d.data.y; },
+      "fill": "none",
+      "pointer-events": "all"
+    });
+
+  function info_out(d) {
+  }
+
+  function info_over(d) {
+    d3.select("#mouseover")
+      .selectAll("text")
+      .remove();
+    d3.select("#mouseover")
+      .append("text")
+      .text(d.data.data.id)
+      .attrs({
+        "transform": "translate(" + d.data.x + "," + d.data.y + ")"
+      });
+  }
+
   // display names on mouseover
   if (mouseover_text) {
-    d3.select(elem)
-      .selectAll(".tree_node")
-      .on("mouseover",
-	        function(d) {
-	          var r = parseFloat(d3.select(this).attr("r"));
-	          d3.select(elem)
-	            .select("#mouseover")
-	            .attrs({
-		            "transform": "translate(" + (d.x + 2 * Math.sqrt(r))+
-		              "," + (d.y - 2 * Math.sqrt(r)) + ")"
-	            });
-
-	          d3.select(elem)
-	            .select("#mouseover > text")
-	            .text(d.data.id)
-	            .attrs({
-		            "font-size": style_opts.mouseover_font_size,
-		            "font-family": style_opts.font_family
-	            });
-	        });
+    voronoi_paths.on("mouseover", info_over)
+	    .on("mouseout", info_out);
   }
 }
 
