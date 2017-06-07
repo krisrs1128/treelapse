@@ -124,7 +124,10 @@ function draw_ts(elem,
 
   d3.select(elem)
     .select("#mouseover > text")
-    .attr("font-size", 0);
+    .attr({
+      "font-size": 0,
+      "font-family": style_opts.font_family
+    });
 
   var search_lines = get_search_values(elem);
 
@@ -141,21 +144,23 @@ function draw_ts(elem,
     }
   }
 
-  d3.select("#ts_voronoi")
+  d3.select(elem)
+    .select("#ts_voronoi")
     .selectAll("path")
-    .remove()
+    .remove();
 
   // setup voronoi mouseover background
   var voronoi = d3.voronoi()
-      .x(function(d) { return scales.x(d.x) })
-      .y(function(d) { return scales.y(d.y) })
+      .x(function(d) { return scales.x(d.x); })
+      .y(function(d) { return scales.y(d.y); })
       .extent([[0, scales.y.range()[1]], [scales.x.range()[1], scales.y.range()[0]]]);
 
   var poly = voronoi(ts_points)
       .polygons()
       .filter(function(d) { return typeof(d) != "undefined"; });
 
-  var voronoi_paths = d3.select("#ts_voronoi")
+  var voronoi_paths = d3.select(elem)
+      .select("#ts_voronoi")
       .selectAll("path")
 	    .data(poly).enter()
       .append("path")
@@ -166,7 +171,9 @@ function draw_ts(elem,
       });
 
   if (mouseover_text) {
-    voronoi_paths.on("mouseover", function(d) { return info_over(d, scales); });
+    voronoi_paths.on("mouseover", function(d) {
+      return info_over(elem, d, scales);
+    });
   }
 }
 
@@ -250,11 +257,13 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales, tree_style
  * @side-effects Removes the current mouseover text and changes it to the new
  * voronoi cell's label.
  **/
-function info_over(d, scales) {
-  d3.select("#mouseover")
+function info_over(elem, d, scales) {
+  d3.select(elem)
+    .select("#mouseover")
     .selectAll("text")
     .remove();
-  d3.select("#mouseover")
+  d3.select(elem)
+    .select("#mouseover")
     .append("text")
     .text(d.data.data.id)
     .attrs({
@@ -331,28 +340,31 @@ function draw_tree(elem,
   );
 
   var voronoi = d3.voronoi()
-      .x(function(d) { return d.x })
-      .y(function(d) { return d.y })
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
       .extent([[0, 0], [scales.x.range()[1], scales.y.range()[1]]]);
 
   var poly = voronoi(nodes)
       .polygons()
-      .filter(function(d) { return typeof(d) != "undefined" });
+      .filter(function(d) { return typeof(d) != "undefined"; });
 
-  var voronoi_paths = d3.select("#tree_voronoi")
-    .selectAll("path")
-	  .data(poly).enter()
-    .append("path")
-    .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
-    .attrs({
-      "fill": "none",
-      "pointer-events": "all"
-    });
+  var voronoi_paths = d3.select(elem)
+      .select("#tree_voronoi")
+      .selectAll("path")
+	    .data(poly).enter()
+      .append("path")
+      .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
+      .attrs({
+        "fill": "none",
+        "pointer-events": "all"
+      });
 
   // display names on mouseover
   if (mouseover_text) {
-    id_scale = {"x": function(x) { return x;}, "y": function(x) { return x; }};
-    voronoi_paths.on("mouseover", function(d) { return info_over(d, id_scale); });
+    var id_scale = {"x": function(x) { return x;}, "y": function(x) { return x; }};
+    voronoi_paths.on("mouseover", function(d) {
+      return info_over(elem, d, id_scale);
+    });
   }
 }
 
@@ -697,7 +709,7 @@ function point_in_box(point, box_extent, scales) {
     return (x_domain.indexOf(point.time) >= x_domain.indexOf(box_extent.x_min)) &&
       (x_domain.indexOf(point.time) <= x_domain.indexOf(box_extent.x_max)) &&
       (point.value >= box_extent.y_min) &&
-      (point.value <= box_extent.y_max)
+      (point.value <= box_extent.y_max);
   }
   return (point.time >= box_extent.x_min) &&
     (point.time <= box_extent.x_max) &&
