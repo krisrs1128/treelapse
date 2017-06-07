@@ -14,11 +14,10 @@ bibliography: materials/antibiotic.bib
 ## Introduction ##
 
 
-```{r, setup}
+```{r setup}
 library("knitr")
-library("ggplot2")
 library("plyr")
-library("dplyr")
+library("tidyverse")
 library("phyloseq")
 library("treelapse")
 
@@ -78,7 +77,7 @@ different antibiotic time courses (Cp, for ciprofloxacin). Unfortunately, the
 treatments were not given at the same time for each person, see the figure
 below.
 
-```{r, sampling-times, out.width = "700px", out.height = "600px"}
+```{r, sampling-times}
 ggplot(mapping) +
   geom_tile(aes(x = time, y = ind, fill = condition)) +
   scale_fill_brewer(palette = "Set3")
@@ -91,7 +90,7 @@ Turning over to the RSV (microbial) abundances, we notice that the counts are
 highly skewed. We're finding that the vast majority of microbes have very small
 abundnaces.
 
-```{r, skewness, out.width = "700px", out.height = "600px"}
+```{r, skewness}
 hist(asinh(as(otu_table(abt), "matrix")), main = "Raw RSV Counts")
 ```
 
@@ -101,7 +100,7 @@ and work with `asinh` transformed counts[^The asinh transformation is like
 taking logs, but is less agressive at smaller values. This is evident from the
 representation, $asinh\left(x\right) = \log\left(x + \sqrt{1 + x^{t}}\right)].
 
-```{r, abt-transform, out.width = "700px", out.height = "600px"}
+```{r, abt-transform}
 abt <- abt %>%
   filter_taxa(function(x) sd(x) > 7.5, prune = TRUE) %>%
   transform_sample_counts(asinh)
