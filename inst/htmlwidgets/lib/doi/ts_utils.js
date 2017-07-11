@@ -421,6 +421,8 @@ function draw_ts_internal(elem,
 
   ts_selection.filter(function(d) { return cur_lines.indexOf(d) != -1; })
     .raise();
+  ts_selection.filter(function(d) { return search_lines.indexOf(d) != -1; })
+    .raise();
 
   ts_selection.exit().remove();
   ts_selection.enter()
@@ -452,18 +454,24 @@ function draw_ts_internal(elem,
 	      return ts_style.col_unselected;
       },
       "stroke-width": function(d) {
-	      if (cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
+	      if (cur_lines.indexOf(d) != -1) {
 	        return ts_style.width_selected;
 	      }
+        if (search_lines.indexOf(d) != -1) {
+          return ts_style.width_search;
+        }
 	      return ts_style.width_unselected;
       },
       "d": function(d) {
 	      return line_fun(pairs[d]);
       },
       "opacity": function(d) {
-	      if(cur_lines.indexOf(d) != -1 || search_lines.indexOf(d) != -1) {
+	      if(cur_lines.indexOf(d) != -1) {
 	        return ts_style.opacity_selected;
 	      }
+        if(search_lines.indexOf(d) != -1) {
+          return ts_style.opacity_search;
+        }
 	      return ts_style.opacity_unselected;
       }
     });
