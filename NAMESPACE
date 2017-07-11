@@ -2,9 +2,12 @@
 
 export(doi_sankey)
 export(doi_tree)
+export(draw_combined)
+export(draw_combined_output)
 export(get_root)
 export(merge_doi_style)
 export(merge_timebox_style)
+export(render_draw_combined)
 export(render_timebox_tree)
 export(render_treebox)
 export(taxa_edgelist)

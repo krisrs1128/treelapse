@@ -123,7 +123,13 @@ function draw_ts(elem,
   );
 
   d3.select(elem)
-    .select("#mouseover > text")
+    .select("#tree_mouseover > text")
+    .attr({
+      "font-size": 0,
+      "font-family": style_opts.font_family
+    });
+  d3.select(elem)
+    .select("#ts_mouseover > text")
     .attr({
       "font-size": 0,
       "font-family": style_opts.font_family
@@ -155,6 +161,7 @@ function draw_ts(elem,
       .y(function(d) { return scales.y(d.y); })
       .extent([[0, scales.y.range()[1]], [scales.x.range()[1], scales.y.range()[0]]]);
 
+  console.log(ts_points)
   var poly = voronoi(ts_points)
       .polygons()
       .filter(function(d) { return typeof(d) != "undefined"; });
@@ -171,8 +178,14 @@ function draw_ts(elem,
       });
 
   if (mouseover_text) {
+    console.log(mouseover_text)
     voronoi_paths.on("mouseover", function(d) {
-      return info_over(elem, d, scales);
+      console.log(d);
+      return info_over(
+        d3.select(elem).select("#ts_mouseover"),
+        d,
+        scales
+      );
     });
   }
 }
@@ -257,14 +270,10 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales, tree_style
  * @side-effects Removes the current mouseover text and changes it to the new
  * voronoi cell's label.
  **/
-function info_over(elem, d, scales) {
-  d3.select(elem)
-    .select("#mouseover")
-    .selectAll("text")
+function info_over(text_elem, d, scales) {
+  text_elem.selectAll("text")
     .remove();
-  d3.select(elem)
-    .select("#mouseover")
-    .append("text")
+  text_elem.append("text")
     .text(d.data.data.id)
     .attrs({
       "transform": "translate(" + scales.x(d.data.x) + "," + scales.y(d.data.y) + ")"
@@ -363,7 +372,11 @@ function draw_tree(elem,
   if (mouseover_text) {
     var id_scale = {"x": function(x) { return x;}, "y": function(x) { return x; }};
     voronoi_paths.on("mouseover", function(d) {
-      return info_over(elem, d, id_scale);
+      return info_over(
+        d3.select(elem).select("#tree_mouseover"),
+        d,
+        id_scale
+      );
     });
   }
 }

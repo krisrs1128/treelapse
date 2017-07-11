@@ -23,9 +23,8 @@ function setup_tree_ts(elem, width, height, style_opts) {
   setup_background(elem, width, height, style_opts.col_background);
   setup_groups(
     d3.select(elem).select("svg"),
-    ["all_ts"]
+    ["ts_brushes", "all_ts"]
   );
-
   var tree_y_border = style_opts.margin.top +
       style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top);
 
@@ -53,13 +52,31 @@ function setup_tree_ts(elem, width, height, style_opts) {
   );
   setup_groups(
     d3.select(elem).select("svg"),
-    ["zoom_ts", "links", "nodes", "tree_voronoi", "ts_voronoi", "ts_brushes",
-     "zoom_brush", "mouseover"]
+    ["zoom_ts", "links", "nodes", "tree_voronoi", "ts_voronoi",
+     "zoom_brush", "tree_mouseover", "ts_mouseover"]
   );
 
   d3.select(elem)
-    .select("#mouseover")
+    .select("#tree_mouseover")
     .append("text");
+  d3.select(elem)
+    .select("#ts_mouseover")
+    .append("text");
+
+  d3.select(elem)
+    .on("mousedown", function(d) {
+      console.log("mousedown")
+      d3.select(elem)
+        .select("#ts_brushes")
+        .raise();
+    });
+  // d3.select(elem)
+  //   .on("mouseup", function(d) {
+  //     console.log("mouseup")
+  //     d3.select(elem)
+  //       .select("#ts_voronoi")
+  //       .raise();
+  //   });
 }
 
 /**
@@ -440,6 +457,13 @@ function treebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false, style_opts);
 }
 
+function combined_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
+  update_axes(elem, scales, style_opts);
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, true, style_opts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true, style_opts);
+}
+
 /**
  * Identify which time series are selected (by either Time or Treeboxes)
  *
@@ -579,13 +603,13 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
 function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
   var brush = d3.brush()
       .on("brush", function() {
-	brush_fun(
-	  elem,
-	  pairs,
-	  scales,
-	  update_fun,
-	  combine_fun
-	);
+	      brush_fun(
+	        elem,
+	        pairs,
+	        scales,
+	        update_fun,
+	        combine_fun
+	      );
       })
       .extent(extent);
 
@@ -694,7 +718,7 @@ function draw_combined(elem, width, height, values, tree, style_opts) {
   setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
-    timebox_update,
+    combined_update,
     elem,
     reshaped,
     tree,
@@ -761,5 +785,5 @@ function draw_combined(elem, width, height, values, tree, style_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, reshaped, tree, [], scales, style_opts);
+  combined_update(elem, reshaped, tree, [], scales, style_opts);
 }
