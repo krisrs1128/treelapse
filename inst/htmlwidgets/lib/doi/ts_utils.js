@@ -161,7 +161,6 @@ function draw_ts(elem,
       .y(function(d) { return scales.y(d.y); })
       .extent([[0, scales.y.range()[1]], [scales.x.range()[1], scales.y.range()[0]]]);
 
-  console.log(ts_points)
   var poly = voronoi(ts_points)
       .polygons()
       .filter(function(d) { return typeof(d) != "undefined"; });
@@ -178,9 +177,7 @@ function draw_ts(elem,
       });
 
   if (mouseover_text) {
-    console.log(mouseover_text)
     voronoi_paths.on("mouseover", function(d) {
-      console.log(d);
       return info_over(
         d3.select(elem).select("#ts_mouseover"),
         d,

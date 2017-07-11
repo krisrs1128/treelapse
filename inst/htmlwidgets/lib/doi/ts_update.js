@@ -67,16 +67,20 @@ function setup_tree_ts(elem, width, height, style_opts) {
     .on("mousedown", function(d) {
       console.log("mousedown")
       d3.select(elem)
-        .select("#ts_brushes")
-        .raise();
+        .select("#ts_voronoi")
+        .selectAll("path")
+        .attrs({"pointer-events": "none"});
     });
-  // d3.select(elem)
-  //   .on("mouseup", function(d) {
-  //     console.log("mouseup")
-  //     d3.select(elem)
-  //       .select("#ts_voronoi")
-  //       .raise();
-  //   });
+  d3.select(elem)
+    .on("mouseup", function(d) {
+      console.log("mouseup")
+      d3.select(elem)
+        .select("#ts_voronoi")
+        .transition()
+        .delay(100)
+        .selectAll("path")
+        .attrs({"pointer-events": "all"});
+    });
 }
 
 /**
