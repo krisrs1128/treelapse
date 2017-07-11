@@ -47,8 +47,10 @@ merge_timebox_style<- function(opts) {
       "col_search" = "#C2571A",
       "width_unselected" = 1,
       "width_selected" = 2,
+      "width_search" = 3,
       "opacity_unselected" = 0.1,
-      "opacity_selected" = 0.9
+      "opacity_selected" = 0.9,
+      "opacity_search" = 1
     )
   )
   modifyList(default_opts, opts)
