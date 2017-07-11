@@ -658,3 +658,108 @@ function remove_brush(elem, pairs, scales, update_fun, combine_fun) {
     combine_fun
   );
 }
+
+/**
+ * Setup and draw the initial timeboxes display
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {float} width The width of the display's rectangle background.
+ * @param {float} height The height the display's rectangle background.
+ * @param {object} values An object with two subarrays,
+ *       - time {array of float} The times associated with Tree nodes.
+ *       - value {array of float} The y values associated with Tree nodes.
+ *       - unit {array of string} The node names associated with values.
+ *     The i^th element in each of the three arrays correspond to the same
+ *     entity.
+ * @param tree {Tree} A tree object (actually, a properly nested JSON would
+ *     suffice) on which we can call d3.hierarchy to compute the layout.
+ * @param {float} size_min The minimum size (in pixels) of any node.
+ * @param {float} size_max The maximum size (in pixels) of any node.
+ * @return null
+ * @side-effects Sets up the time series and tree associated with the timebox
+ *     display.
+ **/
+function draw_combined(elem, width, height, values, tree, style_opts) {
+  var scales = get_scales(
+    values,
+    width,
+    height,
+    style_opts
+  );
+  setup_tree_ts(elem, width, height, style_opts);
+  draw_axes(elem, scales, style_opts);
+
+  var reshaped = get_reshaped_values(values);
+  setup_search(elem, Object.keys(reshaped.dvalues));
+
+  var update_fun = update_factory(
+    timebox_update,
+    elem,
+    reshaped,
+    tree,
+    [],
+    scales,
+    style_opts
+  );
+
+  // add brush in top right for zooming
+  var zoom_brush = d3.brush()
+      .on("brush", function() {
+	      zoom_brush_fun(
+	        elem,
+	        reshaped.pairs,
+	        scales,
+	        update_fun,
+	        brush_ts_intersection
+	      );
+      })
+      .extent([
+        [scales.zoom_x.range()[0], scales.zoom_y.range()[1]],
+        [scales.zoom_x.range()[1], scales.zoom_y.range()[0]]
+      ]);
+
+  d3.select(elem)
+    .select("#zoom_brush")
+    .append("g")
+    .classed("zoom_brush", "true")
+    .call(zoom_brush);
+
+  // draw main brush for selecting series
+  var brush_extent = [
+    [scales.x.range()[0], scales.y.range()[1]],
+    [scales.x.range()[1], scales.y.range()[0]]
+  ];
+
+  function add_fun() {
+    new_brush(
+      elem,
+      reshaped.pairs,
+      scales,
+      update_fun,
+      brush_extent,
+      brush_ts_intersection
+    );
+  }
+
+  function remove_fun() {
+    remove_brush(
+      elem,
+      reshaped.pairs,
+      scales,
+      update_fun,
+      brush_ts_intersection
+    );
+  }
+
+  // draw search box
+  var search_id = "#search_box-" + d3.select(elem).attr("id");
+  $(search_id).change(function() {
+    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_ts_intersection);
+  });
+
+  add_button(elem, "new box", add_fun);
+  add_button(elem, "change focus", function() { return change_focus(elem); });
+  add_button(elem, "remove box", remove_fun);
+  timebox_update(elem, reshaped, tree, [], scales, style_opts);
+}
