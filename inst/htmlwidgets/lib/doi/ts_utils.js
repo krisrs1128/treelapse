@@ -124,8 +124,8 @@ function draw_ts(elem,
 
   d3.select(elem)
     .select("#mouseover > text")
-    .attr({
-      "font-size": 0,
+    .attrs({
+      "font-size": style_opts.mouseover_font_size,
       "font-family": style_opts.font_family
     });
 
@@ -260,15 +260,10 @@ function timebox_node_attrs(dvalues, cur_lines, search_lines, scales, tree_style
 function info_over(elem, d, scales) {
   d3.select(elem)
     .select("#mouseover")
-    .selectAll("text")
-    .remove();
+    .attr("transform", "translate(" + scales.x(d.data.x) + "," + scales.y(d.data.y) + ")");
   d3.select(elem)
-    .select("#mouseover")
-    .append("text")
-    .text(d.data.data.id)
-    .attrs({
-      "transform": "translate(" + scales.x(d.data.x) + "," + scales.y(d.data.y) + ")"
-    });
+    .select("#mouseover > text")
+    .text(d.data.data.id);
 }
 
 /**
