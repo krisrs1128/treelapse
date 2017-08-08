@@ -1,11 +1,18 @@
-#' <Add Title>
+#' Create Timebox Trees
 #'
-#' <Add Description>
+#' Timebox trees provide a way of linking time series and tree views, where
+#' selections are made along the time series.
+#' 
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @importFrom dplyr arrange select left_join group_by summarise
 #' @importFrom magrittr %>%
 #' @export
+#' @examples
+#' data(sim_edges)
+#' data(sim_data)
+#' style_opts <- list("size_min" = 1)
+#' timebox_tree(sim_data, sim_edges, style_opts = style_opts)
 timebox_tree <- function(values,
                          edges,
                          width = NULL,
