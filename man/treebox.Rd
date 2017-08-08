@@ -2,11 +2,21 @@
 % Please edit documentation in R/treebox.R
 \name{treebox}
 \alias{treebox}
-\title{<Add Title>}
+\title{Create treeboxes}
 \usage{
 treebox(values, edges, width = NULL, height = NULL, style_opts = list())
 }
 \description{
+Treeboxes provide a way of linking time series and tree views, where
+selections are made along the tree.
+}
+\details{
 <Add Description>
+}
+\examples{
+data(sim_edges)
+data(sim_data)
+style_opts <- list("size_min" = 1)
+treebox(sim_data, sim_edges, style_opts = style_opts)
 }
 

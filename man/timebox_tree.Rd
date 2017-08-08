@@ -8,7 +8,8 @@ timebox_tree(values, edges, width = NULL, height = NULL,
   style_opts = list())
 }
 \description{
-Timebox trees provide a way of linking time series and tree views.
+Timebox trees provide a way of linking time series and tree views, where
+selections are made along the time series.
 }
 \examples{
 data(sim_edges)
