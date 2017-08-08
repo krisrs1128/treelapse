@@ -16,7 +16,6 @@ bibliography: materials/antibiotic.bib
 
 ```{r setup}
 library("knitr")
-library("plyr")
 library("tidyverse")
 library("phyloseq")
 library("treelapse")
@@ -35,6 +34,7 @@ min_theme <- theme_update(
   strip.text = element_text(size = 8),
   legend.key = element_blank()
 )
+opts_chunk$set("fig.width" = 6.5, "fig.height" = 3.5)
 
 data(abt)
 ```
