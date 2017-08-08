@@ -82,7 +82,7 @@ tip_values <- zillow %>%
 
 values <- tree_fun_multi(
   edges,
-  log(as.matrix(tip_values[, -1, with = F])),
+  log(as.matrix(tip_values[, -1, with = F]), 10),
   tree_mean
 )
 
