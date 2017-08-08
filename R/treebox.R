@@ -1,4 +1,7 @@
-#' <Add Title>
+#' Create treeboxes
+#'
+#' Treeboxes provide a way of linking time series and tree views, where
+#' selections are made along the tree.
 #'
 #' <Add Description>
 #' @import htmlwidgets
@@ -6,6 +9,11 @@
 #' @importFrom dplyr arrange select left_join group_by summarise
 #' @importFrom magrittr %>%
 #' @export
+#' @examples
+#' data(sim_edges)
+#' data(sim_data)
+#' style_opts <- list("size_min" = 1)
+#' treebox(sim_data, sim_edges, style_opts = style_opts)
 treebox <- function(values,
                     edges,
                     width = NULL,

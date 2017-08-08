@@ -2,12 +2,18 @@
 % Please edit documentation in R/timebox_tree.R
 \name{timebox_tree}
 \alias{timebox_tree}
-\title{<Add Title>}
+\title{Create Timebox Trees}
 \usage{
 timebox_tree(values, edges, width = NULL, height = NULL,
   style_opts = list())
 }
 \description{
-<Add Description>
+Timebox trees provide a way of linking time series and tree views.
+}
+\examples{
+data(sim_edges)
+data(sim_data)
+style_opts <- list("size_min" = 1)
+timebox_tree(sim_data, sim_edges, style_opts = style_opts)
 }
 
