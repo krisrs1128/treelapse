@@ -414,7 +414,6 @@ function draw_ts_internal(elem,
       })
       .y(function(d) { return scales.y(d.value); });
   var units = Object.keys(pairs);
-  console.log(units);
 
   // brushed over lines
   var ts_selection = d3.select(elem)

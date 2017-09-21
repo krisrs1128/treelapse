@@ -365,9 +365,24 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
 function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   update_axes(elem, scales, style_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
-  draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
   var layout = tree_layout(tree, elem, style_opts);
   draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, true, style_opts);
+
+  var depth_three = layout.nodes.filter(
+    function(d) {
+      return d.depth == 3
+    }).map(
+      function(d) {
+        return d.data.id;
+      });
+
+  reshaped.pairs_subset = {};
+  var keys = Object.keys(reshaped.pairs);
+  for (var i = 0; i < depth_three.length; i++) {
+    reshaped.pairs_subset[depth_three[i]] = reshaped.pairs[depth_three[i]];
+  }
+
+  draw_ts(elem, reshaped.pairs_subset, cur_lines, scales, false, style_opts);
 }
 
 /**
