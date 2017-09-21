@@ -220,7 +220,7 @@ function get_line_data(values, cur_unit) {
  *       - {dvalues} A object of arrays keyed by series IDs and giving y-values
  *                   for each series.
  **/
-function get_reshaped_values(values) {
+function get_reshaped_values(values, display_ts) {
   var reshaped = {
     "values": values,
     "pairs": {},
@@ -229,8 +229,11 @@ function get_reshaped_values(values) {
 
   var units = d3.set(values.unit).values();
   for (var i = 0; i < units.length; i++) {
-    reshaped.pairs[units[i]] = get_line_data(values, units[i]);
-    reshaped.dvalues[units[i]] = reshaped.pairs[units[i]].map(
+    var line_data = get_line_data(values, units[i]);
+    if (display_ts.indexOf(units[i]) != -1) {
+      reshaped.pairs[units[i]] = line_data;
+    }
+    reshaped.dvalues[units[i]] = line_data.map(
       function(d) { return d.value; }
     );
   }
@@ -269,14 +272,23 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
   setup_tree_ts(elem, width, height, style_opts);
   draw_axes(elem, scales, style_opts);
 
-  var reshaped = get_reshaped_values(values);
+  var layout = tree_layout(tree, elem, style_opts);
+  var depth_three = layout.nodes.filter(
+    function(d) {
+      return d.depth == 3
+    }).map(
+      function(d) {
+        return d.data.id;
+      });
+
+  var reshaped = get_reshaped_values(values, depth_three);
   setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     timebox_update,
     elem,
     reshaped,
-    tree,
+    layout,
     [],
     scales,
     style_opts
@@ -340,7 +352,7 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, reshaped, tree, [], scales, style_opts);
+  timebox_update(elem, reshaped, layout, [], scales, style_opts);
 }
 
 /**
@@ -362,27 +374,11 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
+function timebox_update(elem, reshaped, layout, cur_lines, scales, style_opts) {
   update_axes(elem, scales, style_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
-  var layout = tree_layout(tree, elem, style_opts);
   draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, true, style_opts);
-
-  var depth_three = layout.nodes.filter(
-    function(d) {
-      return d.depth == 3
-    }).map(
-      function(d) {
-        return d.data.id;
-      });
-
-  reshaped.pairs_subset = {};
-  var keys = Object.keys(reshaped.pairs);
-  for (var i = 0; i < depth_three.length; i++) {
-    reshaped.pairs_subset[depth_three[i]] = reshaped.pairs[depth_three[i]];
-  }
-
-  draw_ts(elem, reshaped.pairs_subset, cur_lines, scales, false, style_opts);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
 }
 
 /**
