@@ -366,7 +366,8 @@ function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
   update_axes(elem, scales, style_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
-  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true, style_opts);
+  var layout = tree_layout(tree, elem, style_opts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, true, style_opts);
 }
 
 /**

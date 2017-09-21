@@ -266,6 +266,32 @@ function info_over(elem, d, scales) {
     .text(d.data.data.id);
 }
 
+function tree_layout(tree, elem, style_opts) {
+  var hierarchy = d3.hierarchy(tree);
+  var width = d3.select(elem).select("svg").attr("width");
+  var height = d3.select(elem).select("svg").attr("height");
+
+  // width + height info are in the scales
+  var cluster = d3.tree()
+      .size([
+        0.95 * (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
+        0.95 * style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top)
+      ]);
+  var layout = cluster(hierarchy);
+
+  // translate nodes according to margins
+  var nodes = layout.descendants();
+  nodes.forEach(function(n) {
+    n.y += style_opts.margin.top;
+    n.x += style_opts.margin.tree_left;
+  });
+
+  return {
+    "nodes": nodes,
+    "links": layout.links()
+  };
+}
+
 /**
  * Draw the static tree associated with a tree object
  *
@@ -291,33 +317,14 @@ function info_over(elem, d, scales) {
 function draw_tree(elem,
                    dvalues,
                    cur_lines,
-                   tree,
+                   layout,
                    scales,
                    mouseover_text,
                    style_opts) {
-  var hierarchy = d3.hierarchy(tree);
-  var width = d3.select(elem).select("svg").attr("width");
-  var height = d3.select(elem).select("svg").attr("height");
-
-  // width + height info are in the scales
-  var cluster = d3.tree()
-      .size([
-        0.95 * (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
-        0.95 * style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top)
-      ]);
-  var layout = cluster(hierarchy);
-
-  // translate nodes according to margins
-  var nodes = layout.descendants();
-  nodes.forEach(function(n) {
-    n.y += style_opts.margin.top;
-    n.x += style_opts.margin.tree_left;
-  });
-
   selection_update(
     "path",
     d3.select(elem).select("#links"),
-    layout.links(),
+    layout.links,
     "tree_link",
     timebox_link_attrs(dvalues, cur_lines, scales, style_opts.tree),
     100
@@ -328,7 +335,7 @@ function draw_tree(elem,
   selection_update(
     "circle",
     d3.select(elem).select("#nodes"),
-    nodes,
+    layout.nodes,
     "tree_node",
     timebox_node_attrs(dvalues, cur_lines, search_lines, scales, style_opts.tree),
     100
@@ -339,7 +346,7 @@ function draw_tree(elem,
       .y(function(d) { return d.y; })
       .extent([[0, 0], [scales.x.range()[1], scales.y.range()[1]]]);
 
-  var poly = voronoi(nodes)
+  var poly = voronoi(layout.nodes)
       .polygons()
       .filter(function(d) { return typeof(d) != "undefined"; });
 
@@ -407,6 +414,7 @@ function draw_ts_internal(elem,
       })
       .y(function(d) { return scales.y(d.value); });
   var units = Object.keys(pairs);
+  console.log(units);
 
   // brushed over lines
   var ts_selection = d3.select(elem)
