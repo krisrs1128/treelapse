@@ -12,13 +12,13 @@
 #' @examples
 #' data(sim_edges)
 #' data(sim_data)
-#' style_opts <- list("size_min" = 1)
-#' treebox(sim_data, sim_edges, style_opts = style_opts)
+#' display_opts <- list("size_min" = 1)
+#' treebox(sim_data, sim_edges, display_opts = display_opts)
 treebox <- function(values,
                     edges,
                     width = NULL,
                     height = NULL,
-                    style_opts = list()) {
+                    display_opts = list()) {
   root <- get_root(edges)
   edges <- edges %>%
     merge_edge_values(values)
@@ -28,7 +28,7 @@ treebox <- function(values,
     values,
     root,
     edges,
-    merge_timebox_style(style_opts)
+    merge_timebox_display(display_opts)
   )
 
   # create widget

@@ -93,14 +93,21 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
   setup_tree_ts(elem, width, height, display_opts);
   draw_axes(elem, scales, display_opts);
 
-  var reshaped = get_reshaped_values(values);
+  var layout = tree_layout(tree, elem, display_opts);
+  var keep_ids = ts_display_subset(
+    layout.nodes,
+    display_opts.ts.min_depth,
+    display_opts.ts.max_depth,
+    display_opts.ts.leaves_only
+  );
+  var reshaped = get_reshaped_values(values, keep_ids);
   setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     treebox_update,
     elem,
     reshaped,
-    tree,
+    layout,
     [],
     scales,
     display_opts
@@ -168,7 +175,7 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  treebox_update(elem, reshaped, tree, [], scales, display_opts);
+  treebox_update(elem, reshaped, layout, [], scales, display_opts);
 }
 
 /**
@@ -452,11 +459,11 @@ function update_factory(base_fun,
  * @side_effects Redraws the tree and time series in the treebox display in
  *     order to highlight the currently selected IDs.
  **/
-function treebox_update(elem, reshaped, tree, cur_lines, scales, display_opts) {
+function treebox_update(elem, reshaped, layout, cur_lines, scales, display_opts) {
   update_axes(elem, scales, display_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales, display_opts.ts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, false, display_opts);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true, display_opts);
-  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false, display_opts);
 }
 
 /**
