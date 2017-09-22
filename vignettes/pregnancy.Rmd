@@ -80,7 +80,7 @@ doi_sankey(
   "Bacteria",
   900,
   300,
-  style_opts = list(
+  display_opts = list(
     "focus_font_size" = 20,
     "font_size" = 15,
     "leaf_width" = 37,
@@ -123,7 +123,7 @@ doi_sankey(
   "Bacteria",
   900,
   300,
-  style_opts = list(
+  display_opts = list(
     "focus_font_size" = 20,
     "font_size" = 15,
     "leaf_width" = 37,

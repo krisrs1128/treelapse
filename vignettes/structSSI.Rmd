@@ -90,7 +90,7 @@ timebox_tree(
   el,
   height = 350,
   width = 450,
-  style_opts = list(
+  display_opts = list(
     "axis_font_size" = 11,
     "n_ticks_y" = 2
   )

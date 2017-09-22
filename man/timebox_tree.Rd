@@ -5,7 +5,7 @@
 \title{Create Timebox Trees}
 \usage{
 timebox_tree(values, edges, width = NULL, height = NULL,
-  style_opts = list())
+  display_opts = list())
 }
 \description{
 Timebox trees provide a way of linking time series and tree views, where
@@ -14,7 +14,7 @@ selections are made along the time series.
 \examples{
 data(sim_edges)
 data(sim_data)
-style_opts <- list("size_min" = 1)
-timebox_tree(sim_data, sim_edges, style_opts = style_opts)
+display_opts <- list("size_min" = 1)
+timebox_tree(sim_data, sim_edges, display_opts = display_opts)
 }
 

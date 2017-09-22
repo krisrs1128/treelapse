@@ -18,26 +18,26 @@
  *     treeboxes. This includes the background rectangle and the group elements
  *     for the underlying tree and time series displays.
  **/
-function setup_tree_ts(elem, width, height, style_opts) {
+function setup_tree_ts(elem, width, height, display_opts) {
   d3.select(elem).selectAll("*").remove();
-  setup_background(elem, width, height, style_opts.col_background);
+  setup_background(elem, width, height, display_opts.col_background);
   setup_groups(
     d3.select(elem).select("svg"),
     ["all_ts"]
   );
 
-  var tree_y_border = style_opts.margin.top +
-      style_opts.tree.frac * (height - style_opts.margin.bottom - style_opts.margin.top);
+  var tree_y_border = display_opts.margin.top +
+      display_opts.tree.frac * (height - display_opts.margin.bottom - display_opts.margin.top);
 
-  draw_rect(elem, style_opts.margin.ts_left, height, "y_axis_backdrop", style_opts.col_background);
-  draw_rect(elem, width, style_opts.margin.bottom, "x_axis_backdrop", style_opts.col_background);
-  draw_rect(elem, style_opts.margin.ts_right, height - tree_y_border, "ts_right_backdrop", style_opts.col_background);
+  draw_rect(elem, display_opts.margin.ts_left, height, "y_axis_backdrop", display_opts.col_background);
+  draw_rect(elem, width, display_opts.margin.bottom, "x_axis_backdrop", display_opts.col_background);
+  draw_rect(elem, display_opts.margin.ts_right, height - tree_y_border, "ts_right_backdrop", display_opts.col_background);
   d3.select(elem)
     .select("#x_axis_backdrop")
-    .attr("transform", "translate(0, " + (height - style_opts.margin.bottom) + ")");
+    .attr("transform", "translate(0, " + (height - display_opts.margin.bottom) + ")");
   d3.select(elem)
     .select("#ts_right_backdrop")
-    .attr("transform", "translate(" + (width - style_opts.margin.ts_right) + ", " + tree_y_border + ")");
+    .attr("transform", "translate(" + (width - display_opts.margin.ts_right) + ", " + tree_y_border + ")");
 
   setup_groups(
     d3.select(elem).select("svg"),
@@ -49,7 +49,7 @@ function setup_tree_ts(elem, width, height, style_opts) {
     width,
     tree_y_border,
     "tree_backdrop",
-    style_opts.col_background
+    display_opts.col_background
   );
   setup_groups(
     d3.select(elem).select("svg"),
@@ -83,27 +83,34 @@ function setup_tree_ts(elem, width, height, style_opts) {
  * @side-effects Sets up the time series and tree associated with the treebox
  *     display.
  **/
-function draw_treebox(elem, width, height, values, tree, style_opts) {
+function draw_treebox(elem, width, height, values, tree, display_opts) {
   var scales = get_scales(
     values,
     width,
     height,
-    style_opts
+    display_opts
   );
-  setup_tree_ts(elem, width, height, style_opts);
-  draw_axes(elem, scales, style_opts);
+  setup_tree_ts(elem, width, height, display_opts);
+  draw_axes(elem, scales, display_opts);
 
-  var reshaped = get_reshaped_values(values);
+  var layout = tree_layout(tree, elem, display_opts);
+  var keep_ids = ts_display_subset(
+    layout.nodes,
+    display_opts.ts.min_depth,
+    display_opts.ts.max_depth,
+    display_opts.ts.leaves_only
+  );
+  var reshaped = get_reshaped_values(values, keep_ids);
   setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     treebox_update,
     elem,
     reshaped,
-    tree,
+    layout,
     [],
     scales,
-    style_opts
+    display_opts
   );
 
   // add brush in top right for zooming
@@ -130,11 +137,11 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
 
   // draw main brush for selecting tree nodes
   var brush_extent = [
-    [style_opts.margin.tree_left, style_opts.margin.top],
+    [display_opts.margin.tree_left, display_opts.margin.top],
     [
-      (1 - style_opts.scent_frac.width) * (width - style_opts.margin.tree_left - style_opts.margin.tree_right),
-      style_opts.margin.top +
-        (style_opts.tree.frac) * (height - style_opts.margin.top - style_opts.margin.bottom)
+      (1 - display_opts.scent_frac.width) * (width - display_opts.margin.tree_left - display_opts.margin.tree_right),
+      display_opts.margin.top +
+        (display_opts.tree.frac) * (height - display_opts.margin.top - display_opts.margin.bottom)
     ]
   ];
 
@@ -168,7 +175,7 @@ function draw_treebox(elem, width, height, values, tree, style_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  treebox_update(elem, reshaped, tree, [], scales, style_opts);
+  treebox_update(elem, reshaped, layout, [], scales, display_opts);
 }
 
 /**
@@ -220,7 +227,7 @@ function get_line_data(values, cur_unit) {
  *       - {dvalues} A object of arrays keyed by series IDs and giving y-values
  *                   for each series.
  **/
-function get_reshaped_values(values) {
+function get_reshaped_values(values, display_ts) {
   var reshaped = {
     "values": values,
     "pairs": {},
@@ -229,8 +236,11 @@ function get_reshaped_values(values) {
 
   var units = d3.set(values.unit).values();
   for (var i = 0; i < units.length; i++) {
-    reshaped.pairs[units[i]] = get_line_data(values, units[i]);
-    reshaped.dvalues[units[i]] = reshaped.pairs[units[i]].map(
+    var line_data = get_line_data(values, units[i]);
+    if (display_ts.indexOf(units[i]) != -1) {
+      reshaped.pairs[units[i]] = line_data;
+    }
+    reshaped.dvalues[units[i]] = line_data.map(
       function(d) { return d.value; }
     );
   }
@@ -259,27 +269,43 @@ function get_reshaped_values(values) {
  * @side-effects Sets up the time series and tree associated with the timebox
  *     display.
  **/
-function draw_timebox(elem, width, height, values, tree, style_opts) {
+function draw_timebox(elem, width, height, values, tree, display_opts) {
   var scales = get_scales(
     values,
     width,
     height,
-    style_opts
+    display_opts
   );
-  setup_tree_ts(elem, width, height, style_opts);
-  draw_axes(elem, scales, style_opts);
+  setup_tree_ts(elem, width, height, display_opts);
+  draw_axes(elem, scales, display_opts);
 
-  var reshaped = get_reshaped_values(values);
+  var layout = tree_layout(tree, elem, display_opts);
+  var keep_ids = ts_display_subset(
+    layout.nodes,
+    display_opts.ts.min_depth,
+    display_opts.ts.max_depth,
+    display_opts.ts.leaves_only
+  );
+
+      layout.nodes.filter(
+    function(d) {
+      return d.depth == 3
+    }).map(
+      function(d) {
+        return d.data.id;
+      });
+
+  var reshaped = get_reshaped_values(values, keep_ids);
   setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
     timebox_update,
     elem,
     reshaped,
-    tree,
+    layout,
     [],
     scales,
-    style_opts
+    display_opts
   );
 
   // add brush in top right for zooming
@@ -340,7 +366,7 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  timebox_update(elem, reshaped, tree, [], scales, style_opts);
+  timebox_update(elem, reshaped, layout, [], scales, display_opts);
 }
 
 /**
@@ -362,11 +388,11 @@ function draw_timebox(elem, width, height, values, tree, style_opts) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
-  update_axes(elem, scales, style_opts);
-  draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
-  draw_ts(elem, reshaped.pairs, cur_lines, scales, false, style_opts);
-  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, true, style_opts);
+function timebox_update(elem, reshaped, layout, cur_lines, scales, display_opts) {
+  update_axes(elem, scales, display_opts);
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales, display_opts.ts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, true, display_opts);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, false, display_opts);
 }
 
 /**
@@ -397,7 +423,7 @@ function update_factory(base_fun,
                         tree,
                         cur_lines,
                         cur_scales,
-                        style_opts) {
+                        display_opts) {
   function f(cur_lines, cur_scales) {
     base_fun(
       elem,
@@ -405,7 +431,7 @@ function update_factory(base_fun,
       tree,
       cur_lines,
       cur_scales,
-      style_opts
+      display_opts
     );
   }
 
@@ -433,11 +459,11 @@ function update_factory(base_fun,
  * @side_effects Redraws the tree and time series in the treebox display in
  *     order to highlight the currently selected IDs.
  **/
-function treebox_update(elem, reshaped, tree, cur_lines, scales, style_opts) {
-  update_axes(elem, scales, style_opts);
-  draw_zoom(elem, reshaped.pairs, cur_lines, scales, style_opts.ts);
-  draw_ts(elem, reshaped.pairs, cur_lines, scales, true, style_opts);
-  draw_tree(elem, reshaped.dvalues, cur_lines, tree, scales, false, style_opts);
+function treebox_update(elem, reshaped, layout, cur_lines, scales, display_opts) {
+  update_axes(elem, scales, display_opts);
+  draw_zoom(elem, reshaped.pairs, cur_lines, scales, display_opts.ts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, false, display_opts);
+  draw_ts(elem, reshaped.pairs, cur_lines, scales, true, display_opts);
 }
 
 /**

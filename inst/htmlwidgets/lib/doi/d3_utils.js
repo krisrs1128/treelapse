@@ -37,10 +37,10 @@ function setup_background(elem, width, height, fill) {
  * @return null
  * @side-effects Draws x and y axes on group elements #x_axis and #y_axis
  **/
-function draw_axes(elem, scales, style_opts) {
+function draw_axes(elem, scales, display_opts) {
   x_axis = d3.axisBottom(scales.x)
-    .ticks(style_opts.n_ticks_x)
-    .tickSize(style_opts.tick_size);
+    .ticks(display_opts.n_ticks_x)
+    .tickSize(display_opts.tick_size);
   d3.select(elem)
     .select("#x_axis")
     .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
@@ -48,16 +48,16 @@ function draw_axes(elem, scales, style_opts) {
   d3.select(elem)
     .selectAll("#x_axis > .tick > text")
     .attrs({
-      "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family,
-      "text-anchor": style_opts.axis_text_anchor,
-      "transform": "rotate("+ style_opts.x_axis_rotation + ")"
+      "font-size": display_opts.axis_font_size,
+      "font-family": display_opts.font_family,
+      "text-anchor": display_opts.axis_text_anchor,
+      "transform": "rotate("+ display_opts.x_axis_rotation + ")"
     });
 
   // almost same, for y-axis now
   y_axis = d3.axisLeft(scales.y)
-    .ticks(style_opts.n_ticks_y)
-    .tickSize(style_opts.tick_size);
+    .ticks(display_opts.n_ticks_y)
+    .tickSize(display_opts.tick_size);
   d3.select(elem)
     .select("#y_axis")
     .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
@@ -65,9 +65,9 @@ function draw_axes(elem, scales, style_opts) {
   d3.select(elem)
     .selectAll("#y_axis > .tick > text")
     .attrs({
-      "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family,
-      "transform": "rotate("+ style_opts.y_axis_rotation + ")"
+      "font-size": display_opts.axis_font_size,
+      "font-family": display_opts.font_family,
+      "transform": "rotate("+ display_opts.y_axis_rotation + ")"
     });
 }
 
@@ -83,10 +83,10 @@ function draw_axes(elem, scales, style_opts) {
  * @side-effects Updates x and y axes on group elements #x_axis and #y_axis
  *     to reflect the new scales.
  **/
-function update_axes(elem, scales, style_opts) {
+function update_axes(elem, scales, display_opts) {
   x_axis = d3.axisBottom(scales.x)
-    .ticks(style_opts.n_ticks_x)
-    .tickSize(style_opts.tick_size);
+    .ticks(display_opts.n_ticks_x)
+    .tickSize(display_opts.tick_size);
   d3.select(elem)
     .select("#x_axis")
     .attr("transform", "translate(0, " + scales.y.range()[0] + ")")
@@ -96,15 +96,15 @@ function update_axes(elem, scales, style_opts) {
   d3.select(elem)
     .selectAll("#x_axis > .tick > text")
     .attrs({
-      "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family,
-      "text-anchor": style_opts.axis_text_anchor,
-      "transform": "rotate("+ style_opts.x_axis_rotation + ")"
+      "font-size": display_opts.axis_font_size,
+      "font-family": display_opts.font_family,
+      "text-anchor": display_opts.axis_text_anchor,
+      "transform": "rotate("+ display_opts.x_axis_rotation + ")"
     });
 
   y_axis = d3.axisLeft(scales.y)
-    .ticks(style_opts.n_ticks_y)
-    .tickSize(style_opts.tick_size);
+    .ticks(display_opts.n_ticks_y)
+    .tickSize(display_opts.tick_size);
   d3.select(elem)
     .select("#y_axis")
     .attr("transform", "translate(" + scales.x.range()[0] + ", 0)")
@@ -114,9 +114,9 @@ function update_axes(elem, scales, style_opts) {
   d3.select(elem)
     .selectAll("#y_axis > .tick > text")
     .attrs({
-      "font-size": style_opts.axis_font_size,
-      "font-family": style_opts.font_family,
-      "transform": "rotate("+ style_opts.y_axis_rotation + ")"
+      "font-size": display_opts.axis_font_size,
+      "font-family": display_opts.font_family,
+      "transform": "rotate("+ display_opts.y_axis_rotation + ")"
     });
 }
 

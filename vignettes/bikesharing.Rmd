@@ -281,7 +281,7 @@ doi_sankey(
   edges,
   "root",
   800, 400,
-  style_opts = list(
+  display_opts = list(
     "leaf_width" = 25,
     "leaf_height" = 50,
     "focus_font_size" = 25,

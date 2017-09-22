@@ -1,15 +1,15 @@
 #! /usr/bin/env Rscript
 
 ## File description -------------------------------------------------------------
-## Functions for adapting style in treelapse views.
+## Functions for adapting display in treelapse views.
 
 
-#' Merge in default style for timebox trees / treeboxes
+#' Merge in default display for timebox trees / treeboxes
 #'
-#' Completes a partially filled list of style options.
+#' Completes a partially filled list of display options.
 #'
 #' @export
-merge_timebox_style<- function(opts) {
+merge_timebox_display <- function(opts) {
   default_opts <- list(
     "size_min" = 1,
     "size_max" = 10,
@@ -50,18 +50,21 @@ merge_timebox_style<- function(opts) {
       "width_search" = 3,
       "opacity_unselected" = 0.1,
       "opacity_selected" = 0.9,
-      "opacity_search" = 1
+      "opacity_search" = 1,
+      "max_depth" = Inf,
+      "min_depth" = 0,
+      "leaves_only" = FALSE
     )
   )
   modifyList(default_opts, opts)
 }
 
-#' Merge in default style for doi tree / sankey
+#' Merge in default display for doi tree / sankey
 #'
-#' Completes a partially filled list of style options.
+#' Completes a partially filled list of display options.
 #'
 #' @export
-merge_doi_style <- function(opts) {
+merge_doi_display <- function(opts) {
   default_opts <- list(
     "size_min" = 0,
     "size_max" = 20,

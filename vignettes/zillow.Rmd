@@ -95,7 +95,7 @@ values$time <- values$row
 timebox_tree(
   values %>% select(unit, time, value),
   edges,
-  style_opts = list(
+  display_opts = list(
     "size_max" = 4
   )
 )
@@ -105,7 +105,7 @@ timebox_tree(
 treebox(
   values %>% select(unit, time, value),
   edges,
-  style_opts = list(
+  display_opts = list(
     "size_max" = 4
   )
 )
