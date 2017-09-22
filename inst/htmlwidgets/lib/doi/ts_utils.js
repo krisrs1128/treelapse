@@ -532,6 +532,10 @@ function draw_zoom(elem, pairs, cur_lines, scales, ts_style) {
  */
 function ts_display_subset(nodes, min_depth, max_depth, leaves_only) {
   var filtered_nodes;
+  if (max_depth === null) {
+    max_depth = Infinity;
+  }
+
   if (leaves_only) {
     filtered_nodes = nodes.filter(
       function(d) {
