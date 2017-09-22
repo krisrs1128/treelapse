@@ -514,9 +514,44 @@ function draw_zoom(elem, pairs, cur_lines, scales, ts_style) {
 *******************************************************************************/
 
 /**
+ * Get TS to Display
+ *
+ * We provide an option to the user for displaying subsets of time series in the
+ * timebox and treebox views. This can be used to show only the leaves, for
+ * example, or only those series within some range of depths. This function
+ * reads the users request and returns the IDs of series to actually display.
+ *
+ * @param nodes {object} An array describing every node in the tree. It is
+ * expected to have attributes for depth, children, and id.
+ * @param min_depth {int} What is the minimum depth for nodes whose associated
+ * TS we will display?
+ * @param max_depth {int} What is the maximum depth for nodes whose associated
+ * TS we will display?
+ * @param leaves_only {boolean}: Should only series corresponding to leaves be
+ * displayed?
+ */
+function ts_display_subset(nodes, min_depth, max_depth, leaves_only) {
+  var filtered_nodes;
+  if (leaves_only) {
+    filtered_nodes = nodes.filter(
+      function(d) {
+        return typeof(d.children) == "undefined"
+      });
+  } else {
+    filtered_nodes = nodes.filter(
+      function(d) {
+        return (d.depth <= max_depth) & (d.depth >= min_depth);
+      }
+    );
+  }
+
+  return filtered_nodes.map(function(d) { return d.data.id; });
+}
+
+/**
  * Reshape line data in form required for d3.svg.line()
  *
- * @param {object} values An object with three subarrays,
+ * @param values {object} An object with three subarrays,
  *       - time {array of float} The times associated with Tree nodes.
  *       - value {array of float} The y values associated with Tree nodes.
  *       - unit {array of string} The node names associated with values.
