@@ -273,7 +273,14 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
   draw_axes(elem, scales, display_opts);
 
   var layout = tree_layout(tree, elem, display_opts);
-  var depth_three = layout.nodes.filter(
+  var keep_ids = ts_display_subset(
+    layout.nodes,
+    display_opts.ts.min_depth,
+    display_opts.ts.max_depth,
+    display_opts.ts.leaves_only
+  );
+
+      layout.nodes.filter(
     function(d) {
       return d.depth == 3
     }).map(
@@ -281,7 +288,7 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
         return d.data.id;
       });
 
-  var reshaped = get_reshaped_values(values, depth_three);
+  var reshaped = get_reshaped_values(values, keep_ids);
   setup_search(elem, Object.keys(reshaped.dvalues));
 
   var update_fun = update_factory(
