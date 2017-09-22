@@ -9,14 +9,21 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This application is motivated by [http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html](http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html).
+This application is motivated by
+[http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html](http://statweb.stanford.edu/~susan/summer12/phyloseq-demosh.html).
+
+One treelapse feature illustrated here is the ability to display only those time
+series associated with leaves. This is useful in this case since otherwise some
+of the leaves would be overrepresentated, because many of the internal nodes
+look like them and not other leaves. This option is set by the `display_opts`
+parameter, setting `leaves_only = TRUE` within the `ts` parameter.
 
 ```{r setup}
 library("treelapse")
 library("phyloseq")
 library("ape")
 library("knitr")
-opts_chunk$set(out.width = "700px", out.height = "600px", cache = FALSE)
+opts_chunk$set(out.width = "300px", out.height = "300px", cache = TRUE)
 data(GlobalPatterns)
 gp_subset <- GlobalPatterns %>%
   filter_taxa(function(x) { var(x) > 9.22 * 1e5 }, prune = TRUE) %>%
@@ -63,6 +70,9 @@ display_opts <- list(
   "axis_text_anchor" = "start",
   "margin" = list(
     "bottom" = 75
+  ),
+  "ts" = list(
+    "leaves_only" = TRUE
   )
 )
 timebox_tree(
