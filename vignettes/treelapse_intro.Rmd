@@ -108,7 +108,7 @@ specifies the radius of the smallest node.
 doi_tree(
   values,
   edges,
-  style_opts = list("leaf_width" = 50, "size_min" = 2)
+  display_opts = list("leaf_width" = 50, "size_min" = 2)
 )
 ```
 
@@ -139,7 +139,7 @@ we aggregated values from the tips up).
 doi_tree(
   values,
   edges,
-  style_opts = list(
+  display_opts = list(
     "leaf_width" = 50,
     "size_min" = 2
   )
@@ -209,8 +209,8 @@ display the associated time and value ranges. Finally, searching for a node name
 in the search box will highlight the associated series and node in red.
 
 ```{r vis-timebox}
-style_opts <- list("size_min" = 1)
-timebox_tree(timebox_values, edges, style_opts = style_opts)
+display_opts <- list("size_min" = 1)
+timebox_tree(timebox_values, edges, display_opts = display_opts)
 ```
 
 Timeboxes only let you query based on time series shapes. Treeboxes are the
@@ -218,7 +218,7 @@ natural converse -- they let you select nodes in the tree by drawing brushes
 over them. Other than this, the interaction is exactly the same.
 
 ```{r vis-treebox}
-treebox(timebox_values, edges, style_opts = style_opts)
+treebox(timebox_values, edges, display_opts = display_opts)
 ```
 
 ## Previous Work ##

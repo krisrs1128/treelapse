@@ -57,7 +57,7 @@ values <- tree_fun_multi(
 )
 values$time <- rownames(X)[values$row]
 
-style_opts <- list(
+display_opts <- list(
   "x_axis_rotation" = 45,
   "axis_font_size" = 9,
   "axis_text_anchor" = "start",
@@ -68,7 +68,7 @@ style_opts <- list(
 timebox_tree(
   values,
   edges,
-  style_opts = style_opts
+  display_opts = display_opts
 )
 ```
 
@@ -76,6 +76,6 @@ timebox_tree(
 treebox(
   values,
   edges,
-  style_opts = style_opts
+  display_opts = display_opts
 )
 ```
