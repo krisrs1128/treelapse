@@ -266,6 +266,22 @@ function info_over(elem, d, scales) {
     .text(d.data.data.id);
 }
 
+/**
+ * Extract Layout from Tree
+ *
+ * This returns the coordinates of tree nodes and links, based on a json object.
+ * It basically just wraps the d3.hierarchy, and then adjusts margins.
+ *
+ * @param tree {Tree} A tree object (actually, a properly nested JSON would
+ *     suffice) on which we can call d3.hierarchy to compute the layout.
+ * @param elem {d3 selection} The html selection on which all the brushes to
+ *     check are located.
+ * @param display_opts A {object} An object containing margin size information.
+ * @return layout {object} An object with two major components
+ *   - nodes: The heirarchy.nodes() element from d3, but with x and y offset by
+ *       margins.
+ *   - links: The hierarchy.links() element from d3, also with coordinates offset.
+ */
 function tree_layout(tree, elem, display_opts) {
   var hierarchy = d3.hierarchy(tree);
   var width = d3.select(elem).select("svg").attr("width");
