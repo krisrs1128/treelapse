@@ -39,7 +39,8 @@ merge_timebox_display <- function(opts) {
       "frac" = 0.43,
       "col_unselected" = "#CDCDCD",
       "col_selected" = "#2D869F",
-      "col_search" = "#C2571A"
+      "col_search" = "#C2571A",
+      "layout" = "id"
     ),
     "ts" = list(
       "col_unselected" = "#696969",

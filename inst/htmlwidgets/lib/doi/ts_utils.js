@@ -8,7 +8,6 @@
 /*******************************************************************************
 * Functions for drawing the static tree and time series in timebox trees
 *******************************************************************************/
-
 /**
  * Return the scales required for positioning in time + treeboxes
  *
@@ -284,6 +283,17 @@ function info_over(elem, d, scales) {
  */
 function tree_layout(tree, elem, display_opts) {
   var hierarchy = d3.hierarchy(tree);
+
+  if (display_opts.tree.layout == "id") {
+    hierarchy = hierarchy.sort(function(a, b) {
+      return b.height - a.height || a.data.id.localeCompare(b.data.id);
+    });
+  } else {
+    hierarchy = hierarchy.sort(function(a, b) {
+      return b.descendants().length - a.descendants().length;
+    });
+  }
+
   var width = d3.select(elem).select("svg").attr("width");
   var height = d3.select(elem).select("svg").attr("height");
 
@@ -296,7 +306,7 @@ function tree_layout(tree, elem, display_opts) {
   var layout = cluster(hierarchy);
 
   // translate nodes according to margins
-  var nodes = layout.descendants();
+  var nodes = layout.descendants()
   nodes.forEach(function(n) {
     n.y += display_opts.margin.top;
     n.x += display_opts.margin.tree_left;
@@ -336,14 +346,15 @@ function draw_tree(elem,
                    layout,
                    scales,
                    mouseover_text,
-                   display_opts) {
+                   display_opts,
+                   duration) {
   selection_update(
     "path",
     d3.select(elem).select("#links"),
     layout.links,
     "tree_link",
     timebox_link_attrs(dvalues, cur_lines, scales, display_opts.tree),
-    100
+    duration
   );
 
   // draw nodes
@@ -354,7 +365,7 @@ function draw_tree(elem,
     layout.nodes,
     "tree_node",
     timebox_node_attrs(dvalues, cur_lines, search_lines, scales, display_opts.tree),
-    100
+    duration
   );
 
   var voronoi = d3.voronoi()
@@ -370,7 +381,10 @@ function draw_tree(elem,
       .select("#tree_voronoi")
       .selectAll("path")
 	    .data(poly).enter()
-      .append("path")
+      .append("path");
+
+  var voronoi_paths = d3.selectAll("#tree_voronoi")
+      .selectAll("path")
       .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
       .attrs({
         "fill": "none",
