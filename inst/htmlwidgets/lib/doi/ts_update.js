@@ -596,7 +596,7 @@ function toggle_fun(elem,
 
   var units = selected_ts(elem, pairs, combine_fun, scales);
   var layout = tree_layout(tree, elem, display_opts);
-  update_fun(units, scales, layout, 1200);
+  update_fun(units, scales, layout, 1500);
 }
 
 /**
