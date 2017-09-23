@@ -380,7 +380,10 @@ function draw_tree(elem,
       .select("#tree_voronoi")
       .selectAll("path")
 	    .data(poly).enter()
-      .append("path")
+      .append("path");
+
+  var voronoi_paths = d3.selectAll("#tree_voronoi")
+      .selectAll("path")
       .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
       .attrs({
         "fill": "none",
