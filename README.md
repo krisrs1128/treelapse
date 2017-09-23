@@ -30,6 +30,7 @@ Examples of the compiled vignettes are available at,
 - [Sources of Variation in Bikesharing Demand](http://statweb.stanford.edu/~kriss1/bikesharing.html)
 - [Dynamics in Housing Prices](http://statweb.stanford.edu/~kriss1/zillow.html)
 - [Hierarchical Clustering and the Iris Data](http://statweb.stanford.edu/~kriss1/iris.html)
+- [Hierarchical Clustering on Global Patterns](http://statweb.stanford.edu/~kriss1/global_patterns_hclust.html)
 
 `treelapse` currently supports four kinds displays
 
