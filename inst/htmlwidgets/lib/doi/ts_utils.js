@@ -346,14 +346,15 @@ function draw_tree(elem,
                    layout,
                    scales,
                    mouseover_text,
-                   display_opts) {
+                   display_opts,
+                   duration) {
   selection_update(
     "path",
     d3.select(elem).select("#links"),
     layout.links,
     "tree_link",
     timebox_link_attrs(dvalues, cur_lines, scales, display_opts.tree),
-    1400
+    duration
   );
 
   // draw nodes
@@ -364,7 +365,7 @@ function draw_tree(elem,
     layout.nodes,
     "tree_node",
     timebox_node_attrs(dvalues, cur_lines, search_lines, scales, display_opts.tree),
-    1400
+    duration
   );
 
   var voronoi = d3.voronoi()

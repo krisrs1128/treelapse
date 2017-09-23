@@ -155,7 +155,8 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
       update_fun,
       brush_extent,
       brush_nodes_union,
-      layout
+      tree,
+      display_opts
     );
   }
 
@@ -166,7 +167,20 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
       scales,
       update_fun,
       brush_nodes_union,
-      layout
+      tree,
+      display_opts
+    );
+  }
+
+  function layout_fun() {
+    toggle_fun(
+      elem,
+      tree,
+      reshaped.pairs,
+      scales,
+      update_fun,
+      brush_nodes_union,
+      display_opts
     );
   }
 
@@ -179,7 +193,8 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
-  treebox_update(elem, reshaped, layout, [], scales, display_opts);
+  add_button(elem, "toggle layout", layout_fun);
+  treebox_update(elem, reshaped, layout, [], scales, display_opts, 100);
 }
 
 /**
@@ -354,6 +369,7 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
       scales,
       update_fun,
       brush_ts_intersection,
+      tree,
       display_opts
     );
   }
@@ -380,7 +396,7 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
   add_button(elem, "toggle layout", layout_fun);
-  timebox_update(elem, reshaped, layout, [], scales, display_opts);
+  timebox_update(elem, reshaped, layout, [], scales, display_opts, 100);
 }
 
 
@@ -403,10 +419,10 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
  * @side-effects Updates the timebox display to highlight the currently selected
  *     series.
  **/
-function timebox_update(elem, reshaped, layout, cur_lines, scales, display_opts) {
+function timebox_update(elem, reshaped, layout, cur_lines, scales, display_opts, duration) {
   update_axes(elem, scales, display_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales, display_opts.ts);
-  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, true, display_opts);
+  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, true, display_opts, duration);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, false, display_opts);
 }
 
@@ -439,14 +455,15 @@ function update_factory(base_fun,
                         cur_lines,
                         cur_scales,
                         display_opts) {
-  function f(cur_lines, cur_scales, cur_layout) {
+  function f(cur_lines, cur_scales, cur_layout, duration) {
     base_fun(
       elem,
       reshaped,
       cur_layout,
       cur_lines,
       cur_scales,
-      display_opts
+      display_opts,
+      duration
     );
   }
 
@@ -474,10 +491,11 @@ function update_factory(base_fun,
  * @side_effects Redraws the tree and time series in the treebox display in
  *     order to highlight the currently selected IDs.
  **/
-function treebox_update(elem, reshaped, layout, cur_lines, scales, display_opts) {
+function treebox_update(elem, reshaped, layout, cur_lines, scales, display_opts, duration) {
   update_axes(elem, scales, display_opts);
   draw_zoom(elem, reshaped.pairs, cur_lines, scales, display_opts.ts);
-  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, false, display_opts);
+  console.log(duration);
+  draw_tree(elem, reshaped.dvalues, cur_lines, layout, scales, false, display_opts, duration);
   draw_ts(elem, reshaped.pairs, cur_lines, scales, true, display_opts);
 }
 
@@ -540,7 +558,7 @@ function brush_fun(elem,
                    display_opts) {
   var units = selected_ts(elem, pairs, combine_fun, scales);
   var layout = tree_layout(tree, elem, display_opts);
-  update_fun(units, scales, layout);
+  update_fun(units, scales, layout, 100);
 }
 
 function toggle_fun(elem,
@@ -550,7 +568,6 @@ function toggle_fun(elem,
                     update_fun,
                     combine_fun,
                     display_opts) {
-  console.log(scales);
   if (display_opts.tree.layout == "id") {
     display_opts.tree.layout = "subtree_size";
   } else {
@@ -559,7 +576,7 @@ function toggle_fun(elem,
 
   var units = selected_ts(elem, pairs, combine_fun, scales);
   var layout = tree_layout(tree, elem, display_opts);
-  update_fun(units, scales, layout);
+  update_fun(units, scales, layout, 1200);
 }
 
 /**
@@ -624,7 +641,7 @@ function zoom_brush_fun(elem,
   );
 
   var layout = tree_layout(tree, elem, display_opts);
-  update_fun(units, scales, layout);
+  update_fun(units, scales, layout, 100);
 }
 
 /**
