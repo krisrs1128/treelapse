@@ -175,11 +175,11 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
   function layout_fun() {
     toggle_fun(
       elem,
-      tree,
       reshaped.pairs,
       scales,
       update_fun,
       brush_nodes_union,
+      tree,
       display_opts
     );
   }
@@ -377,11 +377,11 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
   function layout_fun() {
     toggle_fun(
       elem,
-      tree,
       reshaped.pairs,
       scales,
       update_fun,
       brush_ts_intersection,
+      tree,
       display_opts
     );
   }
@@ -561,12 +561,32 @@ function brush_fun(elem,
   update_fun(units, scales, layout, 100);
 }
 
+/**
+ * Function to execute every time toggle button pressed
+ *
+ * @param  {d3 selection} elem The html selection on which the DOI tree display
+ *     will be drawn.
+ * @param {array of objects} pairs An with time / value pairs for each time
+ *      series line. For example, [{"time": 0, "value": 1}, ...]
+ * @param {Object of d3.scales} scales An object with different scales for
+ *     positions and sizes for the time series and nodes.
+ * @param {function} update_fun The function to execute every time the brush is
+ *     updated.
+ * @param {function} combine_fun The function used for combining units across
+ *     brush selections. This is usually the intersection or union of selections
+ *    coming from any individual brush.
+ * @param tree {Tree} A tree object (actually, a properly nested JSON would
+ *     suffice) on which we can call d3.hierarchy to compute the layout.
+ * @return null
+ * @side-effects Every time the toggle button is pressed, the update_fun() will
+ *     be called.
+ */
 function toggle_fun(elem,
-                    tree,
                     pairs,
                     scales,
                     update_fun,
                     combine_fun,
+                    tree,
                     display_opts) {
   if (display_opts.tree.layout == "id") {
     display_opts.tree.layout = "subtree_size";
