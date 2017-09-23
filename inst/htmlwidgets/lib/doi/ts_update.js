@@ -152,7 +152,8 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
       scales,
       update_fun,
       brush_extent,
-      brush_nodes_union
+      brush_nodes_union,
+      layout
     );
   }
 
@@ -162,7 +163,8 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
       reshaped.dvalues,
       scales,
       update_fun,
-      brush_nodes_union
+      brush_nodes_union,
+      layout
     );
   }
 
@@ -335,7 +337,8 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
       scales,
       update_fun,
       brush_extent,
-      brush_ts_intersection
+      brush_ts_intersection,
+      layout
     );
   }
 
@@ -345,25 +348,19 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
       reshaped.pairs,
       scales,
       update_fun,
-      brush_ts_intersection
+      brush_ts_intersection,
+      layout
     );
   }
-
-  toggle_update = toggle_layout_factory(
-    timebox_update,
-    elem,
-    reshaped,
-    layout,
-    [],
-    scales,
-    display_opts
-  );
 
   function layout_fun() {
     toggle_fun(
       elem,
       tree,
-      toggle_update,
+      reshaped.pairs,
+      scales,
+      update_fun,
+      brush_ts_intersection,
       display_opts
     );
   }
@@ -433,15 +430,15 @@ function timebox_update(elem, reshaped, layout, cur_lines, scales, display_opts)
 function update_factory(base_fun,
                         elem,
                         reshaped,
-                        layout,
+                        cur_layout,
                         cur_lines,
                         cur_scales,
                         display_opts) {
-  function f(cur_lines, cur_scales) {
+  function f(cur_lines, cur_scales, cur_layout) {
     base_fun(
       elem,
       reshaped,
-      layout,
+      cur_layout,
       cur_lines,
       cur_scales,
       display_opts
@@ -529,41 +526,28 @@ function selected_ts(elem, pairs, combine_fun, scales) {
  * @side-effects Every time the associated brush is moved, the update_fun() will
  *     be called.
  **/
-function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
+function brush_fun(elem, pairs, scales, update_fun, combine_fun, layout) {
   var units = selected_ts(elem, pairs, combine_fun, scales);
-  update_fun(units, scales);
+  update_fun(units, scales, layout);
 }
 
-function toggle_layout_factory(base_fun,
-                               elem,
-                               reshaped,
-                               layout,
-                               cur_lines,
-                               cur_scales,
-                               display_opts) {
-  function f(layout) {
-    base_fun(
-      elem,
-      reshaped,
-      layout,
-      cur_lines,
-      cur_scales,
-      display_opts
-    );
-  }
-
-  return f;
-}
-
-function toggle_fun(elem, tree, update_fun, display_opts) {
+function toggle_fun(elem,
+                    tree,
+                    pairs,
+                    scales,
+                    update_fun,
+                    combine_fun,
+                    display_opts) {
+  console.log(scales);
   if (display_opts.tree.layout == "id") {
     display_opts.tree.layout = "subtree_size";
   } else {
     display_opts.tree.layout = "id";
   }
 
-  var new_layout = tree_layout(tree, elem, display_opts);
-  update_fun(new_layout);
+  var units = selected_ts(elem, pairs, combine_fun, scales);
+  var layout = tree_layout(tree, elem, display_opts);
+  update_fun(units, scales, layout);
 }
 
 /**
@@ -584,7 +568,7 @@ function toggle_fun(elem, tree, update_fun, display_opts) {
  * @side-effects Redraws the main time series according to the scales set by the
  *     zoom brush on the top right.
  **/
-function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
+function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun, layout) {
   var cur_extent = d3.brushSelection(
     d3.select(elem)
       .select("#zoom_brush")
@@ -647,7 +631,7 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
  * @return null
  * @side-effects Adds a new brush to elem and focuses the display on it.
  **/
-function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
+function new_brush(elem, pairs, scales, update_fun, extent, combine_fun, layout) {
   var brush = d3.brush()
       .on("brush", function() {
 	      brush_fun(
@@ -655,7 +639,8 @@ function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
 	        pairs,
 	        scales,
 	        update_fun,
-	        combine_fun
+	        combine_fun,
+          layout
 	      );
       })
       .extent(extent);
@@ -698,7 +683,7 @@ function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
  * @side-effects Removes the specified brush from elem and refocuses on the
  *     previously added one.
  **/
-function remove_brush(elem, pairs, scales, update_fun, combine_fun) {
+function remove_brush(elem, pairs, scales, update_fun, combine_fun, layout) {
   var brush_ix = 0;
   d3.select(elem)
     .selectAll(".brush").filter(
@@ -726,6 +711,7 @@ function remove_brush(elem, pairs, scales, update_fun, combine_fun) {
     pairs,
     scales,
     update_fun,
-    combine_fun
+    combine_fun,
+    layout
   );
 }
