@@ -121,7 +121,9 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
 	        reshaped.pairs,
 	        scales,
 	        update_fun,
-	        brush_nodes_union
+	        brush_nodes_union,
+          tree,
+          display_opts
 	      );
       })
       .extent([
@@ -171,7 +173,7 @@ function draw_treebox(elem, width, height, values, tree, display_opts) {
   // draw search box
   var search_id = "#search_box-" + d3.select(elem).attr("id");
   $(search_id).change(function() {
-    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_nodes_union);
+    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_nodes_union, tree, display_opts);
   });
 
   add_button(elem, "new box", add_fun);
@@ -310,7 +312,9 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
 	        reshaped.pairs,
 	        scales,
 	        update_fun,
-	        brush_ts_intersection
+	        brush_ts_intersection,
+          tree,
+          display_opts
 	      );
       })
       .extent([
@@ -338,7 +342,8 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
       update_fun,
       brush_extent,
       brush_ts_intersection,
-      layout
+      tree,
+      display_opts
     );
   }
 
@@ -349,7 +354,7 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
       scales,
       update_fun,
       brush_ts_intersection,
-      layout
+      display_opts
     );
   }
 
@@ -368,7 +373,7 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
   // draw search box
   var search_id = "#search_box-" + d3.select(elem).attr("id");
   $(search_id).change(function() {
-    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_ts_intersection);
+    brush_fun(elem, reshaped.pairs, scales, update_fun, brush_ts_intersection, tree, display_opts);
   });
 
   add_button(elem, "new box", add_fun);
@@ -526,8 +531,15 @@ function selected_ts(elem, pairs, combine_fun, scales) {
  * @side-effects Every time the associated brush is moved, the update_fun() will
  *     be called.
  **/
-function brush_fun(elem, pairs, scales, update_fun, combine_fun, layout) {
+function brush_fun(elem,
+                   pairs,
+                   scales,
+                   update_fun,
+                   combine_fun,
+                   tree,
+                   display_opts) {
   var units = selected_ts(elem, pairs, combine_fun, scales);
+  var layout = tree_layout(tree, elem, display_opts);
   update_fun(units, scales, layout);
 }
 
@@ -568,7 +580,13 @@ function toggle_fun(elem,
  * @side-effects Redraws the main time series according to the scales set by the
  *     zoom brush on the top right.
  **/
-function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun, layout) {
+function zoom_brush_fun(elem,
+                        pairs,
+                        scales,
+                        update_fun,
+                        combine_fun,
+                        tree,
+                        display_opts) {
   var cur_extent = d3.brushSelection(
     d3.select(elem)
       .select("#zoom_brush")
@@ -604,7 +622,9 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun, layout) {
     combine_fun,
     scales
   );
-  update_fun(units, scales);
+
+  var layout = tree_layout(tree, elem, display_opts);
+  update_fun(units, scales, layout);
 }
 
 /**
@@ -631,7 +651,14 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun, layout) {
  * @return null
  * @side-effects Adds a new brush to elem and focuses the display on it.
  **/
-function new_brush(elem, pairs, scales, update_fun, extent, combine_fun, layout) {
+function new_brush(elem,
+                   pairs,
+                   scales,
+                   update_fun,
+                   extent,
+                   combine_fun,
+                   tree,
+                   display_opts) {
   var brush = d3.brush()
       .on("brush", function() {
 	      brush_fun(
@@ -640,7 +667,8 @@ function new_brush(elem, pairs, scales, update_fun, extent, combine_fun, layout)
 	        scales,
 	        update_fun,
 	        combine_fun,
-          layout
+          tree,
+          display_opts
 	      );
       })
       .extent(extent);
@@ -683,16 +711,16 @@ function new_brush(elem, pairs, scales, update_fun, extent, combine_fun, layout)
  * @side-effects Removes the specified brush from elem and refocuses on the
  *     previously added one.
  **/
-function remove_brush(elem, pairs, scales, update_fun, combine_fun, layout) {
+function remove_brush(elem, pairs, scales, update_fun, combine_fun, tree, display_opts) {
   var brush_ix = 0;
   d3.select(elem)
     .selectAll(".brush").filter(
       function(d, i) {
-	if(d3.select(this).attr("brush_selected") === "true") {
-	  brush_ix = i;
-	  return true;
-	}
-	return false;
+	      if(d3.select(this).attr("brush_selected") === "true") {
+	        brush_ix = i;
+	        return true;
+	      }
+	      return false;
       }).remove();
 
   // renumber brushes
@@ -712,6 +740,7 @@ function remove_brush(elem, pairs, scales, update_fun, combine_fun, layout) {
     scales,
     update_fun,
     combine_fun,
-    layout
+    tree,
+    display_opts
   );
 }
