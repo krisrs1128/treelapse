@@ -287,14 +287,6 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
     display_opts.ts.leaves_only
   );
 
-      layout.nodes.filter(
-    function(d) {
-      return d.depth == 3
-    }).map(
-      function(d) {
-        return d.data.id;
-      });
-
   var reshaped = get_reshaped_values(values, keep_ids);
   setup_search(elem, Object.keys(reshaped.dvalues));
 
@@ -357,6 +349,25 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
     );
   }
 
+  toggle_update = toggle_layout_factory(
+    timebox_update,
+    elem,
+    reshaped,
+    layout,
+    [],
+    scales,
+    display_opts
+  );
+
+  function layout_fun() {
+    toggle_fun(
+      elem,
+      tree,
+      toggle_update,
+      display_opts
+    );
+  }
+
   // draw search box
   var search_id = "#search_box-" + d3.select(elem).attr("id");
   $(search_id).change(function() {
@@ -366,8 +377,10 @@ function draw_timebox(elem, width, height, values, tree, display_opts) {
   add_button(elem, "new box", add_fun);
   add_button(elem, "change focus", function() { return change_focus(elem); });
   add_button(elem, "remove box", remove_fun);
+  add_button(elem, "toggle layout", layout_fun);
   timebox_update(elem, reshaped, layout, [], scales, display_opts);
 }
+
 
 /**
  * @param  {d3 selection} elem The html selection on which the timebox display
@@ -420,7 +433,7 @@ function timebox_update(elem, reshaped, layout, cur_lines, scales, display_opts)
 function update_factory(base_fun,
                         elem,
                         reshaped,
-                        tree,
+                        layout,
                         cur_lines,
                         cur_scales,
                         display_opts) {
@@ -428,7 +441,7 @@ function update_factory(base_fun,
     base_fun(
       elem,
       reshaped,
-      tree,
+      layout,
       cur_lines,
       cur_scales,
       display_opts
@@ -521,6 +534,38 @@ function brush_fun(elem, pairs, scales, update_fun, combine_fun) {
   update_fun(units, scales);
 }
 
+function toggle_layout_factory(base_fun,
+                               elem,
+                               reshaped,
+                               layout,
+                               cur_lines,
+                               cur_scales,
+                               display_opts) {
+  function f(layout) {
+    base_fun(
+      elem,
+      reshaped,
+      layout,
+      cur_lines,
+      cur_scales,
+      display_opts
+    );
+  }
+
+  return f;
+}
+
+function toggle_fun(elem, tree, update_fun, display_opts) {
+  if (display_opts.tree.layout == "id") {
+    display_opts.tree.layout = "subtree_size";
+  } else {
+    display_opts.tree.layout = "id";
+  }
+
+  var new_layout = tree_layout(tree, elem, display_opts);
+  update_fun(new_layout);
+}
+
 /**
  * Function to call every time brush in zoom box is moved
  *
@@ -605,13 +650,13 @@ function zoom_brush_fun(elem, pairs, scales, update_fun, combine_fun) {
 function new_brush(elem, pairs, scales, update_fun, extent, combine_fun) {
   var brush = d3.brush()
       .on("brush", function() {
-	brush_fun(
-	  elem,
-	  pairs,
-	  scales,
-	  update_fun,
-	  combine_fun
-	);
+	      brush_fun(
+	        elem,
+	        pairs,
+	        scales,
+	        update_fun,
+	        combine_fun
+	      );
       })
       .extent(extent);
 
