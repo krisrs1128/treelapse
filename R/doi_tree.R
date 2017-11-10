@@ -26,7 +26,7 @@ doi_tree <- function(values,
     edges,
     root,
     focus_node_id,
-    merge_doi_style(style_opts)
+    merge_doi_display(style_opts)
   )
 
   # create widget
