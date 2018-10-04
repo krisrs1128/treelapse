@@ -148,7 +148,7 @@ for (i in seq_along(subjects)) {
   cur_ix  <- mapping$ind == subjects[i]
   for (fun in c("sum", "mean")) {
     cur_fun <- get(sprintf("tree_%s", fun))
-    cur_values <- tree_fun_multi(edges, tip_values[cur_ix, ], cur_fun)
+    cur_values <- tree_fun_multi(edges, tip_values[cur_ix,, drop = FALSE], cur_fun)
 
     values <- c(
       values,
