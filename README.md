@@ -77,4 +77,4 @@ The implementation hinges heavily on these (very nice) tools,
 
 We need your help to improve this package. For bug reports and feature
 requests, either create an issue on github or
-[email me](mailto:kriss1@stanford.edu).
+[email me](mailto:kris.sankaran@umontreal.ca).
