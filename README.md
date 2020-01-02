@@ -25,7 +25,7 @@ It might take some time to build each of the vignettes.
 
 Examples of the compiled vignettes are available at,
 - [Package introduction](http://statweb.stanford.edu/~kriss1/treelapse_intro.html)
-- [Microbial Dynamics of Antibiotics Time Courses](http://statweb.stanford.edu/~kriss1/antibiotic.html)
+- [Microbial Dynamics of Antibiotics Time Courses](https://krisrs1128.github.io/treelapse/pages/antibiotic.html)
 - [Differential Microbial Abundance and Preterm Births](http://statweb.stanford.edu/~kriss1/pregnancy.html)
 - [Sources of Variation in Bikesharing Demand](http://statweb.stanford.edu/~kriss1/bikesharing.html)
 - [Dynamics in Housing Prices](http://statweb.stanford.edu/~kriss1/zillow.html)
